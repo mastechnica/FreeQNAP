@@ -1,0 +1,19 @@
+[Unit]
+Description=FreeQNAP exact-board USB PCIe read-request workaround
+After=systemd-udev-settle.service
+Wants=systemd-udev-settle.service
+Before=freeqnap-broker.service freeqnap-smb.service freeqnap-nfs.service freeqnap-afp.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -B /usr/local/libexec/freeqnap-usb-pcie
+RemainAfterExit=yes
+User=root
+UMask=0077
+NoNewPrivileges=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/sys/bus/pci/devices
+
+[Install]
+WantedBy=multi-user.target

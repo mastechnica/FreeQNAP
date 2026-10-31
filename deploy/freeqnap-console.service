@@ -1,0 +1,31 @@
+[Unit]
+Description=FreeQNAP local storage console
+After=local-fs.target
+
+[Service]
+Type=simple
+User=freeqnap
+Group=freeqnap
+WorkingDirectory=/opt/freeqnap/current
+ExecStart=/usr/bin/python3 -B -m freeqnap.server --snapshot /run/freeqnap/inventory.json
+Restart=on-failure
+RestartSec=5
+UMask=0077
+StateDirectory=freeqnap
+StateDirectoryMode=0700
+LogsDirectory=freeqnap
+ReadWritePaths=/var/lib/freeqnap /var/backups/freeqnap
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_UNIX AF_INET
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,18 @@
+[Unit]
+Description=EyeQ per-bay disk presence and activity LEDs
+After=local-fs.target eyeq-cooling.service eyeq-drive-green.service
+Wants=eyeq-drive-green.service
+ConditionPathExists=/etc/eyeq-platform
+ConditionPathExists=/sys/class/leds/eyeq:green:disk1
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/share/eyeq/eyeq-disk-leds.py
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=yes
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target

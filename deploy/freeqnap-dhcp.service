@@ -1,0 +1,29 @@
+[Unit]
+Description=FreeQNAP private-port DHCP and DNS
+After=systemd-networkd.service freeqnap-network.service
+Requires=freeqnap-network.service
+BindsTo=freeqnap-network.service
+ConditionPathExists=/etc/freeqnap-dhcp/private-lan.conf
+
+[Service]
+Type=simple
+User=dnsmasq
+Group=dnsmasq
+ExecStartPre=/usr/sbin/dnsmasq --test --conf-file=/etc/freeqnap-dhcp/private-lan.conf
+ExecStart=/usr/sbin/dnsmasq --keep-in-foreground --conf-file=/etc/freeqnap-dhcp/private-lan.conf --pid-file=
+Restart=on-failure
+RestartSec=3
+StateDirectory=freeqnap-dhcp
+StateDirectoryMode=0700
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW CAP_NET_BIND_SERVICE
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_NETLINK AF_PACKET
+UMask=0077

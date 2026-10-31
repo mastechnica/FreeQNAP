@@ -1,0 +1,10 @@
+[Unit]
+Description=FreeQNAP userspace NFSv4 exports
+After=network.target freeqnap-broker.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/ganesha.nfsd -F -x -L STDERR -f /etc/freeqnap/ganesha.conf -p /run/freeqnap/ganesha.pid
+Restart=on-failure
+RestartSec=5
+UMask=0007

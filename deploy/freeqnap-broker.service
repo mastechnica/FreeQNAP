@@ -1,0 +1,25 @@
+[Unit]
+Description=FreeQNAP privileged NAS operation broker
+After=local-fs.target systemd-udev-settle.service
+Before=freeqnap-console.service
+
+[Service]
+Type=simple
+User=root
+Group=freeqnap
+WorkingDirectory=/opt/freeqnap/current
+ExecStart=/usr/bin/python3 -B -m freeqnap.nas.broker
+Restart=on-failure
+RestartSec=5
+UMask=0077
+StateDirectory=freeqnap-system
+StateDirectoryMode=0700
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/etc /var/lib/freeqnap-system /var/lib/samba /var/cache/samba /var/log/samba /srv/freeqnap /run /dev
+RestrictSUIDSGID=yes
+
+[Install]
+WantedBy=multi-user.target

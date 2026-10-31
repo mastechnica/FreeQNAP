@@ -1,0 +1,100 @@
+{
+  "overview": {
+    "original_sha256": "054854a4164d8e2f601a97cf4a0c70bd61828db464f3dc35d6aab50b46c76ebe",
+    "output_sha256": "373c209b4e064e343dc4f652af7c710fd1b789f97cef4646e2edf7b583db2329",
+    "original_dimensions": [
+      2678,
+      1788
+    ],
+    "output_dimensions": [
+      2678,
+      1372
+    ],
+    "crop_original_coordinates": [
+      0,
+      164,
+      2678,
+      1536
+    ],
+    "opaque_masks_original_coordinates": [],
+    "outside_masks": "Original cropped pixels unchanged",
+    "capture_date": "2026-10-31",
+    "source": "Running FreeQNAP dashboard; no synthetic state or metrics"
+  },
+  "files": {
+    "original_sha256": "27094f1154b2225392a99743d9f230b66d2888cffd52c846fb58be386d93c633",
+    "output_sha256": "a610bdc9db616fbab842d75c24e5498aabb3e49fd84e7d79fa7a9542bf1d6f7f",
+    "original_dimensions": [
+      2678,
+      1788
+    ],
+    "output_dimensions": [
+      2678,
+      1624
+    ],
+    "crop_original_coordinates": [
+      0,
+      164,
+      2678,
+      1788
+    ],
+    "opaque_masks_original_coordinates": [
+      [
+        100,
+        1124,
+        256,
+        1156
+      ],
+      [
+        211,
+        1281,
+        330,
+        1314
+      ],
+      [
+        1373,
+        1124,
+        1530,
+        1156
+      ],
+      [
+        1483,
+        1281,
+        1609,
+        1314
+      ]
+    ],
+    "outside_masks": "Original cropped pixels unchanged",
+    "capture_date": "2026-10-31",
+    "source": "Running FreeQNAP dashboard; no synthetic state or metrics"
+  },
+  "network": {
+    "original_sha256": "a687069eba8102a5e685fe7e26d663a3d59e3433ec54e08a4d1ffedf7abfdad4",
+    "output_sha256": "aa96874e07bb528f6d39703a5302af870727e5df0d7a2e704a7a2bc912ded351",
+    "original_dimensions": [
+      2678,
+      1788
+    ],
+    "output_dimensions": [
+      2678,
+      1596
+    ],
+    "crop_original_coordinates": [
+      0,
+      164,
+      2678,
+      1760
+    ],
+    "opaque_masks_original_coordinates": [
+      [
+        1036,
+        911,
+        1620,
+        950
+      ]
+    ],
+    "outside_masks": "Original cropped pixels unchanged",
+    "capture_date": "2026-10-31",
+    "source": "Running FreeQNAP dashboard; no synthetic state or metrics"
+  }
+}

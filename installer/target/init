@@ -1,0 +1,34 @@
+#!/bin/busybox sh
+/bin/busybox --install -s /bin
+mount -t devtmpfs devtmpfs /dev
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t tmpfs tmpfs /run
+mount -t tmpfs tmpfs /tmp
+exec </dev/console >/dev/console 2>&1
+echo 'FreeQNAP generic Debian bootstrap 0.1 (hardware acceptance pending)'
+/bin/eyeq-mcu-safe-full && touch /run/freeqnap-cooling-ack || echo 'STOP: COOLING NOT VERIFIED'
+insmod /lib/modules/al_thermal.ko || echo 'STOP: THERMAL DRIVER FAILED'
+insmod /lib/modules/al_eth.ko || echo 'STOP: ETHERNET DRIVER FAILED'
+/bin/eyeq-restore-factory-macs && touch /run/freeqnap-macs-verified || echo 'STOP: FACTORY MACS NOT VERIFIED'
+if [ -f /run/freeqnap-cooling-ack ] && [ -f /run/freeqnap-macs-verified ]; then
+ /bin/sh /freeqnap/select-root.sh
+ result=$?
+ if [ "$result" = 0 ] && [ -f /run/freeqnap-root-ready ]; then
+  echo 'FreeQNAP: identified installation verified; PID1 starting Debian.'
+  for path in dev proc sys run; do
+   mount --move /$path /newroot/$path || { echo 'STOP: root handoff mount failed'; exec /bin/sh; }
+  done
+  exec /bin/busybox switch_root /newroot /sbin/init
+ fi
+ if [ "$result" != 42 ]; then
+  echo 'STOP: Existing FreeQNAP root did not pass validation. No installer actions authorized.'
+  touch /run/freeqnap-root-validation-failed
+ fi
+fi
+# No disks formatted/mounted by the RAM installer path. No watchdog is armed.
+echo 'FREEQNAP_RAM_READY: serial inspection available; networking not configured.'
+uname -a
+cat /proc/partitions
+ip link show
+while :; do /bin/sh; done

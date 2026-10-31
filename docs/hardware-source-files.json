@@ -1,0 +1,19 @@
+{
+  "hardware/ts431xeu/alpine-qnap-ts431xeu.dts": "613b1df6b4fb5da3342e45a58848ac686f6b43b07aabeeb500460dd3c5e4d63e",
+  "hardware/ts431xeu/apply-board-patches.py": "dbfadb9519957df5f4a93e1839ad35eaa7bce53cf34ebb36518c348e90222436",
+  "hardware/ts431xeu/eyeq-buttons.py": "651d46fed35a1dbb9bed9ffdec605291f075fa0efc74a33c2b0a7b15ac99db86",
+  "hardware/ts431xeu/eyeq-buttons.service": "dbced8fbe8ab26aeb610bad11e7b7713b8570e345301e4db170f353216388aa6",
+  "hardware/ts431xeu/eyeq-cooling.service": "1fdfa1de5ba1395979f4de9ba2da5bf5dbf32f4b2e4b38a054de53cb75b10d53",
+  "hardware/ts431xeu/eyeq-disk-leds.py": "97dec3b6ffb5a6155fa5f00d3b44bdddfe145b196f45432efec41d6b1db0a13f",
+  "hardware/ts431xeu/eyeq-disk-leds.service": "a4a0f852841b2e9a0ab05ffc2856d013c889edd5769287cc5146baad40240f14",
+  "hardware/ts431xeu/eyeq-drive-green.service": "af322817496fc1111fd724f30df226e37cad4b5c6f9e221fa2633de743bee2a9",
+  "hardware/ts431xeu/eyeq-hwctl.py": "367a6fb2ddd5ca820b8842676a7ae00c981d89fe8524abe53868a06cf497fa92",
+  "hardware/ts431xeu/eyeq-poweroff.c": "625e40b01a16cd47eab50b452b9737f34c6076a3aafbc97b9ca42b78f6c28125",
+  "hardware/ts431xeu/eyeq-raid-event": "a63a0db916dac631dbebc1a78ba84a1262a1ebbf90aaf04a786636762189daf9",
+  "hardware/ts431xeu/factory-identity.h": "f31aca80b27df95f6f8522ee7858642578ec456b917d00ffaf3201945284f251",
+  "hardware/ts431xeu/kernel.config": "454096127b9fba5e5b7dfe55cc85fa11d98e61abaf08d9023e4cf55cf6c556c5",
+  "hardware/ts431xeu/mcu-safe-full.c": "40c6af3f179211d5cff84a6fde3d25ec590c0448235846dadb841bb7c997afc7",
+  "hardware/ts431xeu/restore-factory-macs.c": "0dc65e644c6f5fd9a85b86473490e927e0dbc5ffb8ef35eb469b91d1ff61a334",
+  "hardware/ts431xeu/features-nas.config": "2040ae346bfaeacb4ab3af461bbcbf9bddf2572bdaa0d6fddafaff9f693eb1a6",
+  "hardware/ts431xeu/freeqnap-poweroff.c": "646107e2208c495b4cc6303346808c6376417546fad3540e14616f1b64f44aed"
+}

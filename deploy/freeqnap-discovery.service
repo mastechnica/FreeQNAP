@@ -1,0 +1,10 @@
+[Unit]
+Description=FreeQNAP Bonjour file-service discovery
+After=network.target dbus.service
+Requires=dbus.service
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/avahi-daemon --no-chroot -f /etc/freeqnap/avahi-daemon.conf
+Restart=on-failure
+RestartSec=5

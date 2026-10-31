@@ -1,0 +1,20 @@
+[Unit]
+Description=FreeQNAP designated-folder DLNA media server
+After=network.target freeqnap-broker.service
+BindsTo=freeqnap-broker.service
+
+[Service]
+ExecStartPre=+/usr/sbin/nft --check -f /etc/freeqnap/dlna.nft
+ExecStartPre=+/usr/sbin/nft -f /etc/freeqnap/dlna.nft
+Type=simple
+User=gerbera
+Group=gerbera
+SupplementaryGroups=freeqnap
+ExecStart=/usr/bin/gerbera --config /etc/freeqnap/gerbera.xml --logfile /var/lib/freeqnap-media/gerbera.log
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/lib/freeqnap-media

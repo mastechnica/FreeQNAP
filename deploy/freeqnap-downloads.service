@@ -1,0 +1,29 @@
+[Unit]
+Description=FreeQNAP resumable HTTP and BitTorrent download engine
+After=network.target freeqnap-vpn-firewall.service
+Requires=freeqnap-vpn-firewall.service
+ConditionPathExists=/var/lib/freeqnap-downloads/aria2.conf
+
+[Service]
+Type=simple
+User=freeqnap-downloads
+Group=freeqnap-downloads
+ExecStart=/usr/bin/aria2c --conf-path=/var/lib/freeqnap-downloads/aria2.conf
+Restart=always
+RestartSec=5
+TimeoutStopSec=45
+UMask=0027
+StateDirectory=freeqnap-downloads
+StateDirectoryMode=0700
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ReadWritePaths=/var/lib/freeqnap-downloads /srv/freeqnap/download-work
+InaccessiblePaths=/var/lib/freeqnap-system /etc/freeqnap
+CapabilityBoundingSet=
+RestrictSUIDSGID=yes
+
+[Install]
+WantedBy=multi-user.target

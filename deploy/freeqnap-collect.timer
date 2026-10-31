@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh FreeQNAP inventory
+
+[Timer]
+OnBootSec=15s
+OnUnitInactiveSec=30s
+Unit=freeqnap-collect.service
+
+[Install]
+WantedBy=timers.target

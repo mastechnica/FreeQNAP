@@ -1,0 +1,10 @@
+[Unit]
+Description=FreeQNAP optional AFP shares
+After=network.target freeqnap-discovery.service freeqnap-broker.service
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/netatalk -d -F /etc/freeqnap/afp.conf
+Restart=on-failure
+RestartSec=5
+UMask=0007

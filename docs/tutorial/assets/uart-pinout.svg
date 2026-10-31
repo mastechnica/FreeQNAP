@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 420" role="img" aria-labelledby="title desc">
+<title id="title">CN2 UART0_DEBUG orientation and pin evidence</title><desc id="desc">With UART0_DEBUG text upright, the owner confirmed the far-right pin is ground. The other three labels are a related-model reference, not measured TS-431XeU pin acceptance.</desc>
+<rect width="1080" height="420" rx="18" fill="#152636"/><text x="45" y="49" fill="#d5e4ed" font-family="sans-serif" font-size="24">CN2 / UART0_DEBUG · text upright, as photographed</text>
+<rect x="100" y="94" width="880" height="142" rx="16" fill="#f1f0e7" stroke="#bcc5c2" stroke-width="4"/>
+<g stroke="#77959e" stroke-width="3"><circle cx="220" cy="163" r="23" fill="#f0cf84"/><circle cx="433" cy="163" r="23" fill="#d39082"/><circle cx="646" cy="163" r="23" fill="#f0cf84"/><circle cx="859" cy="163" r="23" fill="#68d4b6"/></g>
+<g fill="#d6e3ec" font-family="sans-serif" font-size="24" text-anchor="middle"><text x="220" y="276">TX*</text><text x="433" y="276">VCC* · leave open</text><text x="646" y="276">RX*</text><text x="859" y="276">GND</text></g>
+<text x="859" y="308" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#79dfc0">Owner confirmed</text>
+<text x="45" y="360" font-family="sans-serif" font-size="18" fill="#e3ca95">* Related-model reference only. Verify these pins and logic voltage on your board.</text>
+<text x="45" y="391" font-family="sans-serif" font-size="17" fill="#a2b8ca">NAS TX → adapter RX · NAS RX → adapter TX · GND → GND · never connect adapter VCC</text>
+</svg>

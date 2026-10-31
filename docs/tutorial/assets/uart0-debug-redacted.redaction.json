@@ -1,0 +1,19 @@
+{
+  "kind": "uart0-debug",
+  "pixels": [
+    2268,
+    4032
+  ],
+  "mask_rectangles": [
+    [
+      0,
+      0,
+      604,
+      463
+    ]
+  ],
+  "outside_mask_pixels_unchanged": true,
+  "source_metadata_copied": false,
+  "sha256": "c40c947d235ae5b89fd4a9116b460c743f0e4655ca237a75df873890d8bf09b1",
+  "method": "Opaque deterministic masks; generative preview rejected and not included"
+}

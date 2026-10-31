@@ -1,0 +1,16 @@
+[Unit]
+Description=EyeQ local button observation and explicit shutdown policy
+After=local-fs.target eyeq-cooling.service eyeq-drive-green.service
+ConditionPathExists=/etc/eyeq-platform
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/share/eyeq/eyeq-buttons.py
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=yes
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target

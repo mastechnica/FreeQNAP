@@ -1,0 +1,22 @@
+[Unit]
+Description=FreeQNAP early default-deny VPN firewall
+DefaultDependencies=no
+After=local-fs.target systemd-modules-load.service
+Before=network-pre.target freeqnap-vpn.service
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/freeqnap/current
+ExecStart=/usr/bin/python3 -B -m freeqnap.nas.vpn_runtime --firewall
+RemainAfterExit=yes
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/lib/freeqnap-system
+CapabilityBoundingSet=CAP_NET_ADMIN
+
+[Install]
+WantedBy=network-pre.target

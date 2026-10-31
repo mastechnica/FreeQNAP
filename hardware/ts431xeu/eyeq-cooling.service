@@ -1,0 +1,16 @@
+[Unit]
+Description=EyeQ QNAP fixed full-speed bench cooling
+After=dev-ttyS1.device
+Before=docker.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/eyeq-mcu-safe-full
+RemainAfterExit=yes
+Restart=on-failure
+RestartSec=2
+TimeoutStartSec=15
+
+[Install]
+WantedBy=multi-user.target

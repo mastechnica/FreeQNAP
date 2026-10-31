@@ -1,0 +1,18 @@
+[Unit]
+Description=EyeQ QNAP hardware drive green LED enable
+After=local-fs.target eyeq-cooling.service
+Before=eyeq-buttons.service
+ConditionPathExists=/etc/eyeq-platform
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/share/eyeq/eyeq-hwctl.py drive-green-enable
+RemainAfterExit=yes
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=15
+NoNewPrivileges=yes
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,27 @@
+[Unit]
+Description=FreeQNAP local network policy and independent rollback
+DefaultDependencies=no
+After=local-fs.target freeqnap-vpn-firewall.service
+Before=network-pre.target systemd-networkd.service
+Wants=network-pre.target
+Requires=freeqnap-vpn-firewall.service
+
+[Service]
+Type=notify
+NotifyAccess=main
+WorkingDirectory=/opt/freeqnap/current
+ExecStart=/usr/bin/python3 -B -m freeqnap.nas.network_runtime
+Restart=always
+RestartSec=2
+TimeoutStartSec=30
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/etc/systemd/network /etc/freeqnap-dhcp /var/lib/freeqnap-system /run /proc/sys/net
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW CAP_DAC_OVERRIDE
+RestrictSUIDSGID=yes
+
+[Install]
+WantedBy=network-pre.target

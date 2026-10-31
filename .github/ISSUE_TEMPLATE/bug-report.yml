@@ -1,0 +1,31 @@
+name: Bug report
+description: Report a reproducible FreeQNAP software issue without private device data.
+body:
+  - type: markdown
+    attributes:
+      value: "For suspected vulnerabilities, use the private reporting route described in SECURITY.md when available. Do not attach credentials, raw serial logs, flash dumps, device configuration or private files."
+  - type: input
+    id: version
+    attributes:
+      label: Source commit or release
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Exact NAS model and board revision
+      description: Only TS-431XeU is the current target. Similar names do not establish compatibility.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps, expected behavior and actual behavior
+      description: Include a minimal reproduction. Redact identifiers and private paths.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence and impact
+      description: State whether data is at risk, which operation failed, and whether the result was physical hardware or a fixture test. Avoid destructive retries.

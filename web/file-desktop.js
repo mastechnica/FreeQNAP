@@ -1,0 +1,16 @@
+/* Small local-only folder-window geometry and selection helpers. */
+(function(root){
+ 'use strict';
+ const finite=(n,f)=>Number.isFinite(n)?n:f;
+ function fit(box,g={}){const width=Math.max(1,finite(box.width,900)),height=Math.max(1,finite(box.height,680));const w=Math.min(width,Math.max(Math.min(360,width),finite(g.width,640))),h=Math.min(height,Math.max(Math.min(240,height),finite(g.height,500)));return {x:Math.max(0,Math.min(width-w,finite(g.x,18))),y:Math.max(0,Math.min(height-h,finite(g.y,18))),width:w,height:h};}
+ function tiles(box,count){if(!count)return [];const columns=box.width<720?1:Math.min(Math.max(1,Math.floor((box.width-10)/370)),Math.ceil(Math.sqrt(count*box.width/box.height))),rows=Math.ceil(count/columns),gap=10,w=(box.width-gap*(columns+1))/columns,h=(box.height-gap*(rows+1))/rows;return Array.from({length:count},(_,i)=>fit(box,{x:gap+(i%columns)*(w+gap),y:gap+Math.floor(i/columns)*(h+gap),width:w,height:h}));}
+ function select(names,current,name,{toggle=false,range=false,anchor=null}={}){if(!names.includes(name))return new Set(current);if(range&&names.includes(anchor)){const a=names.indexOf(anchor),b=names.indexOf(name);return new Set(names.slice(Math.min(a,b),Math.max(a,b)+1));}const next=toggle?new Set(current):new Set();if(toggle&&next.has(name))next.delete(name);else next.add(name);return next;}
+ function attach(node,bar,pane,desk,focus){let dragging=null;function bounds(){return {width:desk.clientWidth,height:desk.clientHeight};}function apply(g=pane.geometry){pane.geometry=fit(bounds(),g);Object.assign(node.style,{left:pane.geometry.x+'px',top:pane.geometry.y+'px',width:pane.geometry.width+'px',height:pane.geometry.height+'px'});}apply();node.addEventListener('pointerdown',()=>focus(pane),{capture:true});
+  function start(event,resize){if(event.button!==0||(!resize&&event.target.closest('button,input,select')))return;event.preventDefault();focus(pane);dragging={x:event.clientX,y:event.clientY,g:{...pane.geometry},resize};event.currentTarget.setPointerCapture(event.pointerId);node.classList.add('window-dragging');}
+  function move(event){if(!dragging)return;const dx=event.clientX-dragging.x,dy=event.clientY-dragging.y,g=dragging.g;apply(dragging.resize?{...g,width:g.width+dx,height:g.height+dy}:{...g,x:g.x+dx,y:g.y+dy});}
+  function stop(){dragging=null;node.classList.remove('window-dragging');}
+  const handle=node.querySelector('.window-resize');for(const target of [bar,handle]){target.addEventListener('pointerdown',e=>start(e,target===handle));target.addEventListener('pointermove',move);target.addEventListener('pointerup',stop);target.addEventListener('pointercancel',stop);target.addEventListener('lostpointercapture',stop);}
+  handle.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();apply({...pane.geometry,width:pane.geometry.width+(e.key==='ArrowRight'?24:e.key==='ArrowLeft'?-24:0),height:pane.geometry.height+(e.key==='ArrowDown'?24:e.key==='ArrowUp'?-24:0)});});return {apply};
+ }
+ const api={fit,tiles,select,attach};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.FreeQNAPDesktop=api;
+})(typeof window==='undefined'?globalThis:window);

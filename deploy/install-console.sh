@@ -1,0 +1,31 @@
+#!/bin/sh
+# Installs the local console only. No disk, flash, network or sharing changes.
+set -eu
+[ "$(id -u)" = 0 ] || { echo 'Run this on the NAS as root'; exit 1; }
+[ "$(tr '\000' '\n' < /proc/device-tree/compatible | head -n 1)" = qnap,ts-431xeu ]
+[ "$(dpkg --print-architecture)" = armhf ]
+base=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+python3 -m compileall -q "$base/freeqnap"
+getent passwd freeqnap >/dev/null || adduser --system --group --home /var/lib/freeqnap --no-create-home freeqnap
+install -d -m 700 -o freeqnap -g freeqnap /var/lib/freeqnap /var/backups/freeqnap
+install -d -m 755 /opt/freeqnap/releases
+# New, immutable source generation; previous generation is retained for rollback.
+release=/opt/freeqnap/releases/$(date -u +%Y%m%dT%H%M%SZ)
+[ ! -e "$release" ];install -d -m 755 "$release"
+cp -R "$base/freeqnap" "$base/web" "$release/"
+if [ -d "$base/docs" ];then cp -R "$base/docs" "$release/";fi
+find "$release" -type d -name __pycache__ -prune -exec rm -rf {} +
+chown -R root:root "$release";find "$release" -type d -exec chmod 755 {} +;find "$release" -type f -exec chmod 644 {} +
+ln -s "$release" /opt/freeqnap/current.next
+mv -Tf /opt/freeqnap/current.next /opt/freeqnap/current
+install -m 644 "$base/deploy/freeqnap.tmpfiles.conf" /etc/tmpfiles.d/freeqnap.conf
+for name in freeqnap-console.service freeqnap-collect.service freeqnap-collect.timer;do
+ install -m 644 "$base/deploy/$name" "/etc/systemd/system/$name"
+done
+systemd-tmpfiles --create /etc/tmpfiles.d/freeqnap.conf
+systemctl daemon-reload
+systemd-analyze verify /etc/systemd/system/freeqnap-console.service /etc/systemd/system/freeqnap-collect.service /etc/systemd/system/freeqnap-collect.timer
+systemctl start freeqnap-collect.service
+systemctl enable --now freeqnap-collect.timer freeqnap-console.service
+systemctl restart freeqnap-console.service
+printf 'Console installed on loopback only; initialize its separate administrator password privately over SSH.\n'

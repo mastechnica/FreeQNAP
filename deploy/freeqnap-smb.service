@@ -1,0 +1,11 @@
+[Unit]
+Description=FreeQNAP authenticated SMB3 shares
+After=network.target freeqnap-broker.service
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/smbd --foreground --no-process-group --configfile=/etc/freeqnap/smb.conf
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+UMask=0007

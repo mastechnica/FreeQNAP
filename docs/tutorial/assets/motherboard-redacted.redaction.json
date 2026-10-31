@@ -1,0 +1,61 @@
+{
+  "kind": "motherboard",
+  "pixels": [
+    2268,
+    4032
+  ],
+  "mask_rectangles": [
+    [
+      0,
+      285,
+      532,
+      748
+    ],
+    [
+      0,
+      1014,
+      541,
+      1683
+    ],
+    [
+      862,
+      1158,
+      973,
+      1329
+    ],
+    [
+      811,
+      2648,
+      975,
+      3040
+    ],
+    [
+      1073,
+      2902,
+      1658,
+      3056
+    ],
+    [
+      1664,
+      1544,
+      1758,
+      1821
+    ],
+    [
+      1390,
+      866,
+      1695,
+      1063
+    ],
+    [
+      1136,
+      581,
+      1280,
+      776
+    ]
+  ],
+  "outside_mask_pixels_unchanged": true,
+  "source_metadata_copied": false,
+  "sha256": "f7dc2c8a8cd204fc500ce393bd2244f56120ceb50056b2ca6b9872c68e0ba7ff",
+  "method": "Opaque deterministic masks; generative preview rejected and not included"
+}

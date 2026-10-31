@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#721c28"><link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icon-192.png"><title>FreeQNAP · Your local NAS</title><link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<aside>
+<a class="brand" href="#overview"><svg class="brand-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M20 3 L34.722432 28.5 L5.277568 28.5 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg><span>FreeQNAP</span></a><p class="tag">YOUR HARDWARE. YOUR NAS.</p>
+<nav aria-label="NAS workspaces">
+<a href="#overview">Overview</a><a href="#storage">Storage & encryption</a><a href="#shares">Shares & users</a>
+<a href="#files">Files</a><a href="#backups">Backup & restore</a><a href="#media">Media library</a>
+<a href="#external">USB storage</a><a href="#network">Network</a><a href="#ddns">Dynamic DNS</a><a href="#vpn">VPN & gateway</a><a href="#downloads">Downloads</a>
+<a href="#recovery">RAID & recovery</a><a href="#alerts">Health &amp; notifications</a><a href="#activity">Activity</a><a href="#settings">Settings</a>
+<a href="/tutorial/" target="_blank" rel="noopener">Installation guide ↗</a>
+</nav><div class="aside-bottom"><span id="mode">Connecting…</span><button id="logout" class="quiet" hidden>Sign out</button></div>
+</aside>
+<main>
+<header><div><span class="eyebrow">LOCAL NAS ADMINISTRATION</span><h1 id="title">Your NAS, independent.</h1><p class="sub" id="subtitle">Storage, sharing and backups under your control.</p></div><span class="pill" id="health">Connecting</span></header>
+<section id="login" class="panel" hidden><h2>Administrator access</h2><p id="setup"></p>
+<form id="login-form"><label>Administrator password<input type="password" id="password" autocomplete="current-password" required></label><button>Sign in</button></form>
+<form id="enroll-form" hidden><label>One-use enrollment token<input type="password" id="enrollment-token" autocomplete="off" required></label>
+<label>New administrator password<input type="password" id="enrollment-password" minlength="12" autocomplete="new-password" required></label>
+<label>Confirm password<input type="password" id="enrollment-confirm" minlength="12" autocomplete="new-password" required></label><button>Set up this NAS</button></form></section>
+<div id="error" class="notice error" role="alert" hidden></div><div id="message" class="notice" role="status" hidden></div>
+<div id="console" hidden><div id="demo-banner" class="notice" hidden>Synthetic preview · All data is illustrative. Operations are disabled and no host disks are accessed.</div><div id="workspace"></div>
+<footer><span>FreeQNAP · TS-431XeU · local development</span><span>Hardware and recovery acceptance remain visible in the guide.</span></footer></div>
+<dialog id="review"><form id="review-form"><h2 id="review-title">Confirm changes</h2><div id="review-detail"></div><label id="confirm-label">Confirmation<input id="confirmation" autocomplete="off" required></label><div id="review-secret" hidden><label>Use password or key file<select id="secret-method"><option value="password">Password</option><option value="key">Key file</option></select></label><label id="secret-password-label">Password<input type="password" id="secret-password" minlength="12" autocomplete="off"></label><label id="secret-password-confirm-label" hidden>Confirm new password<input type="password" id="secret-password-confirm" minlength="12" autocomplete="new-password"></label><label id="secret-key-label" hidden>Key file<input type="file" id="secret-key"></label><button type="button" id="generate-key" class="quiet">Generate and download a new key</button><p class="note">Keep your password/key outside this NAS. An encrypted volume cannot be recovered without an accepted key.</p></div><div class="actions"><button type="button" id="review-cancel" class="quiet">Cancel</button><button id="review-submit">Confirm</button></div></form></dialog>
+<script src="/file-desktop.js"></script><script src="/notifications.js"></script><script src="/ddns.js"></script><script src="/health.js"></script><script src="/file-locations.js"></script><script src="/app.js"></script>
+</main></body></html>
