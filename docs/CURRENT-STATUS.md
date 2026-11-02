@@ -1,5 +1,9 @@
 # Current status — 2 November 2026
 
+## Personal Photos & Videos
+
+The private timeline, albums, favorites, original downloads, metadata viewer and offline GPS map are locally deployed. The optional iCloud connector is installed, disabled and signed out; no real Apple account or archive is configured. Downloaded originals are retained independently of later cloud deletion. Native synthetic and permission/streaming regressions passed; real Apple sign-in and first-library acceptance still require owner setup. See [Personal Photos](PERSONAL-PHOTOS.md).
+
 ## Current physical expansion checkpoint — 2 November 2026
 
 The approved physical operation has progressed beyond the historical preparation

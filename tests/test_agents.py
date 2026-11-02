@@ -68,3 +68,12 @@ class AgentTests(unittest.TestCase):
   self.assertEqual(request('/api/agents/create','POST',{'name':'owner issued','grants':['media.catalog']},**admin)[0],403)
   admin['X-CSRF-Token']=csrf
   self.assertEqual(request('/api/agents/create','POST',{'name':'owner issued','grants':['media.catalog']},**admin)[0],200)
+
+class PersonalPhotoAgentTests(AgentTests):
+ def test_existing_media_role_does_not_grant_personal_photos(self):
+  token,p=self.issue(PRESETS['media-editor'])
+  with self.assertRaises(Denied):self.agents.invoke(p,'photos.catalog',{},None)
+ def test_apple_credentials_are_not_delegable(self):
+  for operation in ('photos.icloud-login','photos.icloud-code','photos.icloud-status','photos.icloud-save'):
+   self.assertNotIn(operation,OPERATIONS)
+   with self.assertRaises(ValueError):self.issue([operation])

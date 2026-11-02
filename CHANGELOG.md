@@ -1,3 +1,12 @@
+## Private personal photo archive — 2 November 2026
+
+- Added a private photo/video timeline, year/month views, albums, favorites, captions, original downloads and offline GPS map.
+- Added an optional pinned iCloud connector with private MFA setup, resumable verified downloads and no cloud-deletion propagation.
+- Kept private originals outside general file/media grants; added explicit photo agent permissions and authenticated range streaming.
+- Isolated metadata/preview decoders with read-only input, reduced privileges, no network and resource limits.
+- Deployed locally with rollback generation retained; connector remains disabled and signed out pending owner setup.
+- Passed 378 host tests (four skips), 74 targeted native tests and native synthetic JPEG/HEIC/QuickTime checks. Real Apple account acceptance remains pending.
+
 ## Installer OS allocation correction — 2 November 2026
 
 - New installer source reserves 128 GiB per OS mirror member and requires at least 130 GiB on each selected OS disk.

@@ -8,6 +8,8 @@ import time
 import uuid
 from pathlib import Path
 from .common import Context, name
+from .personal_photos import PersonalPhotos
+from .personal_cloud import PersonalCloud
 from .disk_reports import DiskReports
 from .cooling import Cooling
 from .alert_rules import AlertRules
@@ -55,6 +57,8 @@ class Backend:
         self.bundles = Bundles(self.ctx,self.files)
         self.archives = Archives(self.ctx,self.files,self.bundles)
         self.media = Media(self.ctx)
+        self.personal_photos=PersonalPhotos(self.ctx)
+        self.personal_cloud=PersonalCloud(self.personal_photos)
         self.recovery = Recovery(self.ctx,self.files)
         self.external = External(self.ctx)
         self.foreign = Foreign(self.ctx,self.external)
@@ -70,7 +74,7 @@ class Backend:
         self.alerts = Health(self.ctx,schedules=self.backup_schedules)
         self.notifications = Notifications(self.ctx)
         self.ddns = DDNS(self.ctx)
-        self.alerts.optional_checks={'cooling':self.cooling.health,'watchdog':self.cooling.watchdog_health,'notifications':self.notifications.health,'ddns':self.ddns.health,'workers':self.worker_alerts,'https':self.https_alerts}
+        self.alerts.optional_checks={'personal-photos':self.personal_cloud.health,'cooling':self.cooling.health,'watchdog':self.cooling.watchdog_health,'notifications':self.notifications.health,'ddns':self.ddns.health,'workers':self.worker_alerts,'https':self.https_alerts}
 
     def status(self):
         config = self.ctx.config()
@@ -153,6 +157,14 @@ class Backend:
             'files.delete-plan': self.files.delete_plan, 'files.trash': self.files.trash_items, 'files.recycle-policy': self.files.policy_apply, 'files.recycle-policy-plan':self.files.policy_plan, 'files.recycle-plan':self.files.recycle_plan,
             'files.purge-plan': self.files.purge_plan, 'files.purge': self.files.purge,
             'recovery.list': self.recovery.list, 'recovery.plan': self.recovery.plan, 'recovery.apply': self.recovery.apply,
+            'photos.status':lambda r:self.personal_photos.status(r), 'photos.configure':self.personal_photos.configure,
+            'photos.related':self.personal_photos.related, 'photos.catalog':self.personal_photos.catalog, 'photos.places':self.personal_photos.places,
+            'photos.read':self.personal_photos.read, 'photos.annotate':self.personal_photos.annotate,
+            'photos.album-create':self.personal_photos.album, 'photos.album-add':self.personal_photos.album_add,
+            'photos.import-folder':self.personal_photos.import_folder, 'photos.pause':self.personal_cloud.pause,
+            'photos.icloud-status':self.personal_cloud.status, 'photos.icloud-save':self.personal_cloud.save,
+            'photos.icloud-login':self.personal_cloud.login, 'photos.icloud-code':self.personal_cloud.code,
+            'photos.icloud-run':self.personal_cloud.run,
             'media.save': lambda r: self.save_library(r), 'media.catalog': self.media.catalog,
             'media.provider-status':self.media.provider_status, 'media.provider-save':self.media.provider_save, 'media.scanner-settings':self.media.scanner_settings, 'media.scanner-status':self.media.scanner_status, 'media.artwork':self.media.artwork, 'media.lookup': self.media.lookup, 'media.metadata': self.media.apply_metadata,
             'jobs.retry': self.retry, 'system.plan': self.system_plan, 'system.apply': self.system_apply,
@@ -168,6 +180,7 @@ class Backend:
         raise ValueError('Unknown or unsupported NAS operation')
 
     def system_plan(self, request):
+        if self.personal_photos.busy.locked() or self.personal_cloud.auth_lock.locked():raise ValueError('Pause and wait for personal photo activity before changing system power')
         operation=request.get('operation')
         if operation not in ('restart','shutdown'):raise ValueError('Choose restart or shutdown')
         active=[job for job in self.ctx.state.jobs() if job['status'] in ('queued','running')]
@@ -175,6 +188,7 @@ class Backend:
         return self.ctx.plan('system-power',{'operation':operation,'shutdown_metadata_followup_open':True},operation.upper()+' NAS')
 
     def system_apply(self, request):
+        if self.personal_photos.busy.locked() or self.personal_cloud.auth_lock.locked():raise ValueError('Personal photo activity started; pause and review power operation again')
         with self.ctx.lock():
             path,plan=self.ctx.reviewed(request,'system-power')
             if any(job['status'] in ('queued','running') for job in self.ctx.state.jobs()):raise ValueError('An operation started after the power plan; wait and review again')
@@ -359,3 +373,9 @@ class Backend:
         days=info.get('certificate',{}).get('days_remaining')
         if days is not None and days<30:out.append(fault('certificate','critical' if days<7 else 'warning','LAN HTTPS certificate expires soon',{'days_remaining':days}))
         return out
+
+    def personal_photo_worker(self):
+        while not self.stop_event.is_set():
+            try:self.personal_cloud.tick()
+            except Exception:self.personal_photos.progress(state='needs-attention',message='Photo scheduler needs attention; originals retained')
+            self.stop_event.wait(30)

@@ -12,6 +12,7 @@ class MediaHTTPTests(unittest.TestCase):
   class Broker:
    def request(self,action,payload):
     if action in ('files.read','files.pool-read','external.session-read'):return {'data_base64':base64.b64encode(test.data[payload['offset']:payload['offset']+payload['count']]).decode(),'etag':'stable','total_bytes':len(test.data),'modified_at':1700000000}
+    if action=='photos.read':return {'filename':'fixture.mp4','data_base64':base64.b64encode(test.data[payload['offset']:payload['offset']+payload['count']]).decode(),'etag':'photo-fixture','total_bytes':len(test.data)}
     if action=='files.bundle-info':return {'ticket':payload['ticket'],'filename':'files.zip','roots':[{'path':'test','name':'test'}]}
     if action=='files.bundle-node':return {'directory':False,'bytes':len(test.data),'modified_at':1700000000,'etag':'stable'}
     if action=='files.bundle-read':return self.request('files.read',payload)
@@ -41,3 +42,9 @@ class MediaHTTPTests(unittest.TestCase):
 
  def test_location_selector_asset_loads_before_login_without_exposing_data(self):
   code,headers,body=self.request('/file-locations.js',authorized=False);self.assertEqual(code,200);self.assertIn('javascript',headers['Content-Type']);self.assertIn(b'FreeQNAPLocations',body)
+
+ def test_personal_photo_stream_requires_session_and_supports_ranges(self):
+  path='/api/photo-file?id='+'a'*64+'&variant=original&inline=1'
+  self.assertEqual(self.request(path,authorized=False)[0],401)
+  code,headers,data=self.request(path,Range='bytes=2-5')
+  self.assertEqual((code,data),(206,b'2345'));self.assertEqual(headers['Cache-Control'],'no-store');self.assertEqual(headers['Cross-Origin-Resource-Policy'],'same-origin')

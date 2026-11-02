@@ -67,7 +67,7 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                 raw=source.read_bytes();self.send_response(200);self.send_header('Content-Type',kind);self.send_header('Content-Length',str(len(raw)));self.send_header('X-Content-Type-Options','nosniff');self.send_header('Content-Security-Policy',"default-src 'self'; style-src 'self'; frame-ancestors 'none'");self.end_headers();
                 if self.command!='HEAD':self.wfile.write(raw)
                 return
-            assets={'/ts431xeu-front.svg':('ts431xeu-front.svg','image/svg+xml'),'/':('index.html','text/html; charset=utf-8'),'/style.css':('style.css','text/css'),'/app.js':('app.js','text/javascript'),'/agents.js':('agents.js','text/javascript'),'/file-desktop.js':('file-desktop.js','text/javascript'),'/file-locations.js':('file-locations.js','text/javascript'),'/health.js':('health.js','text/javascript'),'/notifications.js':('notifications.js','text/javascript'),'/ddns.js':('ddns.js','text/javascript'),'/sw.js':('sw.js','text/javascript'),'/manifest.webmanifest':('manifest.webmanifest','application/manifest+json'),'/icon.svg':('icon.svg','image/svg+xml'),'/icon-192.png':('icon-192.png','image/png'),'/icon-512.png':('icon-512.png','image/png')}
+            assets={'/ts431xeu-front.svg':('ts431xeu-front.svg','image/svg+xml'),'/':('index.html','text/html; charset=utf-8'),'/style.css':('style.css','text/css'),'/app.js':('app.js','text/javascript'),'/photos.js':('photos.js','text/javascript'),'/photo-land.json':('photo-land.json','application/json'),'/agents.js':('agents.js','text/javascript'),'/file-desktop.js':('file-desktop.js','text/javascript'),'/file-locations.js':('file-locations.js','text/javascript'),'/health.js':('health.js','text/javascript'),'/notifications.js':('notifications.js','text/javascript'),'/ddns.js':('ddns.js','text/javascript'),'/sw.js':('sw.js','text/javascript'),'/manifest.webmanifest':('manifest.webmanifest','application/manifest+json'),'/icon.svg':('icon.svg','image/svg+xml'),'/icon-192.png':('icon-192.png','image/png'),'/icon-512.png':('icon-512.png','image/png')}
             if path in assets:
                 name,kind=assets[path];raw=(WEB/name).read_bytes();self.send_response(200)
                 self.send_header('Content-Type',kind);self.send_header('Content-Length',str(len(raw)))
@@ -123,9 +123,9 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                     if getattr(self,'download_started',False):self.close_connection=True
                     else:self.send(400,{'error':str(error)})
                 return
-            if path in ('/api/file','/api/download-file','/api/volume-file','/api/foreign-file','/api/pool-file'):
+            if path in ('/api/file','/api/download-file','/api/volume-file','/api/foreign-file','/api/pool-file','/api/photo-file'):
                 if preview:self.send(403, {'error':'Synthetic preview cannot read files'});return
-                try:self.download(nas, parse_qs(urlsplit(self.path).query),download_job=path=='/api/download-file',volume_file=path=='/api/volume-file',foreign_file=path=='/api/foreign-file',pool_file=path=='/api/pool-file')
+                try:self.download(nas, parse_qs(urlsplit(self.path).query),download_job=path=='/api/download-file',volume_file=path=='/api/volume-file',foreign_file=path=='/api/foreign-file',pool_file=path=='/api/pool-file',photo_file=path=='/api/photo-file')
                 except (ValueError, OSError, KeyError) as error:
                     if getattr(self,'download_started',False):self.close_connection=True
                     else:self.send(400, {'error': str(error)})
@@ -143,9 +143,11 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
             else:
                 self.send(404, {'error': 'Unknown endpoint'})
 
-        def download(self, nas, query, artifact=False, download_job=False, volume_file=False,foreign_file=False,system_backup=False,pool_file=False):
+        def download(self, nas, query, artifact=False, download_job=False, volume_file=False,foreign_file=False,system_backup=False,pool_file=False,photo_file=False):
             import base64
-            if system_backup:
+            if photo_file:
+                payload={'id':query['id'][0],'variant':query.get('variant',['original'])[0]};read_action='photos.read';path='photo.jpg'
+            elif system_backup:
                 payload={'id':query['id'][0]};read_action='backup.local-read';path='freeqnap-recovery.tar.gz.gpg'
             elif artifact:
                 payload={'id':query['id'][0]};read_action='artifacts.read';path='luks-header.bin'
@@ -160,7 +162,7 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
             else:
                 payload={'share':query['share'][0],'path':query['path'][0]};read_action='files.read';path=payload['path']
             first=nas.request(read_action,{**payload,'offset':0,'count':1})
-            if artifact or system_backup:path=first['filename']
+            if artifact or system_backup or photo_file:path=first['filename']
             total=first['total_bytes'];etag='"'+hashlib.sha256(first['etag'].encode()).hexdigest()+'"'
             try:start,end,partial=byte_range(self.headers.get('Range'),total,etag,self.headers.get('If-Range'))
             except ValueError:
@@ -234,6 +236,8 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                     raise ValueError('Request size invalid')
                 value = json.loads(self.rfile.read(size))
                 path = urlsplit(self.path).path
+                if path in ('/api/nas/photos.icloud-login','/api/nas/photos.icloud-code') and not (self.client_address[0] in ('127.0.0.1','::1') and self.headers.get('X-Forwarded-Proto')=='https'):
+                    self.send(403,{'error':'Use trusted local HTTPS for Apple sign-in'});return
                 if not isinstance(value, dict):
                     raise ValueError('JSON object required')
                 if path == '/api/enroll':

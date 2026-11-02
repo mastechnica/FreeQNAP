@@ -12,9 +12,12 @@ from pathlib import Path
 
 BACKEND_OPERATIONS = frozenset(json.loads(Path(__file__).with_name('agent_operations.json').read_text()))
 PLAYER_OPERATIONS = frozenset(['media.players','media.players-discover','media.play','media.playback-control','media.playback-status'])
-OPERATIONS = BACKEND_OPERATIONS | PLAYER_OPERATIONS
+ADMIN_ONLY=frozenset(['photos.icloud-login','photos.icloud-code','photos.icloud-status','photos.icloud-save'])
+OPERATIONS = (BACKEND_OPERATIONS | PLAYER_OPERATIONS) - ADMIN_ONLY
 # Explicit lists: a new operation never expands an existing role or token.
 PRESETS = {
+    'personal-photo-reader':['photos.status','photos.catalog','photos.places','photos.read','photos.related'],
+    'personal-photo-editor':['photos.catalog','photos.annotate','photos.album-create','photos.album-add'],
     'health-reader': ['health.alerts','smart.status','smart.history','system.frontpanel','system.history','network.status','network.history'],
     'media-editor': ['media.catalog','media.provider-status','media.scanner-status','media.lookup','media.metadata','media.artwork','media.scan'],
     'media-playback': ['media.catalog','media.players','media.play','media.playback-control','media.playback-status'],
@@ -22,8 +25,8 @@ PRESETS = {
     'file-editor': ['files.list','files.read','files.mkdir','files.upload-begin','files.upload-chunk','files.upload-finish','files.move-plan','files.move','files.transfer-plan','files.transfer','files.recycle-plan','files.recycle'],
     'download-manager': ['downloads.status','downloads.add','downloads.control','downloads.files','downloads.read'],
 }
-READ_ONLY = frozenset(['media.players','media.playback-status'] + PRESETS['health-reader'] + PRESETS['file-reader'] + ['nas.status','notifications.status','notifications.rules','ddns.status','vpn.status','vpn.peers-status','downloads.status','downloads.files','downloads.read','media.catalog','media.provider-status','media.scanner-status','media.clients','media.dlna-options','external.discover','external.unlock-capabilities','external.files','external.read','external.session-files','external.session-read','backup.schedule-list','backup.system-stages','backup.local-list','repositories.snapshots','files.stages','files.trash','recovery.list','system.https-status','system.https-ca'])
-SENSITIVE = frozenset(['vpn.wireguard-profile','artifacts.read','backup.local-read','encryption.header-backup'])
+READ_ONLY = frozenset(PRESETS['personal-photo-reader'] + ['media.players','media.playback-status'] + PRESETS['health-reader'] + PRESETS['file-reader'] + ['nas.status','notifications.status','notifications.rules','ddns.status','vpn.status','vpn.peers-status','downloads.status','downloads.files','downloads.read','media.catalog','media.provider-status','media.scanner-status','media.clients','media.dlna-options','external.discover','external.unlock-capabilities','external.files','external.read','external.session-files','external.session-read','backup.schedule-list','backup.system-stages','backup.local-list','repositories.snapshots','files.stages','files.trash','recovery.list','system.https-status','system.https-ca'])
+SENSITIVE = frozenset(['photos.read','photos.places','vpn.wireguard-profile','artifacts.read','backup.local-read','encryption.header-backup'])
 
 class Denied(ValueError): pass
 class Limited(ValueError): pass

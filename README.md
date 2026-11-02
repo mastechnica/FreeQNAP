@@ -151,3 +151,13 @@ or previous private project history. Screenshot crops and opaque masks are
 Agent integration: [local API tokens, permissions and approved-player playback](docs/AGENT-API.md).
 
 USB protection: [encryption profiles, password/key files and safe mounting](docs/USB-ENCRYPTION.md).
+
+
+### Personal Photos & Videos
+
+An optional iCloud connector downloads originals into a private local archive and
+keeps them after later cloud deletion. Browse a timeline, albums, favorites and an
+offline GPS map, with captions, previews and video playback. Local-folder import
+is also available. The connector is unofficial; real Apple account validation is
+pending. Verify the complete archive and an independent backup before reducing
+cloud storage. See [setup, privacy and acceptance](docs/PERSONAL-PHOTOS.md).

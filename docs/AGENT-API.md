@@ -196,3 +196,13 @@ retained across restart and does not prevent later jobs from running.
 repeatedly discarding/recreating the engine job. `action: "remove"` still retains
 the downloaded files. Start a new job to use a fresh directory, or reconcile the
 partial files manually; there is no automatic destructive marker repair.
+
+## Personal-photo access
+
+New photo operations do not expand existing token grants. The explicit
+`personal-photo-reader` preset permits catalog/status, GPS clusters, related
+versions and original/preview reads; it exposes private media/location data.
+`personal-photo-editor` permits captions/favorites and manual album membership.
+Apple account settings, sign-in and verification codes are administrator-only
+and cannot be granted to agents. Generic file operations cannot enter the
+protected personal-photo namespace. See [Personal Photos](PERSONAL-PHOTOS.md).
