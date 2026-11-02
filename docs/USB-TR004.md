@@ -102,3 +102,55 @@ On the original installed kernel with the persistent workaround, three 8 MiB ran
 This clears the reproduced small-write regression for the tested configuration. It does not imply a formatted/mounted external NAS volume, complete enclosure management, encrypted physical-media compatibility, every USB device, power-loss safety or a long-duration soak. Keep exact-device quarantine until a deliberately reviewed next storage operation; do not automatically retry the historical failed format job. Original SPI/NAND contents are unchanged. The 32-bit DMA diagnostic image was RAM-only and is no longer running.
 
 The normal-kernel extended regression also passed **128 × 8 MiB random direct write/readback cycles (1 GiB written and 1 GiB verified)** on the TR-004, followed by restoration and verification of the original region. The controller stayed responsive, the exact-device read-only flag was restored, no systemd service was failed, and internal RAID recovery advanced to 66.8%. This is a bounded regression, not a full-surface or long-duration reliability certification.
+
+## Remote read checkpoint — 1 November 2026
+
+The hardened RAM kernel retained the 128-byte MRRS workaround. The read-only
+quarantined enclosure passed two direct reads of each of four 64 MiB regions,
+including beyond 16 TiB and near the LUN end: 512 MiB total with matching repeated
+hashes. Negotiated speed remained 5 Gb/s. No device write or enclosure-mode change
+was issued. This is read-path evidence, not mounted write/flush/reconnect acceptance
+or an independent controller/member-health check.
+
+A fresh identity-bound proposal specifies two approximately 15 TB unencrypted
+ext4 volumes, separate from internal MD and the disposable small USB drive. It
+requires owner approval before releasing quarantine and initializing; the failed
+historical format is not retried automatically.
+
+The proposed long split-volume names exposed an ext4-label truncation collision.
+New external formatting now preserves readable distinguishing suffixes, uses a
+bounded deterministic suffix for longer names and refuses collisions among the
+proposed labels before writes. Existing filesystems/labels are not renamed; UUIDs
+and attachment identities remain authoritative. Twenty-five external-storage
+fixture tests passed. Physical creation of these proposed volumes remains pending.
+
+## Mounted-volume campaign — 2 November 2026
+
+The owner approved replacing the disposable enclosure's presented layout with
+two approximately 15 TB unencrypted ext4 filesystems, each below 16 TiB and with
+the 64bit feature disabled. The enclosure's hardware RAID mode and all internal
+disks were excluded. Exact-device PCIe MRRS remained 128 bytes.
+
+The first operation wrote and directly verified both approved GPT copies, then
+stopped before formatting because the old validation-only udev quarantine made
+the new partitions read-only. Its failed operation and metadata backups were
+retained. A separately inspected single-use continuation retired only that
+exact-enclosure rule, verified the unchanged GPT and finished the two filesystems;
+partition creation was not repeated. Both volumes mounted through the normal
+external-storage backend.
+
+A new preflight regression guard refuses a format plan if any existing child
+partition remains read-only, before any layout change. The USB and RAID-policy
+suites pass 34 tests.
+
+Mounted I/O, flush, filesystem and software reconnection results are recorded in
+the dated validation report. Unexpected power loss, NAS cold boot with the enclosure, full-surface
+media verification and proprietary enclosure/member RAID health are separate
+limits; software reconnect is not a physical unplug test.
+
+The final owner-assisted physical cable and clean enclosure-only power-cycle
+checks both passed exact filesystem/inode/direct-read proofs at SuperSpeed.
+Both volumes remain mounted read/write. These were safe-eject tests; unexpected
+power loss during writes was not tested. See
+[the dated report](TR004-VALIDATION-2026-11-02.md) for the complete results and
+preserved software-reauthorization readiness limit.

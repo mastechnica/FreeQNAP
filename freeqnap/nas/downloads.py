@@ -152,6 +152,8 @@ class Downloads:
             action=request.get('action')
             if action not in ('pause','resume','remove'):raise ValueError('Choose pause, resume or remove')
             row['desired']={'pause':'paused','resume':'running','remove':'removed'}[action];row['updated']=time.time()
+            if action=='resume' and row.get('recovery_required'):
+                raise ValueError('Resume data is damaged. Existing files are preserved. Start a new download in a fresh job, or recover the partial files manually.')
             if action=='resume':row['next_retry']=0
             self.ctx.state.set('downloads_jobs',rows)
             return {'job':self.public_job(row),'files_deleted':False}
@@ -169,8 +171,9 @@ class Downloads:
             with self.ctx.lock():
                 rows=self.jobs();row=rows.get(ident);changed=False
                 if not row or row.get('state')=='complete' and row['desired']=='running':continue
+                if row.get('recovery_required') and row['desired']!='removed':continue
                 try:
-                    status=self.rpc('tellStatus',[row['gid'],['gid','status','totalLength','completedLength','downloadSpeed','uploadSpeed','errorCode','followedBy']])
+                    status=self.rpc('tellStatus',[row['gid'],['gid','status','totalLength','completedLength','downloadSpeed','uploadSpeed','errorCode','errorMessage','followedBy']])
                     if row['desired']=='removed':
                         if status and status['status'] in ('active','waiting','paused'):self.rpc('forceRemove',[row['gid']])
                         if status:self.rpc('removeDownloadResult',[row['gid']])
@@ -178,6 +181,8 @@ class Downloads:
                         if len(retained)>=1024:raise ValueError('Retained file history is full; preserve the queue entry')
                         retained[ident]=self.public_job(row);self.ctx.state.set('downloads_retained_files',retained)
                         del rows[ident];changed=True;continue
+                    if status and status.get('status')=='error' and str(status.get('errorCode'))=='1' and 'segment file' in str(status.get('errorMessage','')).lower():
+                        row.update(state='error',recovery_required=True,download_bps=0,upload_bps=0,error_code='1',engine_error='Resume data is damaged. Existing files are preserved. Start a new download, or recover the partial files manually.');changed=True;continue
                     if status and status.get('followedBy'):
                         # Magnets create the payload GID: persist it before any control.
                         if len(status['followedBy'])!=1:raise ValueError('Unexpected torrent metadata descendants; manual review required')

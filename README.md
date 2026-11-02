@@ -80,6 +80,11 @@ Negotiated link speed is unavailable from this driver and is shown as unknown.
 
 ## What is established—and what is not
 
+**1 November update:** initial internal RAID5 synchronization is complete.
+Post-sync bounded physical-filesystem backup/restore and native file-backed RAID5
+recovery passed. Physical disk failure/rebuild, independent disaster recovery and
+post-write cold-start acceptance remain open. [Validation details](docs/VALIDATION-2026-11-01.md).
+
 Installed NAND boot, warm restarts, a physical cold start, four-disk enumeration,
 RJ45 traffic, fixed full cooling and enclosure controls have observed evidence.
 The EJ188 USB first-write failure has a narrowly checked PCIe MRRS workaround,
@@ -142,3 +147,7 @@ files retain their GPL terms and notices. This source-only package contains no O
 images, vendor firmware, private flash dumps, keys, credentials, runtime databases
 or previous private project history. Screenshot crops and opaque masks are
 [documented](docs/assets/screenshots/PROVENANCE.md); no status or metric was fabricated.
+
+Agent integration: [local API tokens, permissions and approved-player playback](docs/AGENT-API.md).
+
+USB protection: [encryption profiles, password/key files and safe mounting](docs/USB-ENCRYPTION.md).

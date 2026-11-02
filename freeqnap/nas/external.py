@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 from .common import canonical,name,secret
 from .limits import require_ext4_size
-from . import gpt
+from . import gpt,crypto_profiles
 from .. import inventory
 from ..state import atomic
 
@@ -65,6 +65,13 @@ def enclosures():
             rows.append({'id':hashlib.sha256(canonical(identity)).hexdigest()[:32],**identity,'product':optional('product'),'speed_mbps':optional('speed'),'port':node.name})
         except (OSError,ValueError):continue
     return rows
+
+def filesystem_label(ident):
+    """Keep readable ext4 labels without truncating distinguishing suffixes."""
+    ident=name(ident)
+    if len('FQ-'+ident)<=16:return 'FQ-'+ident
+    if len(ident)<=16:return ident
+    return ident[:9]+'-'+hashlib.sha256(ident.encode()).hexdigest()[:6]
 
 class External:
     def __init__(self,ctx,collector=None,probe=usb_probe,path_validator=None):
@@ -167,27 +174,32 @@ class External:
         count=request.get('volume_count',1)
         if isinstance(count,bool) or not isinstance(count,int) or not 1<=count<=8:raise ValueError('Choose one to eight bounded external volumes')
         names=[ident] if count==1 else [name(ident+'-'+str(i+1)) for i in range(count)]
+        if len({filesystem_label(n) for n in names})!=len(names):raise ValueError('Filesystem labels collide; choose a different volume name')
         if any(n in self.ctx.config()['pools'] for n in names):raise ValueError('An external volume name already exists')
         if row['disk']['size']<1024**3:raise ValueError('A data volume of at least 1 GiB is required')
-        if row['disk'].get('ro'):raise ValueError('External device is read-only')
+        if any(item.get('ro') for item in walk(row['disk'])):raise ValueError('External device or partition is read-only; release its write protection before formatting')
         encrypted=request.get('encrypted',True)
         if not isinstance(encrypted,bool):raise ValueError('Choose encryption explicitly')
+        profile=crypto_profiles.profile(request.get('encryption_profile',crypto_profiles.DEFAULT))
+        if not encrypted and 'encryption_profile' in request:raise ValueError('Encryption profile applies only to an encrypted volume')
         dev=row['disk']['path']
         signatures=json.loads(self.ctx.run('wipefs','--json','--no-act',dev))
         geometry=json.loads(self.ctx.run('blockdev','--getss',dev));size=int(self.ctx.run('blockdev','--getsize64',dev))
         if geometry not in (512,4096) or size!=row['disk']['size']:raise ValueError('Unsupported or changed external geometry')
         proposed=gpt.layout(size,geometry,names)
         body={'name':ident,'layout':proposed,'disk_identity':row,'external':self.record(row,dev),'signatures':signatures,'sector_bytes':geometry,
-              'encrypted':encrypted,'mountpoint':'/srv/freeqnap/volumes/'+ident,'filesystem':'ext4','filesystem_profile':{'block_bytes':4096,'bytes_per_inode':262144,'reserved_percent':0},'auto_mount':False,'stable_device':self.stable_path(row),
+              'encrypted':encrypted,'encryption_profile':profile['id'] if encrypted else None,'encryption_details':profile if encrypted else None,'mountpoint':'/srv/freeqnap/volumes/'+ident,'filesystem':'ext4','filesystem_profile':{'block_bytes':4096,'bytes_per_inode':262144,'reserved_percent':0},'auto_mount':False,'stable_device':self.stable_path(row),
               'review':'All existing partitions/data in this presented USB LUN will be erased. Enclosure RAID mode is not changed. Never mix this volume with the internal RAID.'}
         return self.ctx.plan('usb-create',body,'ERASE EXTERNAL '+ident)
     def create(self,request):
         from .storage import Storage
         with self.ctx.lock():
             path,plan=self.ctx.reviewed(request,'usb-create');body=plan['body'];row=self.select(body['external']['id']);self.idle(row)
+            if len({filesystem_label(v['name']) for v in body['layout']['volumes']})!=len(body['layout']['volumes']):raise ValueError('Filesystem labels collide; review another name')
             for volume in body['layout']['volumes']:
                 require_ext4_size(volume['bytes'])
                 if volume['name'] in self.ctx.config()['pools']:raise ValueError('Volume name became occupied')
+            if body['encrypted']:crypto_profiles.profile(body.get('encryption_profile',crypto_profiles.DEFAULT))
             device=row['disk']['path']
             if row!=body['disk_identity'] or json.loads(self.ctx.run('wipefs','--json','--no-act',device))!=body['signatures'] or int(self.ctx.run('blockdev','--getss',device))!=body['sector_bytes']:raise ValueError('External identity, signature or geometry changed after review')
             def guard():
@@ -223,10 +235,11 @@ class External:
                     guard();self.ctx.run('wipefs','--all',partition_ref);step(v['name']+':partition-signatures-cleared')
                     block=partition_ref
                     if body['encrypted']:
-                        guard();self.ctx.run('cryptsetup','luksFormat','--type','luks2','--batch-mode','--pbkdf','argon2id','--pbkdf-memory','131072','--pbkdf-parallel','2','--iter-time','2000','--key-file','-',partition_ref,data=password,timeout=180)
+                        guard();self.ctx.run(*crypto_profiles.format_args(body.get('encryption_profile',crypto_profiles.DEFAULT)),partition_ref,data=password,timeout=180)
+                        pool['encryption_profile']=body.get('encryption_profile',crypto_profiles.DEFAULT)
                         pool['luks_uuid']=self.ctx.run('cryptsetup','luksUUID',partition_ref).strip();step(v['name']+':luks-created')
                         guard();self.ctx.run('cryptsetup','open','--type','luks2','--key-file','-',partition_ref,'freeqnap-'+pool['name'],data=password,timeout=180);opened=True;block='/dev/mapper/freeqnap-'+pool['name']
-                    guard();self.ctx.run('mkfs.ext4','-q','-F','-b','4096','-i','262144','-m','0','-E','lazy_itable_init=1,lazy_journal_init=1','-L','FQ-'+pool['name'][:13],block,timeout=600);step(v['name']+':filesystem-created')
+                    guard();self.ctx.run('mkfs.ext4','-q','-F','-b','4096','-i','262144','-m','0','-E','lazy_itable_init=1,lazy_journal_init=1','-L',filesystem_label(pool['name']),block,timeout=600);step(v['name']+':filesystem-created')
                     pool['filesystem_uuid']=self.ctx.run('blkid','-s','UUID','-o','value',block).strip();pool['block_device']=block
                     if not pool['filesystem_uuid']:raise ValueError('New filesystem UUID unavailable')
                     cfg=self.ctx.config();cfg['pools'][pool['name']]=pool;self.ctx.save(cfg);created.append(pool);step(v['name']+':volume-registered')
@@ -259,6 +272,19 @@ class External:
         rows=[r for r in self.discover()['devices'] if r['usb']['enclosure_id']==enclosure]
         pools=[p['name'] for p in self.ctx.config()['pools'].values() if p.get('kind')=='usb' and p['external']['enclosure_id']==enclosure]
         return self.ctx.plan('usb-eject',{'enclosure':enclosure,'devices':rows,'pools':pools,'review':'Stop dependent shares/media/downloads, unmount all registered volumes in this enclosure and flush. No force/lazy unmount; no vendor power/RAID command.'},'EJECT USB')
+    def flush(self,device):
+        self.ctx.run('blockdev','--flushbufs',device)
+        try:
+            self.ctx.run('sg_sync',device,timeout=60)
+            return {'method':'scsi-sync','device_cache_flush_supported':True}
+        except ValueError as error:
+            # sg3_utils status 9 is specifically unsupported operation code.
+            # Never treat medium/hardware errors, resets or write-back caches as safe.
+            if not str(error).startswith('sg_sync failed (exit 9);') or not re.fullmatch(r'/dev/sd[a-z]+',device):raise
+            policy=(Path('/sys/class/block')/Path(device).name/'queue/write_cache').read_text().strip()
+            if policy!='write through':raise ValueError('Device cannot flush its cache; safe eject refused') from error
+            return {'method':'reported-write-through-no-sync-opcode','device_cache_flush_supported':False}
+
     def eject(self,request,stop_services):
         with self.ctx.lock():
             path,plan=self.ctx.reviewed(request,'usb-eject');body=plan['body']
@@ -282,12 +308,13 @@ class External:
                 if pool['encrypted'] and Path('/dev/mapper/freeqnap-'+ident).exists():self.ctx.run('cryptsetup','close','freeqnap-'+ident)
                 pool['ejected']=True
             # Recheck unmounted/no-holder state after dependent services closed.
+            flushes=[]
             for row in fresh:
-                current=self.select(row['id']);self.idle(current,body['pools']);self.ctx.run('blockdev','--flushbufs',current['disk']['path']);self.ctx.run('sg_sync',current['disk']['path'],timeout=60)
+                current=self.select(row['id']);self.idle(current,body['pools']);flushes.append({'id':row['id'],**self.flush(current['disk']['path'])})
             cfg=self.ctx.config()
             for ident in body['pools']:cfg['pools'][ident]=registered[ident]
             self.ctx.save(cfg)
-            return {'safe_to_unplug':True,'device_powered_off':False,'enclosure_raid_configuration_changed':False}
+            return {'safe_to_unplug':True,'device_powered_off':False,'enclosure_raid_configuration_changed':False,'flush':flushes}
 
     def file_view(self,request,*,registered_pool=False):
         from .files import Files,relative

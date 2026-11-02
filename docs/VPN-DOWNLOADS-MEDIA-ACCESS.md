@@ -40,6 +40,13 @@ Add HTTP/HTTPS URLs, BitTorrent magnet links or a torrent file up to 512 KiB. A 
 
 The root-owned queue is committed before submission. Each job has a persistent GID, so an ambiguous RPC reply is reconciled rather than blindly duplicated. The engine saves its session and partial-file control state frequently, supports HTTP Range resume, checks TLS certificates and retries interrupted transfers. Permanent failures remain visible and retryable; one failing item does not stop later jobs. Pause/resume intent survives process restart; restored engine tasks start paused until the durable desired state is reconciled. Reconciliation rotates in bounded batches and releases the storage lock between items. Removal stops the task and retains files, accessible in **Retained files**. File browsing/downloads reject symlinks, nested mounts and paths outside the recorded job and filesystem identity. Completed and partial files are not silently overwritten or deleted.
 
+A completely full destination can damage aria2's partial-download control file.
+When the engine reports that condition, FreeQNAP stops automatic retries for that
+job and shows a fixed recovery message while preserving the job and partial files.
+Other jobs continue. Resume is refused until manual reconciliation; alternatively
+start a new download in its own fresh job directory. Removing the old job keeps
+its files. No automatic deletion or reconstruction of damaged markers is claimed.
+
 Downloads follow the NAS routing policy. To require VPN-only transfers, use and validate full-tunnel NAS routing and its kill switch. This milestone does not claim per-download VPN namespaces or IPv6 gateway service.
 
 ## DLNA approval
@@ -60,6 +67,6 @@ Executed on the ARMhf NAS, using disposable network namespaces and generated loc
 - Real aria2 interruption/restart, saved partial-file state, nonzero HTTP Range resume, complete SHA-256 readback, rejection of unauthenticated RPC and unknown-GID response handling.
 - Host tests for private redacted plans, configuration injection/scope refusal, stale runtime confirmation, ambiguous download admission, durable pause and failure isolation.
 
-These are isolated native fixture tests, not external-provider/physical client acceptance. Full early-boot protection, systemd namespace/mount-loss behavior, runtime rollback under abrupt service interruption, actual torrent payload exchange, client applications and native-kernel RAM boot still need acceptance. The native control services are installed and verified with unconfigured defaults. Real data pools and external VPN/media/download use remain uncommissioned until the relevant gates and a reviewed owner-selected storage plan are complete. Do not present this source checkpoint as a turnkey public release.
+These are isolated native fixture tests, not external-provider/physical client acceptance. Full early-boot protection, systemd namespace/mount-loss behavior, runtime rollback under abrupt service interruption, external torrent-peer interoperability and complete full-destination torrent recovery still need acceptance, as do intended client applications. Later RAM-kernel and local-peer results are recorded separately in the dated validation reports. The native control services are installed and verified with unconfigured defaults. Real data pools and external VPN/media/download use remain uncommissioned until the relevant gates and a reviewed owner-selected storage plan are complete. Do not present this source checkpoint as a turnkey public release.
 
 Primary references: [WireGuard routing](https://www.wireguard.com/netns/), [WireGuard userspace implementation](https://github.com/WireGuard/wireguard-go), [OpenVPN 2.6 manual](https://openvpn.net/community-docs/community-articles/openvpn-2-6-manual/), [aria2 manual](https://aria2.github.io/manual/en/html/aria2c.html), [nftables manual](https://netfilter.org/projects/nftables/manpage.html).

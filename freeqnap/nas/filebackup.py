@@ -3,6 +3,7 @@ import json
 import os
 import re
 import secrets
+import stat
 import shlex
 import time
 from pathlib import Path
@@ -127,7 +128,10 @@ class FileBackups:
                 raise ValueError('Backups sharing a filesystem, RAID, enclosure or physical disk need explicit acknowledgement; they do not protect against loss of that storage')
             if Path(share['path']).parent != mount or Path(share['path']).is_symlink():
                 raise ValueError('Share root identity changed')
-            paths.append(share['path']);source_bindings.append({'share':share_id,'pool':pool['name'],'filesystem_uuid':pool['filesystem_uuid'],'path':share['path']})
+            info=Path(share['path']).lstat()
+            if not stat.S_ISDIR(info.st_mode) or info.st_dev!=mount.stat().st_dev:
+                raise ValueError('Backup source root is not a directory on the selected filesystem')
+            paths.append(share['path']);source_bindings.append({'share':share_id,'pool':pool['name'],'filesystem_uuid':pool['filesystem_uuid'],'path':share['path'],'device':info.st_dev,'inode':info.st_ino})
         output = self.command(entry, 'backup', '--quiet', '--tag', 'freeqnap', '--', *paths)
         summaries = [json.loads(line) for line in output.splitlines() if line.strip()]
         summary = next((row for row in reversed(summaries) if row.get('message_type') == 'summary'), None)
@@ -135,13 +139,19 @@ class FileBackups:
             raise ValueError('Restic did not return an unambiguous successful snapshot')
         # A vanished/replaced source must not turn an empty/partial walk into
         # an accepted backup, even if Restic returned a snapshot identifier.
-        for binding in source_bindings:
-            current=self.ctx.config()['shares'].get(binding['share'])
-            if not current or current['pool']!=binding['pool'] or current['path']!=binding['path']:raise ValueError('Backup source mapping changed; snapshot remains unaccepted')
-            pool,_=self.ctx.volume(binding['pool'])
-            if pool['filesystem_uuid']!=binding['filesystem_uuid']:raise ValueError('Backup source filesystem changed; snapshot remains unaccepted')
+        def verify_sources():
+            for binding in source_bindings:
+                current=self.ctx.config()['shares'].get(binding['share'])
+                if not current or current['pool']!=binding['pool'] or current['path']!=binding['path']:raise ValueError('Backup source mapping changed; snapshot remains unaccepted')
+                pool,_=self.ctx.volume(binding['pool'])
+                if pool['filesystem_uuid']!=binding['filesystem_uuid']:raise ValueError('Backup source filesystem changed; snapshot remains unaccepted')
+                info=Path(binding['path']).lstat()
+                if not stat.S_ISDIR(info.st_mode) or info.st_dev!=binding['device'] or info.st_ino!=binding['inode']:
+                    raise ValueError('Backup source directory changed; snapshot remains unaccepted')
+        verify_sources()
         # Exit 3/permission failures are exceptions; partial snapshots never become accepted.
         self.command(entry, 'check', timeout=3600)
+        verify_sources()
         accepted = self.ctx.state.setting('successful_snapshots', {})
         accepted.setdefault(ident, []).append(summary['snapshot_id'])
         self.ctx.state.set('successful_snapshots', accepted)

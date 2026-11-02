@@ -123,6 +123,24 @@ class NAS(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'disconnected'):backups.backup({'repository':'repo','shares':['files']})
         self.assertEqual(self.ctx.state.setting('successful_snapshots',{}),{})
 
+    def test_replaced_source_root_cannot_accept_snapshot_or_erase_last_good(self):
+        for replacement,when in (('directory','backup'),('symlink','backup'),('directory','check')):
+            with self.subTest(replacement=replacement,when=when):
+                folder=self.ctx.mount/('files-'+replacement+'-'+when);folder.mkdir()
+                cfg=self.ctx.config();cfg['shares']['files']={'name':'files','pool':'data','path':str(folder)};cfg['repositories']['repo']={'name':'repo','kind':'sftp','initialized':True};self.ctx.save(cfg)
+                self.ctx.state.set('successful_snapshots',{'repo':['a'*64]});backups=FileBackups(self.ctx)
+                def command(entry,*args,**kwargs):
+                    if args[0]==when:
+                        old=folder.with_name(folder.name+'-original');folder.rename(old)
+                        if replacement=='directory':folder.mkdir()
+                        else:folder.symlink_to(old,target_is_directory=True)
+                    if args[0]=='backup':return json.dumps({'message_type':'summary','snapshot_id':'b'*64})
+                    if args[0]=='check':return ''
+                    raise AssertionError('Unexpected backup command')
+                with patch.object(backups,'command',side_effect=command):
+                    with self.assertRaisesRegex(ValueError,'directory changed'):backups.backup({'repository':'repo','shares':['files']})
+                self.assertEqual(self.ctx.state.setting('successful_snapshots'),{'repo':['a'*64]})
+
     def test_system_retention_reviews_and_prunes_only_its_tag(self):
         cfg=self.ctx.config();cfg['repositories']['repo']={'name':'repo','kind':'sftp'};self.ctx.save(cfg);self.ctx.state.set('repository_check:repo',{'checked_at':time.time(),'read_all_data':True});backups=FileBackups(self.ctx);calls=[]
         def command(entry,*args,**kwargs):calls.append(args);return '[]'

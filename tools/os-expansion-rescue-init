@@ -1,0 +1,23 @@
+#!/bin/busybox sh
+/bin/busybox --install -s /bin
+mount -t devtmpfs devtmpfs /dev
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t tmpfs tmpfs /run
+mount -t tmpfs tmpfs /tmp
+exec </dev/console >/dev/console 2>&1
+export PATH=/bin:/sbin
+export PS1='FREEQNAP_OS_MAINT_RAM# '
+echo 'FreeQNAP offline OS maintenance: no disk assembly or mounts.'
+if /bin/eyeq-mcu-safe-full; then touch /run/freeqnap-cooling-ack; else echo 'STOP: full cooling not acknowledged'; while :; do /bin/sh; done; fi
+insmod /lib/modules/al_thermal.ko || echo 'STOP: thermal driver unavailable'
+insmod /lib/modules/al_eth.ko || echo 'STOP: Ethernet driver unavailable'
+/bin/eyeq-restore-factory-macs && touch /run/freeqnap-macs-verified || echo 'STOP: factory MAC identity unavailable'
+printf 'RAM-ONLY-NO-PERSISTENT-MOUNTS\n' > /run/freeqnap-os-maintenance
+cat /proc/mdstat
+cat /proc/mounts
+cat /sys/class/watchdog/watchdog0/state
+ip link show
+uname -a
+echo 'FREEQNAP_OS_MAINT_READY: verify full cooling, identities and empty MD state before tools setup.'
+while :; do /bin/sh; done

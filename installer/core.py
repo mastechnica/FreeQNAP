@@ -217,7 +217,7 @@ def disk_plan(inventory, serials):
         disk=matches[0]
         physical=inventory['fields'].get('disk.'+disk.get('name',Path(disk.get('path','')).name)+'.sysfs','')
         if '/0000:00:09.0/' not in physical or disk.get('ro') is True:raise ValueError('Only writable internal SATA disks are supported')
-        if not re.fullmatch(r'/dev/sd[a-z]',disk.get('path','')) or disk['size']<16*1024**3:raise ValueError('Unsupported disk path/capacity')
+        if not re.fullmatch(r'/dev/sd[a-z]',disk.get('path','')) or disk['size']<130*1024**3:raise ValueError('Unsupported disk path/capacity')
         pending=[disk]
         while pending:
             part=pending.pop();pending.extend(part.get('children',[]))
@@ -226,6 +226,6 @@ def disk_plan(inventory, serials):
             if part.get('path') in active_swaps:raise ValueError('Selected disk contains active swap')
         rows.append({k:disk.get(k) for k in ('path','serial','wwn','model','size')})
     return {'schema':1,'unit_fingerprint':inventory['unit_fingerprint'],'disks':rows,
-        'boot_partition_bytes':512*1024**2,'os_mirror_member_bytes':8*1024**3,
+        'boot_partition_bytes':512*1024**2,'os_mirror_member_bytes':128*1024**3,
         'remaining_capacity':'reserved and unformatted','destructive':True,'writes_performed':False,
         'requires_separate_disk_erase_confirmation':True}

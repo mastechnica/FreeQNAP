@@ -42,11 +42,8 @@ def main():
         save_private(args.session/'credentials-plan.json',{'root_password_method':args.mode,'ssh_password_login_enabled':False,'plaintext_password_stored':False})
         print('Root password method saved: '+args.mode+'. No password has been collected or changed.');return
     if args.action=='status':
-        operation_path=args.session/'disk-operation.json'
-        operation=json.loads(operation_path.read_text()) if operation_path.exists() else None
-        print(json.dumps({'phase':state['phase'],'capture':connection['capture'],
-            'disk_writes':bool(operation and operation.get('disk_writes_started')),
-            'disk_operation':operation,'flash_writes':False},indent=2));return
+        from session_status import session_status
+        print(json.dumps(session_status(args.session),indent=2));return
     console=Console(connection['capture'])
     if args.action=='boot-installed':
         operation=json.loads((args.session/'disk-operation.json').read_text())

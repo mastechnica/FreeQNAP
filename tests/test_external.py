@@ -65,6 +65,12 @@ class USBTests(unittest.TestCase):
   self.data['disks']=[]
   with self.assertRaisesRegex(ValueError,'missing'):self.service.create({**self.review(plan),'secret':{'password':'fixture private password'}})
   self.assertFalse(any(c[0] in ('mkfs.ext4','sgdisk','cryptsetup') or '--all' in c for c in self.commands));self.assertFalse(self.ctx.state.jobs())
+ def test_read_only_child_refuses_format_before_any_disk_write(self):
+  self.fs();self.disk['ro']=False;self.disk['children'][0]['ro']=True
+  with self.assertRaisesRegex(ValueError,'partition is read-only'):
+   self.service.create_plan({'id':self.usb['id'],'name':'external','encrypted':False,'volume_count':2})
+  self.assertFalse(any(c[0] in ('mkfs.ext4','sgdisk') or '--all' in c for c in self.commands))
+  self.assertFalse(self.ctx.state.jobs())
  def test_existing_ext4_import_defaults_read_only_and_does_not_format(self):
   self.fs();plan=self.service.import_plan({'id':self.usb['id'],'name':'external','uuid':'fixture-filesystem'})
   self.assertTrue(plan['body']['read_only']);self.assertFalse(plan['body']['auto_mount'])
@@ -174,4 +180,48 @@ class USBTests(unittest.TestCase):
   self.assertEqual(set(self.ctx.config()['pools']),{'first','second'});self.assertFalse(any(c[0] in ('mkfs.ext4','sgdisk','cryptsetup') for c in self.commands))
   with self.assertRaises(ValueError):self.service.import_plan({'id':self.usb['id'],'name':'duplicate','uuid':'fixture-filesystem'})
 
+
+ def test_encryption_profile_is_explicit_and_reviewed(self):
+  p=self.service.create_plan({'id':self.usb['id'],'name':'external','encrypted':True,'encryption_profile':'aes128-xts'})
+  self.assertEqual(p['body']['encryption_profile'],'aes128-xts');self.assertEqual(p['body']['encryption_details']['key_bits'],256)
+  default=self.service.create_plan({'id':self.usb['id'],'name':'external','encrypted':True});self.assertEqual(default['body']['encryption_details']['key_bits'],512)
+  before=len(self.commands)
+  with self.assertRaises(ValueError):self.service.create_plan({'id':self.usb['id'],'name':'external','encrypted':True,'encryption_profile':'none'})
+  self.assertTrue(all(c[0]=="swapon" for c in self.commands[before:]))
+  with self.assertRaises(ValueError):self.service.create_plan({'id':self.usb['id'],'name':'external','encrypted':False,'encryption_profile':'aes128-xts'})
+
+
+ def test_unsupported_sync_only_allowed_for_reported_write_through(self):
+  original=self.ctx.run
+  def unsupported(*args,**kw):
+   if args[0]=='sg_sync':raise ValueError('sg_sync failed (exit 9); inspect the local service journal')
+   return original(*args,**kw)
+  self.ctx.run=unsupported
+  with patch('pathlib.Path.read_text',return_value='write through\n'):
+   result=self.service.flush('/dev/sdz');self.assertFalse(result['device_cache_flush_supported'])
+  for cache in ('write back','unknown',''):
+   with patch('pathlib.Path.read_text',return_value=cache):
+    with self.assertRaises(ValueError):self.service.flush('/dev/sdz')
+  with patch('pathlib.Path.read_text',side_effect=OSError('unavailable')):
+   with self.assertRaises(OSError):self.service.flush('/dev/sdz')
+  def hardware_error(*args,**kw):
+   if args[0]=='sg_sync':raise ValueError('sg_sync failed (exit 3); inspect the local service journal')
+   return original(*args,**kw)
+  self.ctx.run=hardware_error
+  with patch('pathlib.Path.read_text',return_value='write through'):
+   with self.assertRaises(ValueError):self.service.flush('/dev/sdz')
+
 if __name__=='__main__':unittest.main()
+
+class ExternalLabelTests(unittest.TestCase):
+ def test_split_enclosure_names_keep_distinguishing_suffix(self):
+  from freeqnap.nas.external import filesystem_label
+  labels=[filesystem_label('external-tr004-'+str(i)) for i in (1,2)]
+  self.assertEqual(labels,['external-tr004-1','external-tr004-2']);self.assertEqual(len(set(labels)),2)
+ def test_long_related_names_fit_and_differ(self):
+  from freeqnap.nas.external import filesystem_label
+  labels=[filesystem_label('long-enclosure-volume-'+str(i)) for i in range(8)]
+  self.assertTrue(all(len(s.encode())<=16 for s in labels));self.assertEqual(len(set(labels)),8)
+ def test_existing_short_label_convention_is_preserved(self):
+  from freeqnap.nas.external import filesystem_label
+  self.assertEqual(filesystem_label('usb-test'),'FQ-usb-test')

@@ -75,8 +75,8 @@ class Invariants(unittest.TestCase):
    (p/'uImage').write_bytes(image);m['architecture']='arm64';(p/'manifest.json').write_text(json.dumps(m))
    with self.assertRaises(ValueError):verified_image(p)
  def test_disk_plan_refuses_wrong_mounted_duplicate_stale_and_active_swap(self):
-  inv={'unit_fingerprint':'test-unit','recorded_at':time.time(),'fields':{'mdstat':'Personalities : [raid1]\nunused devices: <none>','swaps':'Filename Type Size Used Priority\n','disk.sda.sysfs':'/sys/devices/pci0000:00/0000:00:09.0/ata1/disk','disk.sdb.sysfs':'/sys/devices/pci0000:00/0000:00:09.0/ata2/disk'},'disks':[{'path':'/dev/sda','type':'disk','size':100*1024**3,'serial':'DISK-A','mountpoints':[None],'children':[{'path':'/dev/sda1','mountpoints':[None],'fstype':'swap'}]},{'path':'/dev/sdb','type':'disk','size':100*1024**3,'serial':'DISK-B','mountpoints':[None]}]}
-  self.assertFalse(disk_plan(inv,['DISK-A','DISK-B'])['writes_performed'])
+  inv={'unit_fingerprint':'test-unit','recorded_at':time.time(),'fields':{'mdstat':'Personalities : [raid1]\nunused devices: <none>','swaps':'Filename Type Size Used Priority\n','disk.sda.sysfs':'/sys/devices/pci0000:00/0000:00:09.0/ata1/disk','disk.sdb.sysfs':'/sys/devices/pci0000:00/0000:00:09.0/ata2/disk'},'disks':[{'path':'/dev/sda','type':'disk','size':256*1024**3,'serial':'DISK-A','mountpoints':[None],'children':[{'path':'/dev/sda1','mountpoints':[None],'fstype':'swap'}]},{'path':'/dev/sdb','type':'disk','size':256*1024**3,'serial':'DISK-B','mountpoints':[None]}]}
+  plan=disk_plan(inv,['DISK-A','DISK-B']);self.assertFalse(plan['writes_performed']);self.assertEqual(plan['os_mirror_member_bytes'],128*1024**3)
   for ids in (['DISK-A','DISK-A'],['DISK-A','UNKNOWN']):
    with self.assertRaises(ValueError):disk_plan(inv,ids)
   inv['disks'][0]['children'][0]['mountpoints']=['/data']

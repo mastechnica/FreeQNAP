@@ -6,6 +6,8 @@ from pathlib import Path
 from urllib.parse import urlsplit, parse_qs, unquote
 from . import auth, backups, demo, inventory
 from .state import State
+from .agents import Agents, Denied, Limited, PLAYER_OPERATIONS
+from .players import Players
 from .media_http import byte_range,content_type,kind as media_kind
 from .jobs import Worker
 WEB = Path(__file__).resolve().parents[1] / 'web'
@@ -13,6 +15,9 @@ WEB = Path(__file__).resolve().parents[1] / 'web'
 def handler(state, destination, snapshot=None, preview=False, broker=None, origins=()):
     from .nas.broker import Client
     nas = broker or Client()
+    agents = Agents(state)
+    players = Players(state,nas,agents)
+    if not preview:players.resume()
 
     class Handler(BaseHTTPRequestHandler):
 
@@ -52,6 +57,9 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                 self.send(403, {'error': 'Unrecognized host'})
                 return
             path = urlsplit(self.path).path
+            if path.startswith('/api/agent/v1'):
+                self.agent_request(path)
+                return
             tutorial={'/tutorial/':('index.html','text/html; charset=utf-8'),'/tutorial':('index.html','text/html; charset=utf-8'),'/tutorial/tutorial.css':('tutorial.css','text/css'),'/tutorial/assets/motherboard-redacted.png':('assets/motherboard-redacted.png','image/png'),'/tutorial/assets/uart0-debug-redacted.png':('assets/uart0-debug-redacted.png','image/png'),'/tutorial/assets/uart-pinout.svg':('assets/uart-pinout.svg','image/svg+xml')}
             if path in tutorial:
                 filename,kind=tutorial[path];source=WEB.parent/'docs'/'tutorial'/filename
@@ -59,7 +67,7 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                 raw=source.read_bytes();self.send_response(200);self.send_header('Content-Type',kind);self.send_header('Content-Length',str(len(raw)));self.send_header('X-Content-Type-Options','nosniff');self.send_header('Content-Security-Policy',"default-src 'self'; style-src 'self'; frame-ancestors 'none'");self.end_headers();
                 if self.command!='HEAD':self.wfile.write(raw)
                 return
-            assets={'/ts431xeu-front.svg':('ts431xeu-front.svg','image/svg+xml'),'/':('index.html','text/html; charset=utf-8'),'/style.css':('style.css','text/css'),'/app.js':('app.js','text/javascript'),'/file-desktop.js':('file-desktop.js','text/javascript'),'/file-locations.js':('file-locations.js','text/javascript'),'/health.js':('health.js','text/javascript'),'/notifications.js':('notifications.js','text/javascript'),'/ddns.js':('ddns.js','text/javascript'),'/sw.js':('sw.js','text/javascript'),'/manifest.webmanifest':('manifest.webmanifest','application/manifest+json'),'/icon.svg':('icon.svg','image/svg+xml'),'/icon-192.png':('icon-192.png','image/png'),'/icon-512.png':('icon-512.png','image/png')}
+            assets={'/ts431xeu-front.svg':('ts431xeu-front.svg','image/svg+xml'),'/':('index.html','text/html; charset=utf-8'),'/style.css':('style.css','text/css'),'/app.js':('app.js','text/javascript'),'/agents.js':('agents.js','text/javascript'),'/file-desktop.js':('file-desktop.js','text/javascript'),'/file-locations.js':('file-locations.js','text/javascript'),'/health.js':('health.js','text/javascript'),'/notifications.js':('notifications.js','text/javascript'),'/ddns.js':('ddns.js','text/javascript'),'/sw.js':('sw.js','text/javascript'),'/manifest.webmanifest':('manifest.webmanifest','application/manifest+json'),'/icon.svg':('icon.svg','image/svg+xml'),'/icon-192.png':('icon-192.png','image/png'),'/icon-512.png':('icon-512.png','image/png')}
             if path in assets:
                 name,kind=assets[path];raw=(WEB/name).read_bytes();self.send_response(200)
                 self.send_header('Content-Type',kind);self.send_header('Content-Length',str(len(raw)))
@@ -85,6 +93,12 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
             if not preview and (not self.authenticated()):
                 self.send(401, {'error': 'Administrator login required'})
                 return
+            if path == '/api/agents/players':
+                self.send(200,players.listing());return
+            if path == '/api/agents/catalog':
+                self.send(200, agents.catalog());return
+            if path == '/api/agents':
+                self.send(200, agents.listing());return
             if path == '/api/nas/status':
                 try:self.send(200, demo.nas() if preview else nas.request('nas.status'))
                 except (ValueError, OSError) as error:self.send(503, {'error': str(error), 'available': False})
@@ -171,9 +185,42 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                 if not chunk:raise ConnectionAbortedError('Short file read')
                 self.wfile.write(chunk);offset+=len(chunk)
 
+        def agent_request(self, path):
+            if preview or not self.safe_host():self.send(403, {'error':'Agent access unavailable'});return
+            # The TLS proxy overwrites this header; only loopback proxy peers count.
+            if self.client_address[0] not in ('127.0.0.1','::1') or self.headers.get('X-Forwarded-Proto')!='https':
+                self.send(403, {'error':'Use the trusted HTTPS endpoint for agent credentials'});return
+            if self.headers.get('Origin') is not None:
+                self.send(403, {'error':'Agent API does not accept browser-origin requests'});return
+            try:
+                principal=agents.authenticate(self.headers.get('Authorization'))
+                if self.command in ('GET','HEAD') and path=='/api/agent/v1':
+                    catalog=agents.catalog()
+                    catalog['operations']=[row for row in catalog['operations'] if row['id'] in principal['grants']]
+                    catalog['presets']={};catalog['principal_id']=principal['id']
+                    self.send(200,catalog);return
+                prefix='/api/agent/v1/operations/'
+                if self.command!='POST' or not path.startswith(prefix):self.send(404,{'error':'Unknown agent endpoint'});return
+                if self.headers.get('Transfer-Encoding') or self.headers.get('Content-Type','').split(';')[0]!='application/json':raise ValueError('Content-Length JSON required')
+                size=int(self.headers.get('Content-Length','0'))
+                operation=path[len(prefix):]
+                limit=2*1024**2 if operation=='media.artwork' else 1024**2 if operation in ('files.upload-chunk','downloads.add','vpn.plan') else 32768
+                if not 0<size<=limit:raise ValueError('Request size invalid')
+                payload=json.loads(self.rfile.read(size))
+                class Gateway:
+                    def request(self,action,value):
+                        if action in PLAYER_OPERATIONS:return players.invoke(action,value,principal)
+                        return nas.request(action,value)
+                self.send(200,agents.invoke(principal,operation,payload,Gateway()))
+            except Denied as error:self.send(403,{'error':str(error)})
+            except Limited as error:self.send(429,{'error':str(error)})
+            except (ValueError,KeyError,TypeError,OSError):self.send(400,{'error':'Operation failed; check its request and the NAS activity. No automatic retry was performed.'})
+
         def do_HEAD(self):self.do_GET()
 
         def do_POST(self):
+            if urlsplit(self.path).path.startswith('/api/agent/v1'):
+                self.agent_request(urlsplit(self.path).path);return
             if preview:
                 self.send(403, {'error': 'Preview is read-only and uses synthetic data'})
                 return
@@ -211,6 +258,16 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                 if not s or not secrets.compare_digest(self.headers.get('X-CSRF-Token', ''), s['csrf']):
                     self.send(403, {'error': 'Authenticated session and CSRF token required'})
                     return
+                if path == '/api/agents/players/configure':
+                    self.send(200,players.configure(value));return
+                if path == '/api/agents/players/discover':
+                    self.send(200,players.discover(value));return
+                if path == '/api/agents/players/approve':
+                    self.send(200,players.approve(value));return
+                if path == '/api/agents/create':
+                    self.send(200,agents.issue(value));return
+                if path == '/api/agents/revoke':
+                    self.send(200,agents.revoke(value));return
                 if path.startswith('/api/nas/'):
                     self.send(200, nas.request(path.removeprefix('/api/nas/'), value))
                     return

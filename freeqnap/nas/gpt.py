@@ -19,7 +19,7 @@ ALIGN=1024**2
 LINUX_DATA=uuid.UUID('0fc63daf-8483-4772-8e79-3d69d8477de4')
 
 def layout(size,sector,names):
-    if sector not in (512,4096) or size%4096 or not 1<=len(names)<=8:raise ValueError('Unsupported aligned GPT geometry')
+    if sector not in (512,4096) or size%sector or not 1<=len(names)<=8:raise ValueError('Unsupported aligned GPT geometry')
     start=ALIGN;end=(size-ALIGN)//ALIGN*ALIGN
     span=(end-start)//len(names)//ALIGN*ALIGN
     if span<1024**3:raise ValueError('Each external volume needs at least 1 GiB')

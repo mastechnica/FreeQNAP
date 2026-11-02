@@ -1,6 +1,6 @@
 """Explicit future-event routing and independent local buzzer policy."""
 import time
-SCOPES=['raid','smart','space','temperature','jobs','schedules','services','inventory','notifications','ddns','workers','https']
+SCOPES=['cooling','watchdog','raid','smart','space','temperature','jobs','schedules','services','inventory','notifications','ddns','workers','https']
 def defaults():return [{'scope':'*','severity':'warning','enabled':True,'smtp':True,'push':True,'buzzer':False}]
 def matches(rule,event):return rule['enabled'] and rule['scope'] in ('*',event.get('scope')) and (rule['severity']=='warning' or event.get('severity')=='critical')
 class AlertRules:

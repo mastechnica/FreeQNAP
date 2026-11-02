@@ -31,6 +31,16 @@ python3 installer/freeqnap.py inspect --session /private/session/install
 
 Inspection reads bootloader version/environment, NAND geometry/bad-block report, transfer capability and temperature. Model selection is an operator attestation, with observed family/geometry checks; it is not an independent PCB identification algorithm.
 
+After any interruption, inspect the original journal before doing anything else:
+
+```sh
+python3 installer/freeqnap.py status --session /private/session/install
+```
+
+An incomplete recorded disk/flash write requires reconciliation. Do not rerun the
+write stage, create a replacement session or edit success records. This status
+command is read-only and does not independently verify the target hardware.
+
 ## 2. Obtain an audited release
 
 A release needs the normal uImage, manifest and matching modules/root filesystem, all checksum-pinned, with complete corresponding source. Development build scripts currently depend on prepared build trees. They are **not a complete clean public build recipe**. Do not download a random related-model image or use a first-unit UUID-specific image.
@@ -61,7 +71,7 @@ The explicit `flash-backup.py` stage reads both original 32 MiB kernel slots and
 
 The disk installer accepts a fresh identity-bound plan, including serial, WWN, capacity, SATA location and the exact installation ID. It checks active mounts, holders, arrays, swap, temperatures and artifact hashes again immediately before writes. The operator must explicitly confirm erasure of the selected disks.
 
-The accepted second-unit layout is a separate boot partition and an 8 GiB ext4 OS RAID1 on two members. Other disks and remaining regions are not automatically converted into data storage. Removing old partition metadata is not a secure wipe of every old data sector.
+New installer source reserves a separate 512 MiB boot partition and a 128 GiB ext4 OS RAID1 member on each of two internal disks (at least 130 GiB each). Older plans lacking the explicit 128 GiB geometry are refused; regenerate and review the disk plan rather than changing its interpretation. Previously built releases may still contain the historical 8 GiB installer and must be rebuilt/audited before claiming this default. The second unit was separately expanded to 128 GiB; see the dated OS-expansion validation. Other disks and remaining regions are not automatically converted into data storage. Removing old partition metadata is not a secure wipe of every old data sector.
 
 This stage is currently exposed as `installer/target/install-disks.py` with separate orchestration, not one complete guided command. A failed destructive stage requires inspection and reconciliation; do not blindly rerun it or invent a completed stage record.
 

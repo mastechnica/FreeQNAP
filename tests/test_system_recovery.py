@@ -60,3 +60,20 @@ class SystemRecoveryTests(unittest.TestCase):
    def command(self,entry,*args,**kwargs):return json.dumps({'message_type':'summary','snapshot_id':'b'*64}) if args[0]=='backup' else ''
   with patch('freeqnap.nas.system_recovery.shutil.rmtree',side_effect=OSError('fixture cleanup failure')):value=self.r.backup({'repository':'repo'},ident,Backups())
   self.assertFalse(value['private_stage_removed']);self.ctx.state.finish(ident,result=value);plan=self.r.stage_plan({'id':ident});self.r.stage_remove(self.review(plan));self.assertFalse(self.r.stages()['items']);self.assertTrue(self.ctx.state.setting('system_backup:'+ident)['encrypted_in_repository'])
+
+ def test_named_watchdog_policy_is_captured_but_other_manager_settings_are_not(self):
+  directory=self.host/'etc/systemd/system.conf.d';directory.mkdir(parents=True)
+  (directory/'80-freeqnap-watchdog.conf').write_text('[Manager]\nRuntimeWatchdogSec=10s\n')
+  (directory/'unrelated.conf').write_text('unrelated')
+  stage=self.r.capture(self.ident)
+  self.assertTrue((stage/'system/etc/systemd/system.conf.d/80-freeqnap-watchdog.conf').exists())
+  self.assertFalse((stage/'system/etc/systemd/system.conf.d/unrelated.conf').exists())
+
+ def test_only_named_hardening_policy_is_captured(self):
+  directory=self.host/'etc/sysctl.d';directory.mkdir(parents=True)
+  (directory/'90-freeqnap-hardening.conf').write_text('kernel.unprivileged_bpf_disabled = 2\n')
+  (directory/'unrelated.conf').write_text('unrelated settings')
+  stage=self.r.capture(self.ident)
+  target=stage/'system/etc/sysctl.d/90-freeqnap-hardening.conf'
+  self.assertEqual(target.read_text(),'kernel.unprivileged_bpf_disabled = 2\n');self.assertEqual(target.stat().st_mode&511,384)
+  self.assertFalse((stage/'system/etc/sysctl.d/unrelated.conf').exists());self.r.verify(stage)

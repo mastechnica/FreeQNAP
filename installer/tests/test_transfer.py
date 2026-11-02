@@ -46,7 +46,7 @@ class AddressWaitTests(unittest.TestCase):
 class RamOnlyTransferTests(unittest.TestCase):
     def fixture(self,root,kernel='same-kernel',ram=True):
         import hashlib,json,struct,zlib
-        root.mkdir();payload=b'owned RAM diagnostic fixture'*100
+        root.mkdir();payload=('owned RAM diagnostic fixture '+kernel).encode()*100
         h=bytearray(struct.pack('>7I4B32s',0x27051956,0,0,len(payload),0x8000,0x8000,zlib.crc32(payload),5,2,2,0,b'FreeQNAP test'))
         h[4:8]=struct.pack('>I',zlib.crc32(h));image=bytes(h)+payload
         manifest={'schema':1,'model':'TS-431XeU','architecture':'armhf','kernel':kernel,'artifacts':{'uImage':{'bytes':len(image),'sha256':hashlib.sha256(image).hexdigest(),'crc32':f'{zlib.crc32(image):08x}'}}}
@@ -73,5 +73,30 @@ class RamOnlyTransferTests(unittest.TestCase):
             with self.assertRaises(ValueError):load_boot_images(root/'normal',allow_ram_only=True,additional_ram_release=root/'first')
             m.update(ram_only=True,flash_allowed=True);(root/'normal'/'manifest.json').write_text(json.dumps(m))
             with self.assertRaises(ValueError):load_boot_images(root/'normal',allow_ram_only=True)
+
+
+class RollbackTransferTests(unittest.TestCase):
+    fixture=RamOnlyTransferTests.fixture
+    def test_different_kernel_rollback_requires_independent_exact_pin(self):
+        import tempfile,json,hashlib
+        from transfer import load_boot_images
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);candidate,_=self.fixture(root/'new',kernel='new')
+            old,manifest=self.fixture(root/'old',kernel='old',ram=False);manifest['generic_root_selector']=True;(root/'old/manifest.json').write_text(json.dumps(manifest))
+            pin=hashlib.sha256(old).hexdigest()
+            result=load_boot_images(root/'new',allow_ram_only=True,rollback_release=root/'old',rollback_sha256=pin)
+            self.assertEqual(set(result),{b'uImage',b'rollback.uImage'})
+            for bad in (None,'0'*64,'bad'):
+                with self.assertRaises(ValueError):load_boot_images(root/'new',allow_ram_only=True,rollback_release=root/'old',rollback_sha256=bad)
+            with self.assertRaises(ValueError):load_boot_images(root/'old',rollback_release=root/'old',rollback_sha256=pin)
+            with self.assertRaises(ValueError):load_boot_images(root/'new',allow_ram_only=True,additional_ram_release=root/'new',rollback_release=root/'old',rollback_sha256=pin)
+    def test_kernel_release_alias_does_not_bypass_comparison_kernel_check(self):
+        import tempfile,json
+        from transfer import load_boot_images
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)
+            for name,kernel in [('a','first'),('b','second')]:
+                _,m=self.fixture(root/name,kernel=kernel);m['kernel_release']=m.pop('kernel');(root/name/'manifest.json').write_text(json.dumps(m))
+            with self.assertRaises(ValueError):load_boot_images(root/'a',allow_ram_only=True,additional_ram_release=root/'b')
 
 if __name__=='__main__':unittest.main()

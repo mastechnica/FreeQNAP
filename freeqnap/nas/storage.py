@@ -479,6 +479,9 @@ class Storage:
                     if pool.get('read_only'):args+=['--readonly','--run']
                     self.ctx.run(*args,*members,timeout=60)
                 if not pool['encrypted']:
+                    # MD partitions can exist before udev has populated PARTUUID.
+                    # Settle discovery, then retain every UUID/extent check below.
+                    self.ctx.run('udevadm','settle','--timeout=15',timeout=20)
                     pool['block_device']=self.data_device(pool);cfg=self.ctx.config();cfg['pools'][pool['name']]=pool;self.ctx.save(cfg);self.mount(pool)
             except Exception as error:errors.append({'pool':pool['name'],'error':str(error)})
         self.ctx.state.set('startup_errors',errors)

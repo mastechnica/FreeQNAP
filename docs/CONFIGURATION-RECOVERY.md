@@ -41,3 +41,9 @@ Recurring policies can independently schedule file or system snapshots and full-
 Host and native ARMhf tests cover encryption/decryption, wrong-password denial, no password in persistent state, changed-archive refusal, source loss, retained last-good backups, scheduling fairness/restart/clock/capacity and private restore boundaries. A native capture under unchanged broker-style filesystem protections included 155 real configuration/artifact files; encrypted download SHA-256, decrypted manifest and consistent Samba credentials were verified. The disposable validation archive was removed and no live configuration was restored.
 
 This is verified capture/export, **not accepted bare-metal recovery**. Recovery on a fresh installation, interrupted/full-destination behavior with actual owner storage, complete account/ACL/share restore and independently received alerts remain operational acceptance work. Install GnuPG and `tdb-tools` alongside the normal NAS dependencies. The source-only console installer does not install missing system packages automatically.
+
+Cooling preferences under `/etc/freeqnap` and the named FreeQNAP watchdog manager
+policy are included when present. Hardware-acceptance receipts and temporary
+attended-trial leases are not restored automatically. Keep hardware supervision
+disabled until the recovery target and its watchdog/cooling behavior have been
+validated; inspect saved enablement settings before activating any recovered unit.

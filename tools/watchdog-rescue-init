@@ -1,0 +1,26 @@
+#!/bin/busybox sh
+# RAM-only attended watchdog acceptance; never selects or mounts a disk root.
+/bin/busybox --install -s /bin
+mount -t devtmpfs devtmpfs /dev
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t tmpfs tmpfs /run
+mount -t tmpfs tmpfs /tmp
+exec </dev/console >/dev/console 2>&1
+export PATH=/bin:/sbin
+export PS1='FREEQNAP_WATCHDOG_RAM# '
+echo 'FreeQNAP WATCHDOG RAM RESCUE: no disk assembly, no disk mounts, no automatic arming.'
+if /bin/eyeq-mcu-safe-full; then
+ touch /run/freeqnap-cooling-ack
+else
+ echo 'STOP: FULL COOLING NOT VERIFIED. NO WATCHDOG TEST AUTHORIZED.'
+ while :; do /bin/sh; done
+fi
+insmod /lib/modules/al_thermal.ko || echo 'STOP: thermal module unavailable; inspect before proceeding.'
+printf 'RAM-ONLY-NO-PERSISTENT-MOUNTS\n' > /run/freeqnap-watchdog-rescue
+cat /proc/mounts
+cat /proc/mdstat
+cat /sys/class/watchdog/watchdog0/state
+uname -a
+echo 'FREEQNAP_WATCHDOG_RAM_READY: full-speed ACK; operator must verify three spinning fans.'
+while :; do /bin/sh; done

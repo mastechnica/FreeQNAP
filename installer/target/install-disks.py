@@ -34,6 +34,8 @@ def validate_plan(plan,observed,fingerprint):
     if plan.get('schema')!=1 or plan.get('unit_fingerprint')!=fingerprint:
         raise ValueError('Plan belongs to a different NAS')
     if not re.fullmatch('[0-9a-f]{32}',plan.get('install_id','')):raise ValueError('Invalid installation ID')
+    if plan.get('os_mirror_member_bytes')!=128*1024**3 or plan.get('boot_partition_bytes')!=512*1024**2:
+        raise ValueError('Fresh reviewed 128 GiB OS layout required; old or missing geometry is refused')
     members=plan.get('os_mirror_serials',[]);rows=plan.get('erase_disks',[])
     serials=[r.get('serial') for r in rows]
     if len(members)!=2 or len(set(members))!=2 or not set(members)<=set(serials):raise ValueError('Two selected OS disks required')
@@ -44,7 +46,7 @@ def validate_plan(plan,observed,fingerprint):
         if len(matches)!=1:raise ValueError('Disk serial missing or ambiguous')
         disk=matches[0]
         if any(disk[k]!=row[k] for k in ('serial','wwn','size')):raise ValueError('Live disk differs from approved identity')
-        if disk['size']<16*1024**3 or not disk['internal_sata'] or disk['readonly'] or disk['busy']:
+        if disk['size']<(130 if disk['serial'] in members else 16)*1024**3 or not disk['internal_sata'] or disk['readonly'] or disk['busy']:
             raise ValueError('Disk is too small, external, read-only or in use')
         resolved.append(disk)
     artifacts=plan.get('artifacts',{})
@@ -113,7 +115,7 @@ def install(plan,disks):
         run('wipefs','--all',device);run('sgdisk','--zap-all',device);run('sgdisk','--clear',device)
         if d['serial'] in members:
             run('sgdisk','--new=1:2048:+512M','--typecode=1:8300','--change-name=1:FREEQNAP_BOOT',
-                '--new=2:0:+8G','--typecode=2:fd00','--change-name=2:FREEQNAP_ROOT',device)
+                '--new=2:0:+128G','--typecode=2:fd00','--change-name=2:FREEQNAP_ROOT',device)
         run('blockdev','--rereadpt',device)
         progress('partitioned',serial=d['serial'],os_member=d['serial'] in members)
     roots=[next(d['path']+'2' for d in disks if d['serial']==s) for s in members]

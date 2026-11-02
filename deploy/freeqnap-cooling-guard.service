@@ -1,0 +1,28 @@
+[Unit]
+Description=FreeQNAP independent full-speed cooling guard
+After=eyeq-cooling.service
+Before=freeqnap-cooling.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=root
+Group=freeqnap
+WorkingDirectory=/opt/freeqnap/current
+ExecStart=/usr/bin/python3 -B -m freeqnap.cooling guard
+ExecStopPost=/usr/bin/python3 -B -m freeqnap.cooling full
+Restart=always
+RestartSec=1
+TimeoutStopSec=15
+RuntimeDirectory=freeqnap-cooling
+RuntimeDirectoryMode=0750
+RuntimeDirectoryPreserve=yes
+UMask=0027
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/run/freeqnap-cooling /run/eyeq-mcu.lock
+
+[Install]
+WantedBy=multi-user.target

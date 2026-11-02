@@ -36,7 +36,7 @@ owner decision, so those recovery guarantees remain unavailable.
 | Green drive indicators | MCU global enable plus active-low GPIO LEDs and per-port disk-I/O policy | Presence/activity physically confirmed in all four populated bays. Empty bays dark. Defined software policy, not a native AHCI hardware activity trigger. |
 | Sound | MCU buzzer | One bounded short beep physically heard. No speech/audio-card support established. Alarm duration/muting/failure behavior not accepted. |
 | RTC | DesignWare I2C plus RX8010 at address `0x32` | Clock reads work. Alarm IRQ, wake and power-loss retention not accepted. |
-| Restart/watchdog | SP805 driver restart path | Repeated Linux restarts work. Watchdog is unarmed; expiry/reset recovery not tested. |
+| Restart/watchdog | SP805 driver restart path | Repeated Linux restarts and three attended 10-second RAM expiry resets passed. Watchdog remains unarmed; unattended ownership/policy and broader failure modes remain unaccepted. |
 | Chassis poweroff | Guarded native late-shutdown MCU hook | Filesystems shut down before power removal; fans/indicators physically off. General emergency/overtemperature poweroff not accepted. |
 | NAND | Vendor U-Boot ECC path for first-slot programming | Full 32 MiB readback matched. Modern Linux MTD disabled. Bad-block growth, interrupted-write recovery, bank fallback and full-chip restore untested. |
 | SPI NOR | Read-only U-Boot comparison | Full 2 MiB unchanged across tested NAND updates. No bootloader/environment writes; complete physical restore untested. |

@@ -10,7 +10,7 @@ Recorded 29 October 2026. Two matching TS-431XeU units informed this work. The o
 - Both original 32 MiB NAND kernel slots and full 2 MiB SPI were privately backed up and matched two independent UART-observed reads each.
 - Only the first NAND kernel slot was programmed. Full padded 32 MiB readback compared equal. SPI, second kernel slot and saved boot command remained unchanged.
 - Two unattended software restarts and one physical cold start booted that installed image with the TFTP helper paused and no bootloader intervention. The owner confirmed all fans had stopped before the cold start. Fresh OS checks passed afterward; see the shutdown follow-up below.
-- Healthy synchronized two-member 8 GiB OS mirror, all four SATA disks identified, no failed systemd services, key-authenticated SSH, factory MAC restoration and ordinary DHCP on LAN1.
+- Healthy synchronized two-member OS mirror, expanded to 128 GiB on 2 November 2026 (see OS-EXPANSION-VALIDATION-2026-11-02.md), all four SATA disks identified, no failed systemd services, key-authenticated SSH, factory MAC restoration and ordinary DHCP on LAN1.
 - Two administrative restart cycles per RJ45, each with matching bidirectional 256 KiB transfers. LAN1 negotiated 1 Gbps; the direct Mac adapter limited LAN2 to 100 Mbps.
 - Acknowledged full cooling, three reporting fan counters, working CPU thermal readings; the owner observed all three fans spinning during the second-unit process. RESET-triggered orderly reboot was observed.
 - Normal boot has no maintenance shell/debug arguments. Root password is locked and deferred; a supplied private installation key is used for administration. No application configuration was imported.
@@ -26,7 +26,7 @@ No disk-loader fallback, interrupted-NAND recovery or full physical flash restor
 
 USB2 reads on all ports, bay LED presence/activity, buzzer, physical orderly chassis-off and earlier warm SATA/network fixes are documented on the original unit. The new generic installer still needs its own complete peripheral regression. Four disks enumerating is not four-disk load, hotplug or rebuild acceptance.
 
-SFP+ traffic, USB SuperSpeed, adaptive cooling, stalled-fan/thermal fault response, watchdog expiration, wake/RTC alarm, degraded OS boot, array rebuild, data power-loss recovery and a general kernel update/rollback path remain unaccepted. The root selector currently stops on a degraded root; high-availability degraded boot is not promised.
+SFP+ traffic, USB SuperSpeed, adaptive cooling, stalled-fan/thermal fault response, unattended watchdog ownership/policy, wake/RTC alarm, degraded OS boot, array rebuild, data power-loss recovery and a general kernel update/rollback path remain unaccepted. The root selector currently stops on a degraded root; high-availability degraded boot is not promised.
 
 ## Standalone console acceptance
 
@@ -81,3 +81,5 @@ The live manifest, worker, icons and new scripts were independently retrieved ov
 ### Generic bootstrap identity gate — 30 October 2026
 
 All 43 installer tests passed. Both prepared-directory and actual uncompressed embedded-CPIO audits passed for the existing uninstalled 6.12.115 candidate (46 entries each). Future generic/native recipes stop if known inherited identities or required-file/archive defects are detected. This does not replace source/provenance review, clean public builds, boot tests, repeat installation or hardware acceptance; the candidate remains RAM-only and uninstalled.
+
+Three attended SP805 expiry/reset cycles at a driver-accepted 10 seconds passed in diskless RAM on 1 November, with successful disarm and restored data hashes. This does not enable an unattended watchdog policy. See [the physical record](WATCHDOG-VALIDATION-2026-11-01.md).

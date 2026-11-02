@@ -28,4 +28,26 @@ systemd-analyze verify /etc/systemd/system/freeqnap-console.service /etc/systemd
 systemctl start freeqnap-collect.service
 systemctl enable --now freeqnap-collect.timer freeqnap-console.service
 systemctl restart freeqnap-console.service
-printf 'Console installed on loopback only; initialize its separate administrator password privately over SSH.\n'
+tls_restored=0
+# Requires=console can stop an existing HTTPS proxy during console replacement.
+# Bring it back explicitly rather than assuming a transient ActiveState is ready.
+if [ -f /etc/freeqnap-https/public.json ] && systemctl is-enabled --quiet freeqnap-https.service;then
+ systemctl start freeqnap-https.service
+ PYTHONPATH="$release" python3 - <<'HTTPS'
+import json,time
+from pathlib import Path
+from freeqnap.nas.management_tls import ManagementTLS,validate
+config=validate(json.loads(Path('/etc/freeqnap-https/public.json').read_text()))
+end=time.monotonic()+20
+while time.monotonic()<end:
+ if ManagementTLS(None).probe(config['address']):break
+ time.sleep(.5)
+else:raise SystemExit('Existing HTTPS did not recover; keep SSH access and inspect the retained generation')
+HTTPS
+ tls_restored=1
+fi
+if [ "$tls_restored" = 1 ];then
+ printf 'Console updated; existing local HTTPS verified and administrator settings retained.\n'
+else
+ printf 'Console installed on loopback only; initialize its separate administrator password privately over SSH.\n'
+fi

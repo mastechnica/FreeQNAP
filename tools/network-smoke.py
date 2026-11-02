@@ -39,10 +39,10 @@ except OSError:sys.exit(1)
 '''
 
 def main():
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--confirm-isolated-test',action='store_true');p.add_argument('--inner',action='store_true');a=p.parse_args()
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--confirm-isolated-test',action='store_true');p.add_argument('--inner',action='store_true');p.add_argument('--wireguard-mode',choices=['userspace','native'],default='userspace');a=p.parse_args()
  if os.geteuid()!=0 or not a.confirm_isolated_test:raise SystemExit('Explicit local-root isolated-test confirmation required')
  if not a.inner:
-  os.execvp('unshare',['unshare','--mount','--net','--fork','--propagation','private',sys.executable,str(Path(__file__).resolve()),'--inner','--confirm-isolated-test'])
+  os.execvp('unshare',['unshare','--mount','--net','--fork','--propagation','private',sys.executable,str(Path(__file__).resolve()),'--inner','--confirm-isolated-test','--wireguard-mode',a.wireguard_mode])
  subprocess.run(['mount','--make-rprivate','/'],check=True)
  Path('/run/netns').mkdir(exist_ok=True);subprocess.run(['mount','-t','tmpfs','-o','mode=700','tmpfs','/run/netns'],check=True)
  processes=[];results={};names=['fq-test-nas','fq-test-lan','fq-test-wan']
@@ -116,7 +116,8 @@ def main():
    wgkeys=[run('wg','genkey').stdout.strip() for _ in (0,1)]
    wgpub=[run('wg','pubkey',data=k+'\n').stdout.strip() for k in wgkeys]
    for which in (0,1):
-    ns(which,'wireguard-go','fqwg'+str(which))
+    if a.wireguard_mode=='native':ns(which,'ip','link','add','fqwg'+str(which),'type','wireguard')
+    else:ns(which,'wireguard-go','fqwg'+str(which))
     text='[Interface]\nPrivateKey = '+wgkeys[which]+'\nListenPort = '+str(51830+which)+'\n[Peer]\nPublicKey = '+wgpub[1-which]+'\nAllowedIPs = 10.77.0.'+str(2-which)+'/32\n'
     if which==1:text+='Endpoint = 192.168.97.1:51830\nPersistentKeepalive = 5\n'
     path=root/('peer'+str(which)+'.conf');path.write_text(text);path.chmod(0o600)
@@ -126,7 +127,8 @@ def main():
    for _ in range(20):
     if http(1,'10.77.0.1',8082).returncode==0:okay=True;break
     time.sleep(.2)
-   expect('wireguard_userspace_encrypted_http',okay)
+   expect('wireguard_'+a.wireguard_mode+'_encrypted_http',okay)
+   if a.wireguard_mode=='native':expect('wireguard_native_link_type',json.loads(ns(0,'ip','-j','-d','link','show','dev','fqwg0').stdout)[0]['linkinfo']['info_kind']=='wireguard')
    expect('wireguard_handshake_reported',int(ns(0,'wg','show','fqwg0','latest-handshakes').stdout.split()[1])>0)
    for which in (0,1):ns(which,'ip','link','delete','fqwg'+str(which))
    from freeqnap.nas.vpn_pki import ensure,issue,server_config,revoke
@@ -156,7 +158,7 @@ def main():
    info=ns(1,'ip','-j','address','show','dev','fqvpn0',check=False)
    ready=info.returncode==0 and any(a.get('family')=='inet' for row in json.loads(info.stdout) for a in row.get('addr_info',[]))
    expect('revoked_openvpn_certificate_cannot_reconnect',not ready)
-  print(json.dumps({'isolated_packet_results':results,'physical_vpn_peer_and_client_acceptance':False},indent=2),flush=True)
+  print(json.dumps({'isolated_packet_results':results,'physical_vpn_peer_and_client_acceptance':False,'wireguard_mode':a.wireguard_mode},indent=2),flush=True)
  finally:
   for p in processes:
    if p.poll() is None:p.terminate()

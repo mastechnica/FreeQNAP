@@ -30,5 +30,15 @@ class GPTTests(unittest.TestCase):
     self.assertEqual(uuid.UUID(bytes_le=ident),uuid.UUID(v['uuid']));self.assertEqual(uuid.UUID(bytes_le=kind),gpt.LINUX_DATA)
     self.assertEqual(first*sector,v['start_bytes']);self.assertEqual((last-first+1)*sector,v['bytes'])
  def test_invalid_geometry_and_tiny_layout_refused(self):
-  for size,sector,names in [(1024**3,512,['a','b']),(8*1024**3,1024,['a']),(8*1024**3+512,512,['a']),(8*1024**3,512,[])]:
+  for size,sector,names in [(1024**3,512,['a','b']),(8*1024**3,1024,['a']),(8*1024**3+1,512,['a']),(8*1024**3,512,[])]:
    with self.assertRaises(ValueError):gpt.layout(size,sector,names)
+
+ def test_sector_aligned_flash_capacity_need_not_be_4k_multiple(self):
+  size=15376000000;self.assertEqual(size%512,0);self.assertNotEqual(size%4096,0)
+  p=gpt.layout(size,512,['usb']);(offset,tail),(_,head)=gpt.images(p)
+  self.assertEqual(offset+len(tail),size);self.assertEqual(tail[-512:-504],b'EFI PART')
+  self.assertEqual(struct.unpack_from('<Q',tail,len(tail)-512+24)[0],size//512-1)
+  self.assertEqual(struct.unpack_from('<Q',head,512+32)[0],size//512-1)
+  for v in p['volumes']:
+   self.assertEqual(v['start_bytes']%gpt.ALIGN,0);self.assertEqual(v['bytes']%gpt.ALIGN,0);self.assertLess(v['start_bytes']+v['bytes'],size-gpt.ALIGN)
+  with self.assertRaises(ValueError):gpt.layout(size,4096,['usb'])

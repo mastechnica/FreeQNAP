@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """One-client boot TFTP; optional explicit, bounded original-flash backups."""
 import argparse
+import hashlib
+import re
 import errno
 import json
 import os
@@ -33,14 +35,23 @@ def bind_when_available(server, address, wait_seconds=300, *, emit=print,
             sleep(min(.5,max(0,deadline-clock())))
 
 
-def load_boot_images(directory,*,allow_ram_only=False,additional_ram_release=None):
+def load_boot_images(directory,*,allow_ram_only=False,additional_ram_release=None,rollback_release=None,rollback_sha256=None):
+    if additional_ram_release and rollback_release:raise ValueError('Choose a comparison image or a rollback image, not both')
+    if rollback_sha256 and not rollback_release:raise ValueError('Rollback pin requires a rollback release')
     manifest,payload=verified_image(directory,allow_ram_only=allow_ram_only)
     images={b'uImage':payload}
     if additional_ram_release:
         if not allow_ram_only or manifest.get('ram_only') is not True or manifest.get('flash_allowed') is not False:raise ValueError('Paired diagnostic serving requires two explicit RAM-only releases')
         extra,data=verified_image(additional_ram_release,allow_ram_only=True)
-        if extra.get('ram_only') is not True or extra.get('flash_allowed') is not False or extra.get('kernel')!=manifest.get('kernel'):raise ValueError('Both paired images must prohibit flash and use the same kernel')
+        kernel=manifest.get('kernel') or manifest.get('kernel_release');other=extra.get('kernel') or extra.get('kernel_release')
+        if extra.get('ram_only') is not True or extra.get('flash_allowed') is not False or not isinstance(kernel,str) or not kernel or other!=kernel:raise ValueError('Both paired images must prohibit flash and use the same kernel')
         images[b'experiment.uImage']=data
+    if rollback_release:
+        if not allow_ram_only or manifest.get('ram_only') is not True or manifest.get('flash_allowed') is not False:raise ValueError('Rollback serving requires an explicit flash-prohibited RAM candidate')
+        if not isinstance(rollback_sha256,str) or not re.fullmatch(r'[0-9a-f]{64}',rollback_sha256):raise ValueError('Pin the independently verified installed-image SHA-256')
+        rollback,data=verified_image(rollback_release)
+        if rollback.get('generic_root_selector') is not True or hashlib.sha256(data).hexdigest()!=rollback_sha256:raise ValueError('Rollback image is not the pinned generic installed image')
+        images[b'rollback.uImage']=data
     return images
 
 def main():
@@ -48,13 +59,15 @@ def main():
     p.add_argument('--release',required=True);p.add_argument('--bind',required=True)
     p.add_argument('--allow-ram-only',action='store_true',help='Explicitly serve a RAM-only diagnostic that normal boot/flash tools reject')
     p.add_argument('--additional-ram-release',help='Serve one same-kernel RAM-only comparison as experiment.uImage')
+    p.add_argument('--rollback-release',help='Also serve a separately pinned installed generic image as rollback.uImage')
+    p.add_argument('--rollback-sha256',help='Independent prior installed-image verification SHA-256, required with --rollback-release')
     p.add_argument('--client',required=True);p.add_argument('--port',type=int,default=69)
     p.add_argument('--receive-backups',help='Opt in to receiving only three original flash backups into an existing private directory; never overwrite')
     p.add_argument('--log-file',help='Append metadata-only server diagnostics to a private local file')
     p.add_argument('--wait-seconds',type=int,default=300,
                    help='Wait for the chosen host address to become active; no adapter is configured')
     p.add_argument('--seconds',type=int,default=3600);a=p.parse_args()
-    bind,client=local_pair(a.bind,a.client);images=load_boot_images(a.release,allow_ram_only=a.allow_ram_only,additional_ram_release=a.additional_ram_release)
+    bind,client=local_pair(a.bind,a.client);images=load_boot_images(a.release,allow_ram_only=a.allow_ram_only,additional_ram_release=a.additional_ram_release,rollback_release=a.rollback_release,rollback_sha256=a.rollback_sha256)
     if a.allow_ram_only and a.receive_backups:raise ValueError('RAM diagnostics do not enable backup uploads')
     if not 1<=a.port<=65535:raise ValueError('Invalid UDP port')
     if not 0<=a.wait_seconds<=3600:raise ValueError('Address wait must be between zero and 3600 seconds')

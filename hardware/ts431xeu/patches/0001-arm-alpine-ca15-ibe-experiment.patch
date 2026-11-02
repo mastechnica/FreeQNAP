@@ -1,0 +1,40 @@
+--- a/arch/arm/mm/proc-v7.S
++++ b/arch/arm/mm/proc-v7.S
+@@ -300,9 +300,21 @@
+ 	b	1f
+ __v7_ca7mp_setup:
+ __v7_ca12mp_setup:
++#ifdef CONFIG_FREEQNAP_CA15_IBE
++	b	.Lfreeqnap_no_ibe_setup
++#endif
+ __v7_ca15mp_setup:
+ __v7_b15mp_setup:
++#ifdef CONFIG_FREEQNAP_CA15_IBE
++	/* Preserve ACTLR; request only the documented A15 IBE bit. */
++	do_invalidate_l1
++	mov	r10, #1
++	b	1f
++#endif
+ __v7_ca17mp_setup:
++#ifdef CONFIG_FREEQNAP_CA15_IBE
++.Lfreeqnap_no_ibe_setup:
++#endif
+ 	do_invalidate_l1
+ 	mov	r10, #0
+ 1:
+--- a/arch/arm/mach-alpine/Kconfig
++++ b/arch/arm/mach-alpine/Kconfig
+@@ -12,3 +12,13 @@
+ 	select PCI_HOST_GENERIC
+ 	help
+ 	  This enables support for the Annapurna Labs Alpine V1 boards.
++
++config FREEQNAP_CA15_IBE
++	bool "RAM-only Alpine Cortex-A15 IBE experiment"
++	depends on ARCH_ALPINE && SMP && HARDEN_BRANCH_PREDICTOR
++	default n
++	help
++	  Request ACTLR bit 0 in the existing A15 CPU setup read/modify/write.
++	  Non-secure firmware may ignore the write. The normal per-CPU kernel
++	  readback check and vulnerability warning remain unchanged.
++	  Experimental TS-431XeU RAM validation only; do not adopt for flash.

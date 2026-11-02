@@ -4,6 +4,8 @@ set -eu
 [ "$(id -u)" = 0 ]
 [ "$(tr '\000' '\n' < /proc/device-tree/compatible | head -n 1)" = qnap,ts-431xeu ]
 base=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+# Disable only unprivileged BPF; preserve privileged firewall/VPN use.
+python3 "$base/deploy/configure-hardening.py" --apply
 for command in smbd testparm netatalk ganesha.nfsd cryptsetup restic gpg tdbbackup gerbera ffprobe mdadm sfdisk sgdisk partx blockdev findmnt lsblk wipefs udevadm nft openvpn wg wireguard-go aria2c sg_sync dnsmasq networkctl;do
  command -v "$command" >/dev/null || { echo "Missing NAS dependency: $command";exit 1; }
 done
@@ -78,5 +80,6 @@ systemd-analyze verify /etc/systemd/system/freeqnap-broker.service /etc/systemd/
 systemctl enable --now freeqnap-vpn-firewall.service freeqnap-vpn.service freeqnap-network.service
 sh "$base/deploy/install-usb-pcie.sh"
 systemctl enable --now freeqnap-broker.service freeqnap-discovery.service
+if [ -f /opt/freeqnap/current/freeqnap/cooling.py ];then sh "$base/deploy/install-cooling.sh";fi
 if [ -f "$base/tools/configure-smartd.py" ];then python3 "$base/tools/configure-smartd.py" --apply;fi
 printf 'Native broker configured. No data pool, user, share or media library was created.\n'

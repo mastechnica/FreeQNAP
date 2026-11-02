@@ -17,9 +17,12 @@ from freeqnap.nas.bundle import Bundles
 from freeqnap.state import State
 from freeqnap.server import NASHTTPServer,handler
 from freeqnap import auth
+import freeqnap
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--confirm-bounded-data-fixture',action='store_true',required=True);p.add_argument('--source-pool',required=True);p.add_argument('--source-uuid',required=True);p.add_argument('--destination-pool',required=True);p.add_argument('--destination-uuid',required=True);a=p.parse_args()
 if sys.platform!='linux' or os.geteuid()!=0:raise SystemExit('Explicit Linux root test required')
 if a.source_pool==a.destination_pool:raise SystemExit('Choose two distinct explicitly identified pools')
+media=Path(freeqnap.__file__).resolve().parents[1]/'web/demo-media/video.mp4'
+if not media.is_file():raise SystemExit('Installed test video fixture is missing; no data files created')
 ident=secrets.token_hex(8);root=Path('/var/lib/freeqnap-validation')/('data-'+ident);root.mkdir(mode=0o700,parents=True);ctx=Context(root/'state');folders=[];server=None;report={};repository=None;repo_identity=None
 
 def run(*args,**kwargs):
@@ -75,7 +78,7 @@ try:
  zipped=archives.plan({'operation':'zip','share':'validation-0','paths':['payload.bin','Café_测试.txt'],'filename':'fixture.zip','max_output_bytes':16*1024**2});archives.apply(review(zipped));extract=archives.plan({'operation':'extract','share':'validation-0','path':'fixture.zip','destination':'named','max_output_bytes':16*1024**2});archives.apply(review(extract));assert digest(first/'fixture/payload.bin')==expected;report['zip_creation_and_named_extraction']=True
  files.mkdir({'share':'validation-0','name':'current-extraction'});extract=archives.plan({'operation':'extract','share':'validation-0','path':'fixture.zip','target_path':'current-extraction','destination':'current','max_output_bytes':16*1024**2});archives.apply(review(extract));assert digest(first/'current-extraction/payload.bin')==expected;report['current_folder_extraction']=True
  # A real protected HTTP endpoint reads these physical-volume files using disposable login state.
- media=Path(__file__).resolve().parents[1]/'web/demo-media/video.mp4';shutil.copyfile(media,first/'video.mp4');webstate=State(root/'web');password=secrets.token_urlsafe(32);webstate.set('administrator',auth.password_hash(password))
+ shutil.copyfile(media,first/'video.mp4');webstate=State(root/'web');password=secrets.token_urlsafe(32);webstate.set('administrator',auth.password_hash(password))
  class FileBroker:
   def request(self,action,payload):
    return {'files.read':files.read,'files.bundle-info':bundles.info,'files.bundle-node':bundles.node,'files.bundle-read':bundles.read}[action](payload)

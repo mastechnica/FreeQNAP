@@ -9,6 +9,7 @@ import uuid
 from pathlib import Path
 from .common import Context, name
 from .disk_reports import DiskReports
+from .cooling import Cooling
 from .alert_rules import AlertRules
 from .status_light import StatusLight
 from .metrics import Metrics
@@ -41,6 +42,7 @@ class Backend:
         self.metrics = Metrics(self.ctx)
         self.status_light = StatusLight(self.ctx)
         self.disk_reports = DiskReports(self.ctx)
+        self.cooling = Cooling()
         self.alert_rules = AlertRules(self.ctx)
         self.storage = Storage(self.ctx)
         self.management_tls = ManagementTLS(self.ctx)
@@ -68,7 +70,7 @@ class Backend:
         self.alerts = Health(self.ctx,schedules=self.backup_schedules)
         self.notifications = Notifications(self.ctx)
         self.ddns = DDNS(self.ctx)
-        self.alerts.optional_checks={'notifications':self.notifications.health,'ddns':self.ddns.health,'workers':self.worker_alerts,'https':self.https_alerts}
+        self.alerts.optional_checks={'cooling':self.cooling.health,'watchdog':self.cooling.watchdog_health,'notifications':self.notifications.health,'ddns':self.ddns.health,'workers':self.worker_alerts,'https':self.https_alerts}
 
     def status(self):
         config = self.ctx.config()
@@ -99,7 +101,7 @@ class Backend:
                              ('mdadm', 'cryptsetup', 'mkfs.ext4', 'smbd', 'ganesha.nfsd', 'netatalk', 'restic', 'gerbera', 'ffprobe','openvpn','wg','wireguard-go','aria2c','nft','tdbbackup','gpg')},
                 'local_recovery_backups':self.local_recovery.list(), 'backup_schedules':self.backup_schedules.list(), 'system_recovery_stages':self.system_recovery.stages(), 'startup_errors': self.ctx.state.setting('startup_errors',[]),
                 'network':self.network.status(), 'vpn': self.vpn.status(), 'downloads': self.downloads.status(), 'dlna_access': self.dlna.list(),
-                'notifications':self.optional_status(self.notifications), 'ddns':self.optional_status(self.ddns), 'health':self.alert_status(), 'management_tls':self.management_tls.status(), 'physical_recovery_acceptance': False, 'shutdown_metadata_followup_open': True}
+                'cooling':self.optional_status(self.cooling), 'notifications':self.optional_status(self.notifications), 'ddns':self.optional_status(self.ddns), 'health':self.alert_status(), 'management_tls':self.management_tls.status(), 'physical_recovery_acceptance': False, 'shutdown_metadata_followup_open': True}
 
     def dispatch(self, action, request):
         direct = {
@@ -107,6 +109,7 @@ class Backend:
             'notifications.status':self.notifications.status, 'notifications.save':self.notifications.save, 'notifications.push-key':self.notifications.public_key, 'notifications.subscribe':self.notifications.subscribe, 'notifications.unsubscribe':self.notifications.unsubscribe, 'notifications.test':self.notifications.test, 'notifications.retry-plan':self.notifications.retry_plan, 'notifications.retry':self.notifications.retry, 'notifications.discard':self.notifications.discard,
             'ddns.status':self.ddns.status, 'ddns.plan':self.ddns.plan, 'ddns.save':self.ddns.apply, 'ddns.remove':self.ddns.remove, 'ddns.update':self.ddns.request_update,
             'vpn.peers-status':self.vpn.peer_status, 'smart.status':self.disk_reports.status, 'smart.history':self.disk_reports.history, 'smart.schedule':self.disk_reports.save, 'notifications.rules':self.alert_rules.status, 'notifications.rules-save':self.alert_rules.save, 'notifications.buzzer':self.alert_rules.sound, 'health.alerts':self.alerts.list, 'health.acknowledge':self.alerts.acknowledge, 'health.settings':self.alerts.settings,
+            'system.cooling-status':self.cooling.status, 'system.cooling-history':self.cooling.history, 'system.cooling-mode':self.cooling.mode, 'system.watchdog-status':self.cooling.watchdog,
             'system.https-status':self.management_tls.status, 'system.https-ca':self.management_tls.public_ca,
             'network.status':self.network.status,'network.plan':self.network.plan,'network.apply':self.network.apply,
             'network.confirm':self.network.confirm,'network.rollback':self.network.rollback,'network.client-plan':self.network.client_plan,

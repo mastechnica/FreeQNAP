@@ -8,12 +8,22 @@ spec=importlib.util.spec_from_file_location('disk_install',path);module=importli
 
 class DiskInstallTests(unittest.TestCase):
  def fixture(self):
-  disks=[{'serial':'SERIAL-'+str(i),'wwn':'0x5000cca21122334'+str(i),'size':100*1024**3,
+  disks=[{'serial':'SERIAL-'+str(i),'wwn':'0x5000cca21122334'+str(i),'size':256*1024**3,
      'path':'/dev/sd'+chr(97+i),'internal_sata':True,'readonly':False,'busy':False} for i in range(4)]
-  plan={'schema':1,'unit_fingerprint':'unit-A','install_id':'a'*32,'os_mirror_serials':['SERIAL-0','SERIAL-1'],
+  plan={'schema':1,'os_mirror_member_bytes':128*1024**3,'boot_partition_bytes':512*1024**2,'unit_fingerprint':'unit-A','install_id':'a'*32,'os_mirror_serials':['SERIAL-0','SERIAL-1'],
    'erase_disks':[{k:d[k] for k in ('serial','wwn','size')} for d in disks],
    'root_password_method':'first-login','artifacts':{name:{'bytes':100,'sha256':'b'*64} for name in ('uImage','debian-armhf-base.tar.gz')}}
   return plan,disks
+ def test_legacy_or_missing_geometry_and_small_os_disks_rejected(self):
+  plan,observed=self.fixture()
+  for geometry in (None,8*1024**3):
+   bad=copy.deepcopy(plan);bad['os_mirror_member_bytes']=geometry
+   with self.assertRaises(ValueError):module.validate_plan(bad,observed,'unit-A')
+  observed[0]['size']=100*1024**3;plan['erase_disks'][0]['size']=observed[0]['size']
+  with self.assertRaises(ValueError):module.validate_plan(plan,observed,'unit-A')
+ def test_small_non_os_erased_disk_does_not_need_root_capacity(self):
+  plan,observed=self.fixture();observed[3]['size']=32*1024**3;plan['erase_disks'][3]['size']=observed[3]['size']
+  self.assertEqual(len(module.validate_plan(plan,observed,'unit-A')),4)
  def test_explicit_four_disk_erase_keeps_two_disk_os_mirror(self):
   plan,observed=self.fixture();self.assertEqual(len(module.validate_plan(plan,observed,'unit-A')),4)
   # Resolve from immutable identities, even after kernel sdX enumeration changes.

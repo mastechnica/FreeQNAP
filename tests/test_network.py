@@ -83,6 +83,26 @@ class Network(unittest.TestCase):
   with patch.object(manager,'target',return_value=self.root),patch.object(manager,'rpc',side_effect=rpc):manager.reconcile()
   self.assertEqual(admitted,[good['gid']]);manager.control({'id':good['id'],'action':'pause'})
   restarted=Downloads(Context(self.root));self.assertEqual(restarted.jobs()[good['id']]['desired'],'paused');self.assertEqual(len(restarted.jobs()),2)
+ def test_damaged_resume_marker_preserves_job_and_does_not_block_later_work(self):
+  manager=Downloads(self.ctx);self.ctx.state.set('downloads_settings',{'pool':'fixture'})
+  with patch.object(manager,'target',return_value=self.root):
+   bad=manager.add({'url':'https://example.test/partial.bin'})['job'];good=manager.add({'url':'https://example.test/next.bin'})['job']
+  calls=[]
+  def rpc(method,params=()):
+   calls.append((method,params))
+   if method=='tellStatus':
+    if params[0]==bad['gid']:return {'status':'error','errorCode':'1','errorMessage':'Failed to read from the segment file /private/fixture.bin.aria2'}
+    return None
+   if method=='addUri':return params[1]['gid']
+  with patch.object(manager,'target',return_value=self.root),patch.object(manager,'rpc',side_effect=rpc):
+   manager.reconcile();manager.reconcile()
+  row=manager.jobs()[bad['id']];self.assertTrue(row['recovery_required']);self.assertEqual(row['state'],'error')
+  self.assertNotIn('/private/',json.dumps(row));self.assertEqual(len([c for c in calls if c[0]=='tellStatus' and c[1][0]==bad['gid']]),1)
+  self.assertFalse(any(c[0]=='removeDownloadResult' for c in calls));self.assertTrue(any(c[0]=='addUri' and c[1][1]['gid']==good['gid'] for c in calls))
+  restarted=Downloads(Context(self.root));self.assertTrue(restarted.jobs()[bad['id']]['recovery_required'])
+  with self.assertRaisesRegex(ValueError,'preserved'):manager.control({'id':bad['id'],'action':'resume'})
+  self.assertFalse(manager.control({'id':bad['id'],'action':'remove'})['files_deleted'])
+
  def test_vpn_timeout_rollback_does_not_wait_for_storage_lock(self):
   from freeqnap.nas import vpn_runtime
   from freeqnap.state import atomic

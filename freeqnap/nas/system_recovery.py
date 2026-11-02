@@ -77,7 +77,7 @@ class SystemRecovery:
         if token.exists():copy(token,'state/nas/downloads-rpc-token')
         required=self.host('/etc/freeqnap-install-id')
         if not required.is_file():raise ValueError('Installation identity is required for system recovery capture')
-        fixed=['/etc/freeqnap-install-id','/etc/fstab','/etc/hostname','/etc/hosts','/etc/passwd','/etc/group','/etc/shadow','/etc/gshadow','/etc/mdadm/mdadm.conf']
+        fixed=['/etc/freeqnap-install-id','/etc/fstab','/etc/hostname','/etc/hosts','/etc/passwd','/etc/group','/etc/shadow','/etc/gshadow','/etc/mdadm/mdadm.conf','/etc/systemd/system.conf.d/80-freeqnap-watchdog.conf','/etc/sysctl.d/90-freeqnap-hardening.conf']
         for file in fixed:
             source=self.host(file)
             if source.exists():copy(source,'system'+file)
