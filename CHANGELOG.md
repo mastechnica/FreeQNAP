@@ -1,3 +1,8 @@
+## Branded sharing preview — 2 November 2026
+
+- Added an explicit 1200 × 630 logo/dashboard sharing image for the showcase and tutorial.
+- Added Open Graph and large-card metadata; reused only the already approved public screenshot.
+
 ## Private personal photo archive — 2 November 2026
 
 - Added a private photo/video timeline, year/month views, albums, favorites, captions, original downloads and offline GPS map.
