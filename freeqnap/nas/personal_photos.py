@@ -2,6 +2,8 @@
 import base64,contextlib,hashlib,json,math,os,re,secrets,sqlite3,stat,threading,time
 from pathlib import Path
 from .common import name
+from .library_lock import serialized
+from .library_storage_source import source_directory
 from .files import Files,relative
 from .personal_metadata import inspect,jpeg
 
@@ -33,7 +35,7 @@ def directory(fd,parts,create=False):
 
 class PersonalPhotos:
     def __init__(self,ctx,extract=inspect,preview=jpeg):
-        self.ctx=ctx;self.extract=extract;self.preview=preview;self.busy=threading.Lock();self.stop=threading.Event();self.preview_slot=threading.BoundedSemaphore(1)
+        self.storage_lock=threading.RLock();self.ctx=ctx;self.extract=extract;self.preview=preview;self.busy=threading.Lock();self.stop=threading.Event();self.preview_slot=threading.BoundedSemaphore(1)
         with ctx.state.connect() as db:
             db.executescript('''CREATE TABLE IF NOT EXISTS personal_assets(id TEXT PRIMARY KEY,name TEXT NOT NULL,kind TEXT NOT NULL,taken TEXT,latitude REAL,longitude REAL,camera TEXT,bytes INTEGER NOT NULL,path TEXT NOT NULL,inode INTEGER NOT NULL,mtime_ns INTEGER NOT NULL,metadata TEXT NOT NULL,group_id TEXT NOT NULL,favorite INTEGER NOT NULL DEFAULT 0,caption TEXT NOT NULL DEFAULT '',created REAL NOT NULL); CREATE INDEX IF NOT EXISTS personal_taken ON personal_assets(taken); CREATE INDEX IF NOT EXISTS personal_groups ON personal_assets(group_id); CREATE TABLE IF NOT EXISTS personal_sources(id TEXT PRIMARY KEY,revision TEXT NOT NULL,asset TEXT,status TEXT NOT NULL,partial TEXT,attempts INTEGER NOT NULL DEFAULT 0,error TEXT,updated REAL NOT NULL); CREATE TABLE IF NOT EXISTS personal_albums(id TEXT PRIMARY KEY,title TEXT NOT NULL); CREATE TABLE IF NOT EXISTS personal_album_items(album TEXT NOT NULL,asset TEXT NOT NULL,PRIMARY KEY(album,asset));''')
         with ctx.state.connect() as db:
@@ -41,6 +43,7 @@ class PersonalPhotos:
             for field,declaration in [('verified_bytes','INTEGER NOT NULL DEFAULT 0'),('prefix_sha256',"TEXT NOT NULL DEFAULT ''"),('filename',"TEXT NOT NULL DEFAULT ''"),('total_bytes','INTEGER NOT NULL DEFAULT 0')]:
                 if field not in columns:db.execute('ALTER TABLE personal_sources ADD COLUMN '+field+' '+declaration)
     def config(self):return self.ctx.state.setting('personal-photos',{})
+    @serialized
     def configure(self,r):
         if self.busy.locked():raise ValueError('Pause and wait for the current photo operation first')
         pool_id=name(r.get('pool'));label=text(r.get('folder','PersonalPhotos'),120).strip()
@@ -75,7 +78,7 @@ class PersonalPhotos:
         pool,mount=self.ctx.volume(cfg['pool'])
         if pool['filesystem_uuid']!=cfg['filesystem_uuid']:raise ValueError('Photo archive volume identity changed')
         with Files(self.ctx).directory('pool:'+cfg['pool']) as (volume_fd,_,_):
-          with directory(volume_fd,(cfg['folder'],)) as fd:
+          with directory(volume_fd,Path(cfg['folder']).parts) as fd:
             marker=os.open('.freeqnap-photo-library.json',os.O_RDONLY|os.O_NOFOLLOW,dir_fd=fd)
             try:
                 if json.loads(os.read(marker,4096))!={'archive_id':cfg['archive_id'],'filesystem_uuid':cfg['filesystem_uuid']}:raise ValueError('Photo archive marker changed')
@@ -107,7 +110,8 @@ class PersonalPhotos:
                     yield fd
                 finally:os.close(fd)
     def progress(self,**v):self.ctx.state.set('personal-photo-progress',{'at':time.time(),**v})
-    def ingest(self,source_id,revision,filename,opener,total,group=None,taken=None):
+    @serialized
+    def ingest(self,source_id,revision,filename,opener,total,group=None,taken=None,metadata_override=None):
         """opener(offset) yields bytes from a validated range; partials survive failure."""
         filename=Path(text(filename)).name;ext=Path(filename).suffix.lower()
         if ext not in PHOTO|VIDEO:raise ValueError('Unsupported photo or video file type')
@@ -169,7 +173,7 @@ class PersonalPhotos:
                     if st.st_nlink==2:
                         with directory(root,('originals',ident[:2])) as linked:
                             if os.stat(ident+ext,dir_fd=linked,follow_symlinks=False).st_ino!=st.st_ino:raise ValueError('Unexpected link to partial download')
-                    meta=self.extract(fd,taken);group_id=digest(group or meta.get('live_id') or ident)
+                    meta=self.extract(fd,taken);meta.update(metadata_override or {});group_id=digest(group or meta.get('live_id') or ident)
                     with self.ctx.state.connect() as db:existing=db.execute('SELECT * FROM personal_assets WHERE id=?',(ident,)).fetchone()
                     if existing:
                         with self.opened(dict(existing)) as old:
@@ -204,6 +208,7 @@ class PersonalPhotos:
                     with self.ctx.state.connect() as db:db.execute("UPDATE personal_sources SET status='pending',error=?,updated=? WHERE id=?",('paused' if isinstance(error,InterruptedError) else 'Download or verification incomplete; original retained',time.time(),sid))
                     raise
                 finally:os.close(fd)
+    @serialized
     def sidecar(self,ident):
         item=self.asset(ident);item['metadata']=json.loads(item['metadata'])
         with self.root() as root:
@@ -212,10 +217,38 @@ class PersonalPhotos:
                 try:os.write(out,(json.dumps(item,indent=2)+'\n').encode());os.fsync(out)
                 finally:os.close(out)
                 os.rename(tmp,ident+'.json',src_dir_fd=fd,dst_dir_fd=fd);os.fsync(fd)
+    def scope(self,r):
+        scope=r.get('_share_scope',{'mode':'library'})
+        if scope.get('mode')=='library':return '1',[]
+        ids=scope.get('ids')
+        if not isinstance(ids,list) or not 1<=len(ids)<=1000 or any(not isinstance(v,str) for v in ids):raise ValueError('Invalid shared selection')
+        if scope.get('mode')=='items' and all(IDENT.fullmatch(v) for v in ids):return 'id IN (SELECT value FROM json_each(?))',[json.dumps(ids)]
+        if scope.get('mode')=='albums' and all(re.fullmatch('[a-f0-9]{32}',v) for v in ids):return 'id IN (SELECT asset FROM personal_album_items WHERE album IN (SELECT value FROM json_each(?)))',[json.dumps(ids)]
+        raise ValueError('Invalid shared selection')
+    def shared_view(self,operation,payload,scope):
+        clause,params=self.scope({'_share_scope':scope})
+        if operation=='photos.status':
+            with self.ctx.state.connect() as db:rows=db.execute('SELECT kind,count(*) count,COALESCE(sum(bytes),0) bytes,count(latitude) located FROM personal_assets WHERE '+clause+' GROUP BY kind',params).fetchall()
+            online=False
+            try:
+                with self.root():online=True
+            except (ValueError,OSError):pass
+            return {'photos':sum(v['count'] for v in rows if v['kind']=='photo'),'videos':sum(v['count'] for v in rows if v['kind']=='video'),'bytes':sum(v['bytes'] for v in rows),'located':sum(v['located'] for v in rows),'config':{'pool':'Shared library','location_selected':True},'online':online,'operation':{'state':'idle'}}
+        if operation in ('photos.catalog','photos.places'):return getattr(self,operation.split('.')[1])({**payload,**({'include_versions':True} if scope.get('mode')!='library' else {}),'_share_scope':scope})
+        ident=payload.get('id')
+        with self.ctx.state.connect() as db:
+            if not db.execute('SELECT 1 FROM personal_assets WHERE ('+clause+') AND id=?',(*params,ident)).fetchone():raise ValueError('This photo or video is not shared')
+        if operation=='photos.read':return self.read(payload)
+        if operation=='photos.metadata-read':return {**self.metadata_read(payload),'read_only':True}
+        if operation=='photos.related':
+            result=self.related(payload)
+            with self.ctx.state.connect() as db:result['items']=[v for v in result['items'] if db.execute('SELECT 1 FROM personal_assets WHERE ('+clause+') AND id=?',(*params,v['id'])).fetchone()]
+            return result
+        raise ValueError('Shared library is read-only')
     def catalog(self,r):
         limit=r.get('limit',120);offset=r.get('offset',0)
         if type(limit)!=int or not 1<=limit<=200 or type(offset)!=int or not 0<=offset<=1000000:raise ValueError('Invalid photo page')
-        clauses=[];params=[]
+        scope_clause,scope_params=self.scope(r);clauses=[scope_clause];params=list(scope_params)
         if r.get('id'):
             if not isinstance(r['id'],str) or not IDENT.fullmatch(r['id']):raise ValueError('Invalid photo identifier')
             clauses.append('id=?');params.append(r['id'])
@@ -233,7 +266,14 @@ class PersonalPhotos:
             album=text(r['album'],64);clauses.append('id IN (SELECT asset FROM personal_album_items WHERE album=?)');params.append(album)
         where=' WHERE '+' AND '.join(clauses) if clauses else ''
         with self.ctx.state.connect() as db:
-            total=db.execute('SELECT count(*) FROM personal_assets'+where,params).fetchone()[0];rows=db.execute('SELECT * FROM personal_assets'+where+' ORDER BY taken IS NULL,taken DESC,created DESC LIMIT ? OFFSET ?',(*params,limit,offset)).fetchall();years=[dict(v) for v in db.execute("SELECT substr(taken,1,4) year,count(*) count,max(id) cover FROM personal_assets WHERE taken IS NOT NULL GROUP BY year ORDER BY year DESC")];months=[dict(v) for v in db.execute("SELECT substr(taken,1,7) month,count(*) count,max(id) cover FROM personal_assets WHERE taken IS NOT NULL GROUP BY month ORDER BY month DESC")];albums=[dict(v) for v in db.execute('SELECT a.*,count(i.asset) count,max(i.asset) cover FROM personal_albums a LEFT JOIN personal_album_items i ON i.album=a.id GROUP BY a.id ORDER BY a.title')]
+            total=db.execute('SELECT count(*) FROM personal_assets'+where,params).fetchone()[0]
+            rows=db.execute('SELECT * FROM personal_assets'+where+' ORDER BY taken IS NULL,taken DESC,created DESC LIMIT ? OFFSET ?',(*params,limit,offset)).fetchall()
+            years=[dict(v) for v in db.execute("SELECT substr(taken,1,4) year,count(*) count,max(id) cover FROM personal_assets WHERE taken IS NOT NULL AND ("+scope_clause+") GROUP BY year ORDER BY year DESC",scope_params)]
+            months=[dict(v) for v in db.execute("SELECT substr(taken,1,7) month,count(*) count,max(id) cover FROM personal_assets WHERE taken IS NOT NULL AND ("+scope_clause+") GROUP BY month ORDER BY month DESC",scope_params)]
+            if r.get('_share_scope',{}).get('mode')=='items':albums=[]
+            else:
+                album_filter=" WHERE a.id IN (SELECT value FROM json_each(?))" if r.get('_share_scope',{}).get('mode')=='albums' else ''
+                albums=[dict(v) for v in db.execute('SELECT a.*,count(i.asset) count,max(i.asset) cover FROM personal_albums a LEFT JOIN personal_album_items i ON i.album=a.id AND i.asset IN (SELECT id FROM personal_assets WHERE '+scope_clause+')'+album_filter+' GROUP BY a.id ORDER BY a.title',(*scope_params,*([json.dumps(r['_share_scope']['ids'])] if album_filter else [])))]
         items=[]
         for row in rows:
             v=dict(row);v.pop('path');v.pop('inode');v.pop('mtime_ns');v['metadata']=json.loads(v['metadata']);v['favorite']=bool(v['favorite']);items.append(v)
@@ -251,29 +291,34 @@ class PersonalPhotos:
         if isinstance(cell,bool) or not isinstance(cell,(int,float)) or not math.isfinite(cell) or not 0.000001<=cell<=30:raise ValueError('Invalid map scale')
         # Aggregate on the NAS: all located assets contribute without sending
         # millions of individual coordinates to a phone or external map service.
+        clause,scope_params=self.scope(r)
         with self.ctx.state.connect() as db:
-            rows=db.execute("SELECT CAST((longitude+180)/? AS INTEGER) gx,CAST((latitude+90)/? AS INTEGER) gy,count(*) count,avg(latitude) latitude,avg(longitude) longitude,max(id) id,max(taken) taken FROM personal_assets WHERE longitude BETWEEN ? AND ? AND latitude BETWEEN ? AND ? GROUP BY gx,gy LIMIT 1801",(cell,cell,west,east,south,north)).fetchall()
+            rows=db.execute("SELECT CAST((longitude+180)/? AS INTEGER) gx,CAST((latitude+90)/? AS INTEGER) gy,count(*) count,avg(latitude) latitude,avg(longitude) longitude,max(id) id,max(taken) taken FROM personal_assets WHERE longitude BETWEEN ? AND ? AND latitude BETWEEN ? AND ? AND ("+clause+") GROUP BY gx,gy LIMIT 1801",(cell,cell,west,east,south,north,*scope_params)).fetchall()
         items=[]
         for row in rows[:1800]:
             v=dict(row);v.update(west=max(-180,v['gx']*cell-180),east=min(180,(v['gx']+1)*cell-180),south=max(-90,v['gy']*cell-90),north=min(90,(v['gy']+1)*cell-90));items.append(v)
         return {'items':items,'total':sum(v['count'] for v in items),'truncated':len(rows)>1800,'offline_map':True}
+    @serialized
     def annotate(self,r):
         item=self.asset(r.get('id'));favorite=r.get('favorite',bool(item['favorite']));caption=text(r.get('caption',item['caption']),4000)
         if not isinstance(favorite,bool):raise ValueError('Choose favorite on or off')
         with self.ctx.state.connect() as db:db.execute('UPDATE personal_assets SET favorite=?,caption=? WHERE id=?',(int(favorite),caption,item['id']))
         self.sidecar(item['id']);return {'saved':True,'original_unchanged':True}
+    @serialized
     def album(self,r):
         title=text(r.get('title'),120).strip()
         if not title:raise ValueError('Give the album a name')
         ident=secrets.token_hex(16)
         with self.ctx.state.connect() as db:db.execute('INSERT INTO personal_albums VALUES(?,?)',(ident,title))
         return {'id':ident,'title':title}
+    @serialized
     def album_add(self,r):
         item=self.asset(r.get('id'));album=text(r.get('album'),32)
         with self.ctx.state.connect() as db:
             if not db.execute('SELECT 1 FROM personal_albums WHERE id=?',(album,)).fetchone():raise ValueError('Choose an existing album')
             db.execute('INSERT OR IGNORE INTO personal_album_items VALUES(?,?)',(album,item['id']))
         return {'saved':True}
+    @serialized
     def read(self,r):
         item=self.asset(r.get('id'));variant=r.get('variant','original');offset=r.get('offset',0);count=r.get('count',512*1024)
         if variant not in ('original','thumbnail','preview') or type(offset)!=int or not 0<=offset<=max(item['bytes'],8*1024**2) or type(count)!=int or not 1<=count<=512*1024:raise ValueError('Invalid photo read')
@@ -303,15 +348,19 @@ class PersonalPhotos:
     def import_folder(self,r):
         if not self.busy.acquire(False):raise ValueError('A photo operation is already running')
         try:
-            pool=name(r.get('pool'));folder=text(r.get('folder',''),2048);relative(folder)
+            pool=name(r.get('pool')) if 'pool' in r else None;share=r.get('share') if pool is None else 'pool:'+pool;folder=text(r.get('folder',''),2048);relative(folder)
+            if pool is not None and 'share' in r:raise ValueError('Choose one source volume or folder')
+            with self.root():pass
+            with source_directory(self.ctx,share,folder):pass
             if pool==self.config().get('pool') and (folder==self.config()['folder'] or folder.startswith(self.config()['folder']+'/')):raise ValueError('Do not import the archive into itself')
-            self.ctx.volume(pool);self.stop.clear();self.progress(state='scanning',source='local folder')
-            t=threading.Thread(target=self._import,args=(pool,folder),daemon=True);t.start();return {'started':True}
+            self.stop.clear();self.progress(state='scanning',source='local folder')
+            t=threading.Thread(target=self._import,args=(pool,folder,share),daemon=True);t.start();return {'started':True}
         except Exception:self.busy.release();raise
-    def _import(self,pool,folder):
+    @serialized
+    def _import(self,pool,folder,share=None):
         done=failed=0
         try:
-            with Files(self.ctx).directory('pool:'+pool,folder) as (root,_,volume):
+            with source_directory(self.ctx,share or 'pool:'+pool,folder) as (root,_,volume):
                 stack=[(os.dup(root),'')];seen=0
                 try:
                     while stack and not self.stop.is_set():
@@ -336,7 +385,8 @@ class PersonalPhotos:
                                             offset+=len(data);yield data
                                         after=os.fstat(source)
                                         if (before.st_ino,before.st_size,before.st_mtime_ns)!=(after.st_ino,after.st_size,after.st_mtime_ns):raise ValueError('Source changed during import')
-                                    self.ingest('local:'+volume['filesystem_uuid']+':'+folder+'/'+prefix+n,str(before.st_size)+':'+str(before.st_mtime_ns),n,chunks,before.st_size,group='local:'+volume['filesystem_uuid']+':'+folder+'/'+prefix+Path(n).stem)
+                                    from .file_metadata import read_xmp
+                                    self.ingest('local:'+volume['filesystem_uuid']+':'+folder+'/'+prefix+n,str(before.st_size)+':'+str(before.st_mtime_ns),n,chunks,before.st_size,group='local:'+volume['filesystem_uuid']+':'+folder+'/'+prefix+Path(n).stem,metadata_override=read_xmp(fd,n))
                                     done+=1
                                 except (ValueError,OSError):failed+=1
                                 finally:os.close(source)
@@ -353,3 +403,26 @@ class PersonalPhotos:
         item=self.asset(r.get('id'))
         with self.ctx.state.connect() as db:rows=db.execute('SELECT id,name,kind,bytes FROM personal_assets WHERE group_id=? ORDER BY kind,created',(item['group_id'],)).fetchall()
         return {'items':[dict(v) for v in rows]}
+
+    @serialized
+    def metadata_read(self,r):
+        from .file_metadata import current
+        item=self.asset(r.get('id'));parts=Path(item['path']).parts;extra=json.loads(item['metadata']);extra['description']=item['caption'] or extra.get('description','')
+        with self.opened(item) as source,self.root() as root,directory(root,parts[:-1]) as parent:return current(source,parent,parts[-1],extra)
+    @serialized
+    def metadata_plan(self,r):
+        from .file_metadata import clean
+        if set(r)!={'id','etag','metadata'}:raise ValueError('Choose an item and metadata')
+        fresh=self.metadata_read(r)
+        if fresh['etag']!=r['etag']:raise ValueError('Metadata changed; reopen the editor')
+        return self.ctx.plan('photo-metadata',{'id':r['id'],'etag':r['etag'],'metadata':clean(r['metadata']),'review':'Update the private catalog and XMP sidecar. Original bytes and embedded EXIF remain unchanged. GPS/date edits update the gallery/map; previous sidecar is retained.'},'SAVE PHOTO METADATA')
+    def metadata_apply(self,r):
+        from .file_metadata import write
+        with self.ctx.lock(),self.storage_lock:
+            path,plan=self.ctx.reviewed(r,'photo-metadata');b=plan['body'];fresh=self.metadata_read(b)
+            if fresh['etag']!=b['etag']:raise ValueError('Metadata changed after review')
+            item=self.asset(b['id']);parts=Path(item['path']).parts;meta=json.loads(item['metadata']);meta.update(b['metadata'])
+            with self.root() as root,directory(root,parts[:-1]) as parent:
+                self.ctx.consume(path,plan);result=write(parent,parts[-1],b['metadata'])
+            with self.ctx.state.connect() as db:db.execute('UPDATE personal_assets SET taken=?,latitude=?,longitude=?,camera=?,metadata=?,caption=? WHERE id=?',(meta['taken'],meta['latitude'],meta['longitude'],meta.get('camera'),json.dumps(meta),meta['description'],item['id']))
+            self.sidecar(item['id']);return result

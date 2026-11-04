@@ -56,6 +56,13 @@ class PhotosTests(unittest.TestCase):
   self.assertFalse(hasattr(self.photos,'delete'));self.assertFalse(hasattr(self.photos,'prune'))
   with self.assertRaises(ValueError):self.put(filename='x.exe')
 
+ def test_metadata_gps_and_capture_date_update_map_without_changing_original(self):
+  from unittest.mock import patch
+  item=self.put();before=base64.b64decode(self.photos.read({'id':item['id']})['data_base64'])
+  with patch('freeqnap.nas.file_metadata.inspect',return_value={}):
+   value=self.photos.metadata_read({'id':item['id']});plan=self.photos.metadata_plan({'id':item['id'],'etag':value['etag'],'metadata':{**value['metadata'],'latitude':40.5,'longitude':-75.5,'taken':'1990-06-01T10:00:00','description':'Added location'}});self.photos.metadata_apply({'plan_id':plan['id'],'digest':plan['digest'],'confirmation':plan['confirmation']})
+  row=self.photos.catalog({'id':item['id']})['items'][0];self.assertEqual(row['latitude'],40.5);self.assertTrue(row['taken'].startswith('1990-06-01'));self.assertEqual(row['caption'],'Added location');self.assertEqual(self.photos.places({})['total'],1);self.assertEqual(base64.b64decode(self.photos.read({'id':item['id']})['data_base64']),before)
+
 class CloudTests(PhotosTests):
  def setUp(self):
   super().setUp()

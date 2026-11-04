@@ -12,6 +12,32 @@ is included. The public installer workflow
 and several recovery/hardware acceptance gates remain unfinished. Do not put
 irreplaceable data on an unaccepted installation.
 
+## Your family. Your memories. Beyond iCloud.
+
+Build a path away from growing cloud storage bills: download available iCloud
+originals to your own NAS, retain them after cloud deletion, and browse private
+photos, albums and an offline location map. Each family member gets their own
+account, library locations and optional Apple connection. Share selected albums,
+memories or libraries with other NAS users without merging personal collections.
+
+A viewer-only **metadata editor** adds missing locations, dates, titles and tags
+using portable XMP sidecars while keeping original bytes unchanged. **Share Social**
+prepares a separate metadata/GPS-cleaned copy by default, then opens a supported
+device share sheet; download fallback is available. Administrators assign personal
+and system permissions separately. Local accounts work without Authentik; linkage
+to your own Authentik provider is optional.
+
+Verify a complete archive **and an independent backup** before reducing iCloud
+storage. The unofficial connector still needs real-account acceptance and periodic
+Apple authentication. Direct automatic iPhone camera-roll backup to the NAS is not
+included. Native sharing depends on the phone/browser; privacy copies have format
+and size limits. This is an alternative local archive, not a complete replacement
+for Apple Photos or every iCloud service.
+
+Read [family accounts](docs/LOCAL-USERS-AND-AUTHENTIK.md),
+[Photos & iCloud](docs/PERSONAL-PHOTOS.md), and
+[metadata & Share Social](docs/METADATA-AND-SOCIAL-SHARING.md).
+
 ## Your hardware. Your NAS.
 
 FreeQNAP combines **Debian 13 ARMhf**, model-specific enclosure support and a
@@ -41,6 +67,8 @@ This independent project is not affiliated with or endorsed by QNAP.
 | Downloads | Graphical HTTP(S), magnet and torrent queue; pause/resume, saved partials, transfer progress and independent retries |
 | RAID & recovery | Array inspection, synchronization, guarded import/replacement/check operations and explicit recovery staging |
 | Health & notifications | Persistent incidents, rules/presets, optional email and Web Push, buzzer enable/timed/permanent silence and a health-linked physical status light |
+| Personal libraries | Private local family accounts, individual iCloud connections, dedicated folder selection, My Radio, photo timelines/albums/maps and scoped read-only family sharing |
+| Metadata & Share Social | Viewer-only XMP edits, GPS/date corrections, privacy-cleaned sharing copies, native device sharing and download fallback |
 | Local administration | Trusted LAN HTTPS, separate dashboard enrollment, key-only root SSH by default, installable PWA and durable activity history |
 
 Source implementation and fixture tests do not imply acceptance of every real
@@ -63,6 +91,10 @@ All physical ports remain visible, including disconnected ports. Live rates and
 hourly aggregates stay local. Daily, weekly, 30-day and 365-day averages explicitly
 show observed coverage: they do not invent a year of data on a new installation.
 Negotiated link speed is unavailable from this driver and is shown as unknown.
+
+## My Radio and guided recovery
+
+[My Radio](docs/MY-RADIO.md) adds private music, books, podcasts and verified internet radio to the dashboard and PWA. [Interrupted-array recovery](docs/INTERRUPTED-RAID-RECOVERY.md) exposes deliberate read-only inspection, separately confirmed rebuild resume and volume mounting to administrators and explicitly authorized agents. [Front-button limits](docs/FRONT-BUTTON.md) distinguish accepted held-button shutdown from the requested, still-unavailable five-tap melody.
 
 ## Start here
 

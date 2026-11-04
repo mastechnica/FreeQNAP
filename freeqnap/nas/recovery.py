@@ -47,6 +47,7 @@ class Recovery:
         return {'items':rows}
 
     def plan(self, request):
+        self.files.writable(request.get('share'))
         kind=request.get('kind');ident=request.get('id');pool,path,description=self.source(kind,ident)
         share_name=name(request.get('share'));new_name=request.get('name')
         if len(relative(new_name))!=1:raise ValueError('Choose one destination file or folder name')
@@ -66,6 +67,7 @@ class Recovery:
     def apply(self, request):
         with self.ctx.lock():
             plan_path,plan=self.ctx.reviewed(request,'recover-files');body=plan['body']
+            self.files.writable(body['share'])
             pool,path,_=self.source(body['kind'],body['id']);info=path.stat()
             if (info.st_ino,info.st_dev,info.st_mtime_ns,pool['filesystem_uuid'])!=(body['inode'],body['device'],body['mtime_ns'],body['filesystem_uuid']):
                 raise ValueError('Recovery source identity changed since review')

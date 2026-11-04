@@ -1,0 +1,8 @@
+{
+  "name": "Shutdown melody",
+  "tempo_bpm": 116,
+  "articulation": 0.82,
+  "notes": "C4:0.5 D4:0.5 F4:1 F4:1 R:1 F4:0.5 G4:0.5 AB4:1 AB4:1 R:1 C5:1 BB4:1 G4:1 R:1 G4:0.5 EB4:0.5 F4:1",
+  "enabled": false,
+  "requires": "Accepted raw press/release input and pitch-capable audio output; the current QNAP MCU interface supplies neither."
+}

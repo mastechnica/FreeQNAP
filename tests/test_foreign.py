@@ -88,3 +88,10 @@ class ForeignTests(unittest.TestCase):
   with patch('os.path.ismount',return_value=True),patch.object(self.foreign,'validate',side_effect=ValueError('Attachment changed')):
    rows=self.foreign.sessions();self.assertEqual(len(rows),1);self.assertFalse(rows[0]['active'])
   with patch('os.path.ismount',return_value=True),patch.object(self.foreign,'validate',return_value=record):self.assertTrue(self.foreign.sessions()[0]['active'])
+
+ def test_plain_ntfs_plan_mounts_readonly_without_password_or_cryptsetup(self):
+  self.disk['children'][0]['fstype']='ntfs';plan=self.foreign.plan(self.request());self.assertEqual(plan['confirmation'],'MOUNT USB READ ONLY');calls=[]
+  def run(*args,**kwargs):calls.append(args);return ''
+  with patch.object(self.foreign,'source',return_value=(self.service.select(self.request()['id']),self.disk['children'][0])),patch.object(self.ctx,'run',side_effect=run),patch.object(self.foreign,'prepare_target'),patch.object(self.foreign,'validate'),patch('freeqnap.nas.foreign.atomic'),patch('shutil.which',return_value='/usr/bin/ntfs-3g'),patch('pathlib.Path.exists',return_value=True):
+   result=self.foreign.unlock(self.review(plan))
+  self.assertTrue(result['read_only']);mount=next(v for v in calls if v[0]=='systemd-mount');self.assertIn('--type=ntfs-3g',mount);self.assertIn('--options=ro,nodev,nosuid,noexec,norecover',mount);self.assertFalse(any(v[0]=='cryptsetup' for v in calls))

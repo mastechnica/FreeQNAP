@@ -1,3 +1,115 @@
+# Viewer metadata and sharing — 4 November 2026
+
+Metadata/GPS editing now uses non-destructive XMP sidecars and updates the Photos
+map/timeline. Share Social prepares bounded, metadata-cleaned private copies before
+the native share sheet; download fallback is available. Independent reader checks
+fail closed. The update is deployed. Local regression and native synthetic photo/video
+cleaning, original preservation and metadata sidecar checks passed. See the
+[dated validation](SHARING-VALIDATION-2026-11-04.md).
+Actual phone/PWA app availability and delivery require owner testing. No real
+external shares were sent. See [privacy and sharing](METADATA-AND-SOCIAL-SHARING.md).
+
+# Local family accounts and File Manager follow-up — 4 November 2026
+
+Implemented local family/admin roles and permissions, isolated personal libraries
+and iCloud settings, administrator-assigned folders, optional Authentik setup/linking,
+and distinct read-only scoped sharing. File Manager gains numbered pages,
+Copy/Move-to pickers, drag/drop choice and folder-wide fullscreen media arrows.
+The account/features checkpoint is deployed. Native private account and file-operation fixtures passed; no real family account or provider was created. Real family accounts, Authentik/Apple
+logins and mobile sharing acceptance require owner setup; none are seeded.
+See [accounts](LOCAL-USERS-AND-AUTHENTIK.md) and [Files](FILE-MANAGER.md).
+
+# Explicit private library locations — 4 November 2026
+
+Music and Personal Photos & Videos now require a selected volume and dedicated
+folder in the browser before use. Settings → Library locations handles later
+changes through a reviewed, verified copy; previous archives remain retained.
+File Manager offers named shortcuts and explicit source-preserving folder imports
+from mounted USB volumes, including validated read-only unlock sessions. Copies
+placed in visible folders require import to appear in the library catalog.
+Owner selection of the actual production locations remains pending; deployment
+does not choose them or migrate personal content automatically.
+See [the workflow](MY-RADIO.md#choose-library-locations-and-import-usb-folders).
+
+# Regional radio and book voices — 4 November 2026
+
+Locally deployed: searchable US/Canada Internet Radio with online directory
+search, regional podcast subscriptions and episode search, plus selectable local
+book-reading voices with speed/pitch controls saved per browser. The starter list
+contains 55 sampled stations; the live installation retains 57 regional entries.
+Actual listening, phone/PWA speech behavior and device-specific pitch support
+remain owner acceptance items. No sound was played and no publication was made.
+See [validation](MY-RADIO-VALIDATION-2026-11-04.md#uscanada-discovery-and-book-voice-follow-up--4-november-2026).
+
+# Interrupted data RAID recovery completed — 4 November 2026
+
+The original four-member data RAID5 is non-degraded and idle. Both mounted data
+volumes passed final exact-filesystem/partition/extent/path/inode/size direct-read
+SHA-256 verification of their original 8 MiB proof files. No recovery mutation
+was repeated. The OS mirror is non-degraded; its queued consistency check is now
+running and remains an ordinary maintenance warning. Cooling/guard/watchdog and
+trusted HTTPS are healthy, with no new completion-interval kernel errors.
+
+The completion monitor is stopped. Whole-content/parity integrity, physical
+replacement, recovery cold starts and the original lockup root cause remain
+unaccepted. Notification preferences were unchanged; external delivery remains
+disabled. See [the incident completion record](LOCKUP-RECOVERY-2026-11-03.md#recovery-completed-and-final-proofs-verified--4-november-2026).
+Earlier in-progress percentages and ETAs below are historical checkpoints.
+
+# Dashboard, private libraries and recovery controls — 4 November 2026
+
+Locally deployed: **My Radio** (Music, Books, Podcasts, Internet Radio), separate
+private collection storage, cover art/metadata, retained transfers, optional title
+lookups and exact agent permissions. Settings now groups connections, access,
+VPN, DDNS, backup and installation help. Storage & RAID joins volumes/encryption
+and recovery. Existing bookmarks remain valid.
+
+Interrupted-array recovery now has separate reviewed read-only inspection,
+writable rebuild resume, mounting and private metadata backup controls. The
+running array was not failed, re-added, force-assembled or otherwise disturbed to
+test these controls. Mount planning passed during live recovery without applying
+the plan. Forced recovery execution paths have fixture/failure-injection coverage;
+physical failure/replacement acceptance is unchanged.
+
+The hardened broker's set-ID restriction exposed a decoder integration fault.
+A separate unprivileged, network-disabled helper fixes it without relaxing the
+broker. Native tests verified read-only input, denied writes/network/root
+escalation, hidden NAS paths, unchanged originals and real book/music/cover output.
+
+At the browser checkpoint data recovery was approximately 93.5%, both data volumes
+were mounted and the OS mirror was healthy. This is a dated observation, not a
+live ETA or completed recovery. Full-speed cooling and the watchdog were retained.
+The original lockup cause remains unknown; kernel update/rollback and the other
+recorded hardware/recovery acceptance limits remain separate work.
+
+Five quick power-button presses and the requested pitched melody remain disabled:
+the accepted MCU exposes a held-button event and fixed beep only. The exact tune
+is retained for a future proven input/output path. No sound, shutdown or reboot
+was tested in this work. Phone/PWA playback and real personal media/feed/provider
+acceptance still require intended-device testing. KPF/protected Kindle originals
+need a readable or audiobook companion.
+
+See [validation](MY-RADIO-VALIDATION-2026-11-04.md), [My Radio](MY-RADIO.md),
+[recovery](INTERRUPTED-RAID-RECOVERY.md), [API contracts](MY-RADIO-AND-RECOVERY-API.md)
+and [button limits](FRONT-BUTTON.md). Changes are committed locally; this task
+has not published or pushed a new public snapshot.
+
+# Latest incident checkpoint — 3 November 2026
+
+After a management stall and owner hard reset, the OS mirror is healthy but the
+initial data RAID5 did not automatically resume: it refused dirty/degraded
+assembly with its fourth member about 90.86% rebuilt. Exact-member forced
+read-only recovery was explicitly approved and completed after independent
+metadata backups. Both original 8 MiB initialization proof files match, but this
+does not accept all content or parity integrity. The separately approved writable
+resume has now restarted recovery near its saved checkpoint. Both data volumes are mounted
+and their original direct-read proofs match after journal recovery. The data array remains non-redundant,
+around 91% rebuilt. Do not present the older sync ETA as current.
+
+The dashboard loading fix is deployed. Bounded persistent logs are enabled.
+The original management-stall cause remains unknown. See the
+[dated incident record](LOCKUP-RECOVERY-2026-11-03.md).
+
 # Current status — 2 November 2026
 
 ## Personal Photos & Videos

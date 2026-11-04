@@ -84,3 +84,21 @@ class FileManagerTests(unittest.TestCase):
   self.ctx.state.finish(job,error='Injected copy failure retained')
   self.assertEqual(self.fm.stages()['items'][0]['id'],job);plan=self.fm.stage_plan({'id':job});self.fm.stage_remove(self.review(plan))
   self.assertFalse(self.fm.stages()['items']);self.assertEqual((self.a/'folder/first').read_text(),'kept source');self.assertEqual(outside.read_text(),'outside');self.assertFalse((self.b/'folder').exists())
+
+ def test_cross_volume_move_verifies_then_recycles_original(self):
+  other=self.root/'second';other.mkdir();destination=other/'destination';destination.mkdir();cfg=self.ctx.config();cfg['pools']['second']={'name':'second','mountpoint':str(other),'filesystem_uuid':'second-uuid'};cfg['shares']['second']={'name':'second','pool':'second','path':str(destination),'gid':os.getgid()};self.ctx.save(cfg)
+  original_volume=self.ctx.volume
+  def volume(key):return (self.ctx.config()['pools']['second'],other) if key=='second' else original_volume(key)
+  (self.a/'move.txt').write_bytes(b'verified content')
+  with patch.object(self.ctx,'volume',side_effect=volume):
+   plan=self.fm.transfer_plan({'share':'a','paths':['move.txt'],'target_share':'second','mode':'move'});result=self.fm.transfer(self.review(plan))
+  self.assertEqual((destination/'move.txt').read_bytes(),b'verified content');self.assertFalse((self.a/'move.txt').exists());self.assertEqual(len(result['recycled_sources']),1);self.assertEqual((self.ctx.mount/'.freeqnap/trash'/result['recycled_sources'][0]).read_bytes(),b'verified content')
+ def test_readonly_source_can_copy_but_cannot_move_or_be_written(self):
+  cfg=self.ctx.config();cfg['shares']['a']['read_only']=True;self.ctx.save(cfg);(self.a/'copy.txt').write_text('safe source')
+  plan=self.fm.transfer_plan({'share':'a','paths':['copy.txt'],'target_share':'b','mode':'copy'});self.fm.transfer(self.review(plan));self.assertTrue((self.a/'copy.txt').exists())
+  for request in [{'share':'a','paths':['copy.txt'],'target_share':'b','mode':'move'},{'share':'b','paths':['copy.txt'],'target_share':'a','mode':'copy'}]:
+   with self.assertRaises(ValueError):self.fm.transfer_plan(request)
+ def test_media_neighbors_span_pages_and_exclude_links_private_and_nonmedia(self):
+  for i in range(250):(self.a/('image-%03d.jpg'%i)).write_bytes(b'image')
+  (self.a/'image-099a.txt').write_text('ignore');(self.a/'image-099b.jpg').symlink_to(self.a/'image-000.jpg');(self.a/'.freeqnap-private.jpg').write_bytes(b'private')
+  result=self.fm.media_neighbors({'share':'a','path':'','name':'image-099.jpg'});self.assertEqual(result['next']['name'],'image-100.jpg');self.assertEqual(result['previous']['name'],'image-098.jpg');self.assertEqual(result['total'],250)

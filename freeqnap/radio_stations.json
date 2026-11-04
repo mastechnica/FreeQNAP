@@ -1,0 +1,983 @@
+{
+  "source": "https://www.radio-browser.info/",
+  "directory_api": "https://de1.api.radio-browser.info/",
+  "regions": [
+    "US",
+    "CA"
+  ],
+  "checked_at": 1793799523.271192,
+  "stations": [
+    {
+      "id": "d1a54d2e-623e-4970-ab11-35f7b56c5ec3",
+      "name": "Classic Vinyl HD",
+      "url": "https://icecast.walmradio.com:8443/classic",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "1930,1940,1950,1960,beautiful music,big band,classic hits,crooners,easy,easy listening,hd,jazz,light orchestral,lounge,oldies,orchestral,otr,relaxation,strings,swing,unwind,walm",
+        "codec": "MP3",
+        "bitrate": 320,
+        "homepage": "https://walmradio.com/classic",
+        "favicon": "https://icecast.walmradio.com:8443/classic.jpg"
+      },
+      "checked_at": 1793799514.6787279,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "313046e3-b203-4b9d-bc3e-393da7d97126",
+      "name": "WALM - Old Time Radio",
+      "url": "https://icecast.walmradio.com:8443/otr",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "78,78-rpm,78rpm,classic,comedy,drama,easy listening,musical,mystery,old time radio,otr,sci-fi,v-disc,vintage,walm",
+        "codec": "MP3",
+        "bitrate": 64,
+        "homepage": "https://walmradio.com/otr",
+        "favicon": "https://icecast.walmradio.com:8443/otr.jpg"
+      },
+      "checked_at": 1793799511.0053859,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "d28420a4-eccf-47a2-ace1-088c7e7cb7e0",
+      "name": "101 SMOOTH JAZZ",
+      "url": "http://jking.cdnstream1.com/b22139_128mp3",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "easy listening,jazz,smooth jazz",
+        "codec": "MP3",
+        "bitrate": 192,
+        "homepage": "http://101smoothjazz.com/",
+        "favicon": "http://101smoothjazz.com/favicon.ico"
+      },
+      "checked_at": 1793799511.273909,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "9627ddc0-0601-11e8-ae97-52543be04c81",
+      "name": "181.FM - Old School HipHop/RnB",
+      "url": "http://listen.181fm.com/181-oldschool_128k.mp3",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "hiphop,oldschool,rnb,waynesboro",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.181.fm/",
+        "favicon": "http://www.181.fm/favicon.ico"
+      },
+      "checked_at": 1793799512.531948,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "960ac54b-0601-11e8-ae97-52543be04c81",
+      "name": "Your Classical - Relax",
+      "url": "http://relax.stream.publicradio.org/relax.mp3",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "classical,relax",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.yourclassical.org/",
+        "favicon": "http://www.yourclassical.org/apple-touch-icon.png"
+      },
+      "checked_at": 1793799513.28162,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "961d9b63-0601-11e8-ae97-52543be04c81",
+      "name": ".977 Country",
+      "url": "http://26343.live.streamtheworld.com/977_COUNTRY_SC",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "country",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.977music.com/",
+        "favicon": ""
+      },
+      "checked_at": 1793799515.015543,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "961b7325-0601-11e8-ae97-52543be04c81",
+      "name": ".977 80s",
+      "url": "http://26433.live.streamtheworld.com/977_80_SC",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "80s",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.977music.com/",
+        "favicon": ""
+      },
+      "checked_at": 1793799516.060357,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "961d5c4e-0601-11e8-ae97-52543be04c81",
+      "name": ".977 Hitz",
+      "url": "http://15313.live.streamtheworld.com/977_HITS_SC",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "hits,top 40",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.977music.com/",
+        "favicon": ""
+      },
+      "checked_at": 1793799516.3139331,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "961fa288-0601-11e8-ae97-52543be04c81",
+      "name": "Ambient Sleeping Pill",
+      "url": "http://radio.stereoscenic.com/asp-h",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "ambient,meditation,sleep",
+        "codec": "MP3",
+        "bitrate": 256,
+        "homepage": "http://ambientsleepingpill.com/",
+        "favicon": ""
+      },
+      "checked_at": 1793799516.436692,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "961787d1-0601-11e8-ae97-52543be04c81",
+      "name": "Frisky",
+      "url": "http://stream2.friskyradio.com/frisky_mp3_hi",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "electronic,frisky,new york city,progressive",
+        "codec": "MP3",
+        "bitrate": 96,
+        "homepage": "https://www.friskyradio.com/",
+        "favicon": "https://s3.amazonaws.com/media.friskyradio.com/favicon.png"
+      },
+      "checked_at": 1793799517.016541,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "204b0d57-2c17-11e8-91bf-52543be04c81",
+      "name": "Rockabilly-radio.net",
+      "url": "http://lin3.ash.fast-serv.com:6026/stream_96",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "",
+        "tags": "rockabilly",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://rockabilly-radio.net/",
+        "favicon": ""
+      },
+      "checked_at": 1793799517.351715,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "960cf833-0601-11e8-ae97-52543be04c81",
+      "name": "SomaFM Groove Salad (128k MP3)",
+      "url": "https://ice2.somafm.com/groovesalad-128-mp3",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "ambient,chillout,downtempo,groove,lounge,sleep",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://somafm.com/groovesalad/",
+        "favicon": "https://somafm.com/img3/groovesalad-400.jpg"
+      },
+      "checked_at": 1793799516.970058,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "961dbb40-0601-11e8-ae97-52543be04c81",
+      "name": ".977 The Mix",
+      "url": "http://26343.live.streamtheworld.com:3690/977_MIX_SC",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "80s,90s,hits,today",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.977music.com/",
+        "favicon": ""
+      },
+      "checked_at": 1793799517.7596831,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "96274cbb-0601-11e8-ae97-52543be04c81",
+      "name": "Big R Radio - 80s Metal FM",
+      "url": "http://bigrradio.cdnstream1.com/5186_128",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "80s,aor,glam metal,hair metal,hard rock,heavy metal,metal",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.bigrradio.com/",
+        "favicon": "http://www.bigrradio.com/image/favicon/apple-touch-icon.png"
+      },
+      "checked_at": 1793799517.385199,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "960c7c81-0601-11e8-ae97-52543be04c81",
+      "name": "SomaFM Secret Agent (128k MP3)",
+      "url": "https://ice5.somafm.com/secretagent-128-mp3",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "ambient,downtempo,jazz,lounge,samba,sixties",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://somafm.com/secretagent/",
+        "favicon": "https://somafm.com/img3/secretagent-400.jpg"
+      },
+      "checked_at": 1793799517.189575,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "96336b01-0601-11e8-ae97-52543be04c81",
+      "name": "Hard Rock Heaven",
+      "url": "http://hydra.cdnstream.com/1521_128",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "80s,glam metal,hair metal,hard rock,heavy metal,overland park",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://hrhradio.com/",
+        "favicon": ""
+      },
+      "checked_at": 1793799517.5993679,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "9627dcf4-0601-11e8-ae97-52543be04c81",
+      "name": "181.FM - The Beat (HipHop/R&B)",
+      "url": "http://listen.181fm.com/181-beat_128k.mp3",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "hiphop,rnb,urban,waynesboro",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.181.fm/",
+        "favicon": "http://www.181.fm/favicon.ico"
+      },
+      "checked_at": 1793799517.9591072,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "7ba4c184-fc2b-11e9-bbf2-52543be04c81",
+      "name": "NPR 24 Hour Program Stream",
+      "url": "http://npr-ice.streamguys1.com/live.mp3",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "news,news talk,political talk,politics,public radio,talk",
+        "codec": "MP3",
+        "bitrate": 96,
+        "homepage": "https://www.npr.org/2016/04/05/472557877/npr-program-stream",
+        "favicon": "https://static-assets.npr.org/static/images/favicon/favicon-96x96.png"
+      },
+      "checked_at": 1793799517.3495429,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "9609ed67-0601-11e8-ae97-52543be04c81",
+      "name": "Cryosleep",
+      "url": "http://streams.echoesofbluemars.org:8000/cryosleep",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "ambient,calm,music,nobeat,sleep,space",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.echoesofbluemars.org/cryosleep.php",
+        "favicon": "http://www.echoesofbluemars.org/images/favicon.ico"
+      },
+      "checked_at": 1793799517.882206,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "9614b5e5-0601-11e8-ae97-52543be04c81",
+      "name": "SomaFM Underground 80s (128k MP3)",
+      "url": "https://ice5.somafm.com/u80s-128-mp3",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "80s,new wave,uk synthpop",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://somafm.com/u80s/",
+        "favicon": "https://somafm.com/img3/u80s-400.png"
+      },
+      "checked_at": 1793799517.871487,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "961a4cdd-0601-11e8-ae97-52543be04c81",
+      "name": "Infowars",
+      "url": "http://stream.alexjones.media/alexjonesshow-mp3",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "conspiracies,conspiracy theories,information,news,survivalism,talk",
+        "codec": "MP3",
+        "bitrate": 64,
+        "homepage": "http://www.infowars.com/",
+        "favicon": ""
+      },
+      "checked_at": 1793799517.924575,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "f4bfa5d0-a403-11e8-abb8-52543be04c81",
+      "name": "The Big 80s Station",
+      "url": "http://158.69.114.190:8065/;",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "80s",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.thebig80sstation.com/",
+        "favicon": ""
+      },
+      "checked_at": 1793799517.7847638,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "960cc332-0601-11e8-ae97-52543be04c81",
+      "name": "Bassdrive",
+      "url": "http://bassdrive.radioca.st:8702/",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "drum and bass",
+        "codec": "MP3",
+        "bitrate": 192,
+        "homepage": "http://bassdrive.com/",
+        "favicon": "https://thumbnailer.mixcloud.com/unsafe/160x160/extaudio/8/5/8/a/f8e6-9555-4eb9-8005-1ec4dabd55ce.jpg"
+      },
+      "checked_at": 1793799518.385231,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "960e0117-0601-11e8-ae97-52543be04c81",
+      "name": "SomaFM PopTron (128k MP3)",
+      "url": "https://ice2.somafm.com/poptron-128-mp3",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "electropop,indie,synthpop",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://somafm.com/poptron/",
+        "favicon": "https://somafm.com/img3/poptron-400.png"
+      },
+      "checked_at": 1793799518.2905521,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "9610c519-0601-11e8-ae97-52543be04c81",
+      "name": ".977 Smooth Jazz",
+      "url": "http://15693.live.streamtheworld.com:3690/977_SMOOJAZZ_SC",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "jazz,smooth jazz",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.977music.com/",
+        "favicon": ""
+      },
+      "checked_at": 1793799519.305536,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "960d4889-0601-11e8-ae97-52543be04c81",
+      "name": "181.FM - Highway 181",
+      "url": "https://listen.181fm.com/181-highway_128k.mp3",
+      "metadata": {
+        "country": "The United States Of America",
+        "countrycode": "US",
+        "language": "english",
+        "tags": "classic country,waynesboro",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.181.fm/",
+        "favicon": "http://www.181.fm/favicon.ico"
+      },
+      "checked_at": 1793799519.3214731,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "961185f5-0601-11e8-ae97-52543be04c81",
+      "name": "ChroniX Radio Metalcore",
+      "url": "http://usa17.fastcast4u.com:5508/stream",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "death metal,heavy metal,industrial,metalcore,thrash metal",
+        "codec": "MP3",
+        "bitrate": 320,
+        "homepage": "http://chronixradio.net/",
+        "favicon": "https://storage.googleapis.com/wzukusers/user-27172421/images/fav-6a63dee4b19e4b57a9038cc5f853f41a/apple-touch-icon-120x120.png?v=fav-6a63dee4b19e4b57a9038cc5f853f41a"
+      },
+      "checked_at": 1793799518.127167,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "a3253a96-a1ba-4cf5-bf4b-ec7988afcfd3",
+      "name": "REGGAE CHILL CAFE",
+      "url": "https://maggie.torontocast.com:2020/stream/reggaechillcafe",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "chill,chillout,dancehall,reggae,relax,relaxation,relaxing,tropical",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://radiosuitenetwork.torontocast.stream/",
+        "favicon": ""
+      },
+      "checked_at": 1793799518.6899981,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "7afae7e3-8d06-42f5-b59e-a52d6e09e60e",
+      "name": " # RdMix Classic Rock 70s 80s 90s",
+      "url": "https://cast1.torontocast.com:4610/stream",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "60s,60s and 70s.,70's,70er,70s,80's,80er,80s,90's,90er,90s,blues,blues rock,classic blues,classic hits,classic hits 60s 70a 80s,classic rock,classic rock  50's 60's 70's 80's 90's,classic rock music,classic rock oldies,classic rock oldies soul,classic rock; alternative rock indie,country,entretenimiento,fm,hard rock,high quality audio,hits,local radio,melodic hard rock,music,music 70s 80s 90s,musica,oldies,pop rock,public radio,radio,real classic rock,rhythm and blues,rock,soft rock",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://radiodimensionemix.torontocast.stream/",
+        "favicon": "https://static.wixstatic.com/media/f361b3_1bad7e5fb9a54196b2ac2c2fe71d6e4f~mv2.jpg"
+      },
+      "checked_at": 1793799518.63769,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "0df85b66-7ef3-4e16-9283-2dc113a956dd",
+      "name": "Labgate - Progressive Rock",
+      "url": "https://s2.ssl-stream.com/radio/8180/radio.mp3",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "",
+        "tags": "progressive rock",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://labgateradio.com/accueil/progressive-rock/",
+        "favicon": ""
+      },
+      "checked_at": 1793799519.293886,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "d360268f-8f23-4386-b062-bcd368f1f211",
+      "name": "100 GREATEST OF THE 80'S",
+      "url": "https://maggie.torontocast.com:2020/stream/100greatestofthe80s",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "",
+        "tags": "1980's,80s,80s radio,80s rock,the best decade 80s radio around.,the best of 80's",
+        "codec": "MP3",
+        "bitrate": 192,
+        "homepage": "https://100-greatest-network.torontocast.stream/",
+        "favicon": ""
+      },
+      "checked_at": 1793799519.309058,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "d60869db-46e8-445f-8aaf-d09816e1d73e",
+      "name": "70 80 90 Vibrazioni Rock Radio",
+      "url": "https://maggie.torontocast.com:2020/stream/vibrazionirockradio",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "70s,80s,90s,blues,blues rock,classic rock,pop rock,rock",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://radiosuitenetwork.torontocast.stream/vibrazioni-rock-radio/",
+        "favicon": ""
+      },
+      "checked_at": 1793799519.407064,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "95277bca-2c9a-4c08-b2e7-0854e5793f8e",
+      "name": "Nature Radio Rain",
+      "url": "https://maggie.torontocast.com:2020/stream/natureradiorain",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "ambient,ambient and relaxation music,nature,rainorshine,relax,relaxation,relaxation music,relaxing,sounds of nature",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://radiosuitenetwork.torontocast.stream/nature-radio-rain/",
+        "favicon": ""
+      },
+      "checked_at": 1793799519.946582,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "aa6ee95d-e208-4592-a121-047056106596",
+      "name": "Ancient FM",
+      "url": "https://mediaserv73.live-streams.nl:18058/stream",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english,french",
+        "tags": "ancient music,classical,folk,medieval,mittelalter,renaissance",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://www.ancientfm.com/",
+        "favicon": ""
+      },
+      "checked_at": 1793799520.250355,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "d0df2a51-9cd3-4f3e-977d-aab92ddef7a3",
+      "name": "# 100 GREATEST HEAVY METAL",
+      "url": "https://cast1.torontocast.com:4660/stream",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "60's,60s,70's,70er,70s,80's,80er,80s,90's,90er,90s,black metal,classic hits,classic metal,classic rock,entretenimiento,fm,hard rock,heavy metal,local radio,metal,music,musica,oldies,public radio,radio,rock",
+        "codec": "MP3",
+        "bitrate": 192,
+        "homepage": "https://100-greatest-network.torontocast.stream/",
+        "favicon": "https://static.wixstatic.com/media/f361b3_a5ce07773ea14d209785044fbeb26dca~mv2.jpg"
+      },
+      "checked_at": 1793799519.595423,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "d95c1da9-838c-4684-a009-44fc73608279",
+      "name": "80's New Wave Radio",
+      "url": "https://puma.streemlion.com:2910/stream",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "",
+        "tags": "80's,alternative,new wave,synthpop",
+        "codec": "MP3",
+        "bitrate": 192,
+        "homepage": "https://newwaveradio.org/",
+        "favicon": ""
+      },
+      "checked_at": 1793799520.970807,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "768a27cc-bb26-11e9-acb2-52543be04c81",
+      "name": "Crucial Velocity Radio",
+      "url": "http://ais-sa2.cdnstream1.com/1369_128",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "classic metal,hard rock,hardcore,heavy metal,metal,thrash",
+        "codec": "MP3",
+        "bitrate": 192,
+        "homepage": "http://crucialvelocity.ca/",
+        "favicon": "http://crucialvelocity.ca/CrucialVelocityLogo.jpg"
+      },
+      "checked_at": 1793799519.6061969,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "02569932-0b3c-4938-9d3e-b00b2158d40b",
+      "name": "AIRPORT LOUNGE RADIO",
+      "url": "https://az1.mediacp.eu/listen/airport-lounge-radio/radio.mp3",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "aereoporto,airport,ambient,chill,chillout,easy listening,house,lounge,smooth,smooth jazz",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://radiosuitenetwork.torontocast.stream/airport-lounge-radio/",
+        "favicon": "https://favicon-generator.org/favicon-generator/htdocs/favicons/2023-12-16/9274e8a4803971186ff5c45359ab77a4.ico.png"
+      },
+      "checked_at": 1793799520.478441,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "de478916-6d8d-4997-9894-9d068bcf1857",
+      "name": "Labgate P.YG. Pink Floyd, Yes, Genesis",
+      "url": "https://s2.ssl-stream.com/radio/8160/radio.mp3",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "",
+        "tags": "progressive rock",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://labgateradio.com/",
+        "favicon": ""
+      },
+      "checked_at": 1793799520.465604,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "962ece3f-0601-11e8-ae97-52543be04c81",
+      "name": "Calm Radio - Bach",
+      "url": "http://streams.calmradio.com:6828/stream",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "bach,classical",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://www.calmradio.com/",
+        "favicon": "https://calmradio.com/templates/calmradio/favicons/apple-touch-icon.png"
+      },
+      "checked_at": 1793799520.144316,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "69cdf0f5-ed69-4bf2-be17-719a17c5681f",
+      "name": "Gritty Rock Radio",
+      "url": "https://listen.radioking.com/radio/10713/stream/224413",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "blues rock,country rock,garage rock,southern rock,stoner rock",
+        "codec": "MP3",
+        "bitrate": 192,
+        "homepage": "https://www.grittyrockradio.com/",
+        "favicon": "https://www.grittyrockradio.com/apple-touch-icon.png"
+      },
+      "checked_at": 1793799520.8097181,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "cf14b5ee-f03e-4468-8ce1-379f171fd8c4",
+      "name": " # 70s 80s 90s RdMix Network",
+      "url": "https://cast1.torontocast.com:1830/stream",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "00's,00s,192kbps,1970s,1980s,1990s,70's,70s,80's,80s,90's,90s,charts,classic hits,classic rock,dance,entretenimiento,fm,high quality audio,hits,local news,local radio,misc,music,musica,news,oldies,ontario,pop,pop music,pop rock,public radio,radio,rock,talk,top 100,top hits,top40,toronto,webradio",
+        "codec": "MP3",
+        "bitrate": 192,
+        "homepage": "https://radiodimensionemix.torontocast.stream/",
+        "favicon": ""
+      },
+      "checked_at": 1793799520.631365,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "96250be4-0601-11e8-ae97-52543be04c81",
+      "name": "Calm Radio - Mozart",
+      "url": "http://streams.calmradio.com:7328/stream",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "classical,mozart",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://www.calmradio.com/",
+        "favicon": "https://calmradio.com/templates/calmradio/favicons/apple-touch-icon.png"
+      },
+      "checked_at": 1793799520.709897,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "6cb69b95-72d9-4ea6-859f-52546a85c1fe",
+      "name": " # RdMix DJSET 70s 80s 90s",
+      "url": "https://cast1.torontocast.com:4560/stream",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "1970s,1980s,1990s,70's,70er,70s,70s disco,80's,80er,80s,90's,90er,90s,anni 70,anni 80,anni 90,classic hip hop,classic hits,classic hits 60s 70a 80s,club house,dance,dance music,dance pop,dancefloor,disco,disco funk,discomusic 70,discomusic 80,dj,dj mix,dj mixes,dj remix,dj sets,electronic,euro disco,eurodance,fm,funky,funky 70,goldies,high quality audio,hip-hop and rap oldies,hits,house,italo disco,music,music 70s 80s 90s,musica,musica anni 70,musica anni 80,oldies,oldschool,pop,pop music,public radio,radio,rap,studio 54,techno,vintage music,vintage radio",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://radiodimensionemix.torontocast.stream/",
+        "favicon": "https://static.wixstatic.com/media/f361b3_ee09b4fc28354c5287c3be2392e0b1e3~mv2.png"
+      },
+      "checked_at": 1793799520.966836,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "410f7868-8184-436e-b189-bb6d9cd686ba",
+      "name": "70 80 90 ITALIA D'AUTORE",
+      "url": "https://maggie.torontocast.com:2020/stream/708090italiadautore",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "70,80,90,classic italian pop,italian pop,musica italiana",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://radiosuitenetwork.torontocast.stream/70-80-90-italia-dautore/",
+        "favicon": ""
+      },
+      "checked_at": 1793799521.376234,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "e9577c10-e299-4bb8-9313-c6cc2070c1f3",
+      "name": " # RdMix Italo Disco 80s",
+      "url": "https://cast1.torontocast.com:2130/stream",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "1980,1980s,1980s hits,80's,80er,80s,anni 80,classic hits,club dance,club hits,dance,dance music,dance pop,disco,dj,dj mix,dj mixes,dj remix,electronic,fm,hits,italo dance,italo disco,italo-disco,italy,local radio,mixed,music,musica,musica anni 80,oldies,pop,pop dance,pop music,public radio,radio,radio anni 80,the best of 80's",
+        "codec": "MP3",
+        "bitrate": 192,
+        "homepage": "https://radiodimensionemix.torontocast.stream/",
+        "favicon": "https://static.wixstatic.com/media/f361b3_12e18c80af1f44a283eb3115b0ddd750~mv2.jpg"
+      },
+      "checked_at": 1793799521.1516428,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "aa2ff2d2-0605-11e9-a3cd-52543be04c81",
+      "name": "Calm Radio - Gregorian",
+      "url": "http://streams.calmradio.com:4428/stream",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.calmradio.com/",
+        "favicon": "https://calmradio.com/templates/calmradio/favicons/apple-touch-icon.png"
+      },
+      "checked_at": 1793799521.261577,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "4cc3e959-b572-4285-99e2-069151d03b5e",
+      "name": "# 100 GREATEST JAZZ LOUNGE BAR",
+      "url": "https://cast1.torontocast.com:4640/stream",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "192kbps,chillout,chillout+lounge,classic hits,club,cool jazz,cool music seduction,fm,high quality audio,jazz,jazz fusion,jazz lounge,local radio,lounge,lounge music,lounge radio,music,musica,oldies,public radio,radio,relax,relax music,relaxation,relaxing,smooth,smooth jazz,smooth lounge,vocal jazz,vocal lounge",
+        "codec": "MP3",
+        "bitrate": 192,
+        "homepage": "https://100-greatest-network.torontocast.stream/",
+        "favicon": "https://static.wixstatic.com/media/f361b3_2722a2a63db342f0901576a0168f2571~mv2.jpg"
+      },
+      "checked_at": 1793799521.288498,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "7c84ac30-1a0f-42f7-8b0d-40b5c6548abf",
+      "name": "DKFM Shoegaze Radio",
+      "url": "https://kathy.torontocast.com:2005/stream",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "",
+        "tags": "",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://decayfm.com/",
+        "favicon": "https://i0.wp.com/decayfm.com/wp-content/uploads/2018/12/cropped-512-1.jpg?fit=180%2c180&#038;ssl=1"
+      },
+      "checked_at": 1793799521.579303,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "cd150a3d-7ffc-4747-827b-158358d41ebe",
+      "name": "Clam Radio - Solo Piano & Guitar",
+      "url": "http://streams.calmradio.com:30228/",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "",
+        "tags": "classical,instrumental,piano",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.calmradio.com/",
+        "favicon": "https://calmradio.com/templates/calmradio/favicons/apple-touch-icon.png"
+      },
+      "checked_at": 1793799521.362703,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "4abe67bd-cd14-418e-88c3-284f1ef8c487",
+      "name": "Forest Green Radio",
+      "url": "http://s1.streamaudio.de:8000/forest-green",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "celtic,classical,hits,music,pop",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "http://www.forestgreenradio.ca/",
+        "favicon": "https://liveonlineradio.net/wp-content/uploads/2017/02/Forest-Green-Radio-100x47.jpg"
+      },
+      "checked_at": 1793799521.753296,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "e5ec7527-cb54-4632-b5a1-7ee080bb19c0",
+      "name": "A1中文电台",
+      "url": "http://s2.voscast.com:9530/",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "cantonese,chinese",
+        "tags": "chinese,news,talk",
+        "codec": "MP3",
+        "bitrate": 64,
+        "homepage": "https://www.a1chineseradio.ca/",
+        "favicon": "https://www.a1chineseradio.ca/images/a1_logo_114x114.png"
+      },
+      "checked_at": 1793799521.484143,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "96301845-0601-11e8-ae97-52543be04c81",
+      "name": "Calm Radio - Violin",
+      "url": "http://streams.calmradio.com:4528/stream",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "baroque,classical",
+        "codec": "MP3",
+        "bitrate": 128,
+        "homepage": "https://www.calmradio.com/",
+        "favicon": "https://calmradio.com/templates/calmradio/favicons/apple-touch-icon.png"
+      },
+      "checked_at": 1793799521.5695841,
+      "content_type": "audio/mpeg",
+      "working": true
+    },
+    {
+      "id": "c5182415-bb25-11e9-acb2-52543be04c81",
+      "name": "Blown",
+      "url": "http://ais-sa2.cdnstream1.com/1370_128",
+      "metadata": {
+        "country": "Canada",
+        "countrycode": "CA",
+        "language": "english",
+        "tags": "60's,70's,classic rock,hard rock,heavy metal",
+        "codec": "MP3",
+        "bitrate": 192,
+        "homepage": "http://crucialvelocity.ca/",
+        "favicon": ""
+      },
+      "checked_at": 1793799521.531401,
+      "content_type": "audio/mpeg",
+      "working": true
+    }
+  ]
+}

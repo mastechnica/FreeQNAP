@@ -10,6 +10,7 @@ def main():
     s = p.add_subparsers(dest='command', required=True)
     s.add_parser('status')
     s.add_parser('init-admin')
+    q=s.add_parser('reset-local-password');q.add_argument('--username',required=True)
     q=s.add_parser('enroll-admin');q.add_argument('--output',type=Path,required=True)
     q = s.add_parser('backup-policy')
     q.add_argument('--daily', choices=('on', 'off'), required=True)
@@ -37,6 +38,19 @@ def main():
     elif a.command == 'init-admin':
         auth.initialize(State(a.state))
         value = {'administrator_configured': True, 'password_logged': False}
+    elif a.command == 'reset-local-password':
+        import os,getpass,warnings
+        from . import accounts
+        state=State(a.state)
+        if os.geteuid() not in (0,state.database.stat().st_uid):raise ValueError('Use root or the console service account')
+        accounts.ensure(state)
+        with state.connect() as db:
+            target=db.execute('SELECT * FROM local_accounts WHERE username=?',(a.username,)).fetchone();admin=db.execute('SELECT * FROM local_accounts WHERE primary_admin=1').fetchone()
+        if not target:raise ValueError('Local account not found')
+        with warnings.catch_warnings():
+            warnings.simplefilter('error',getpass.GetPassWarning);one=getpass.getpass('New temporary password: ');two=getpass.getpass('Confirm temporary password: ')
+        if one!=two:raise ValueError('Passwords do not match')
+        value=accounts.change(state,accounts.public(admin),{'action':'set-password','id':target['id'],'password':one})
     elif a.command == 'backup-policy':
         if not 1 <= a.keep <= 365:
             raise ValueError('Retention must be 1–365')

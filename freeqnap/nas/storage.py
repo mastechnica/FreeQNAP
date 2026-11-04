@@ -479,6 +479,8 @@ class Storage:
                     if pool.get('read_only'):args+=['--readonly','--run']
                     self.ctx.run(*args,*members,timeout=60)
                 if not pool['encrypted']:
+                    if self.ctx.run('blockdev','--getro',self.array_device(pool)).strip()=='1' and not pool.get('read_only'):
+                        raise ValueError('Array is in manual read-only recovery; resume writes only through a separately confirmed recovery plan')
                     # MD partitions can exist before udev has populated PARTUUID.
                     # Settle discovery, then retain every UUID/extent check below.
                     self.ctx.run('udevadm','settle','--timeout=15',timeout=20)

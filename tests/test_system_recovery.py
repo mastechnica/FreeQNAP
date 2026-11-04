@@ -15,7 +15,9 @@ class SystemRecoveryTests(unittest.TestCase):
  def review(self,p):return {'plan_id':p['id'],'digest':p['digest'],'confirmation':p['confirmation']}
  def test_consistent_private_capture_includes_broker_credentials_and_excludes_sessions(self):
   stage=self.r.capture(self.ident);manifest=self.r.verify(stage);self.assertTrue(manifest['contains_credentials_and_private_keys']);self.assertFalse(manifest['automatic_restore_supported']);self.assertEqual((stage/'state/nas/secrets/repo.password').read_text(),'private-repo-password')
-  self.assertFalse((stage/'state/console').exists());self.assertFalse(manifest['console_login_database_included']);self.assertTrue(manifest['fresh_console_administrator_required'])
+  self.assertTrue((stage/'state/console').exists());self.assertTrue(manifest['console_login_database_included']);
+  with sqlite3.connect(stage/'state/console/state.sqlite3') as db:self.assertEqual(db.execute('SELECT count(*) FROM sessions').fetchone()[0],0);self.assertEqual(db.execute("SELECT count(*) FROM settings WHERE key='enrollment'").fetchone()[0],0)
+  self.assertTrue(manifest['fresh_console_administrator_required'])
   with sqlite3.connect(stage/'state/nas/state.sqlite3') as db:self.assertEqual(db.execute('PRAGMA integrity_check').fetchone()[0],'ok')
   self.assertEqual((stage/'system/etc/shadow').stat().st_mode&511,384);self.assertEqual(stage.stat().st_mode&511,448);self.assertEqual(self.r.capture(self.ident),stage)
  def test_modified_or_incomplete_capture_refuses_retry(self):

@@ -17,6 +17,12 @@ from .status_light import StatusLight
 from .metrics import Metrics
 from .frontpanel import snapshot as frontpanel_snapshot
 from .storage import Storage
+from .array_recovery import ArrayRecovery
+from .myradio import MyRadio
+from .library_storage import LibraryStorage,FileLocation
+from .personal import Personal
+from .file_metadata import FileMetadata
+from .power_button import status as power_button_status
 from .sharing import Sharing, SERVICES
 from .filebackup import FileBackups
 from .backup_schedules import BackupSchedules
@@ -47,6 +53,8 @@ class Backend:
         self.cooling = Cooling()
         self.alert_rules = AlertRules(self.ctx)
         self.storage = Storage(self.ctx)
+        self.array_recovery = ArrayRecovery(self.ctx,self.storage)
+        self.my_radio = MyRadio(self.ctx)
         self.management_tls = ManagementTLS(self.ctx)
         self.sharing = Sharing(self.ctx)
         self.backups = FileBackups(self.ctx)
@@ -54,10 +62,16 @@ class Backend:
         self.system_recovery = SystemRecovery(self.ctx)
         self.local_recovery = LocalRecovery(self.ctx,self.system_recovery)
         self.files = FileManager(self.ctx)
+        self.file_metadata=FileMetadata(self.ctx,self.files)
         self.bundles = Bundles(self.ctx,self.files)
         self.archives = Archives(self.ctx,self.files,self.bundles)
         self.media = Media(self.ctx)
         self.personal_photos=PersonalPhotos(self.ctx)
+        self.library_storage=LibraryStorage(self.ctx,self.my_radio,self.personal_photos)
+        self.personal_files=FileLocation(self.ctx,self.library_storage.owner)
+        self.personal=Personal(self)
+        from .social_media import SocialMedia
+        self.social=SocialMedia(self)
         self.personal_cloud=PersonalCloud(self.personal_photos)
         self.recovery = Recovery(self.ctx,self.files)
         self.external = External(self.ctx)
@@ -108,8 +122,46 @@ class Backend:
                 'cooling':self.optional_status(self.cooling), 'notifications':self.optional_status(self.notifications), 'ddns':self.optional_status(self.ddns), 'health':self.alert_status(), 'management_tls':self.management_tls.status(), 'physical_recovery_acceptance': False, 'shutdown_metadata_followup_open': True}
 
     def dispatch(self, action, request):
+        if action=='personal.social-prepare':return self.social.prepare(request)
+        if action=='personal.social-read':return self.social.read(request)
+        if action=='personal.social-discard':return self.social.discard(request)
+        if action=='personal.shared':return self.personal.shared(request)
+        if action=='personal.control':return self.personal.control(request)
+        if action=='personal.options':return {'shares':list(self.ctx.config()['shares'].values()),'pools':{k:{'filesystem_uuid':v['filesystem_uuid']} for k,v in self.ctx.config()['pools'].items()}}
+        if action=='personal.invoke':return self.personal.invoke(request)
         direct = {
             'nas.status': lambda _: self.status(),
+            'library.files-status':self.personal_files.status,'library.files-plan':self.personal_files.plan,'library.files-apply':self.personal_files.apply,
+            'library.storage-plan':self.library_storage.plan,
+            'myradio.status':self.my_radio.status,
+            'myradio.configure':self.my_radio.configure,
+            'myradio.catalog':self.my_radio.catalog,
+            'myradio.item':self.my_radio.item,
+            'myradio.read':self.my_radio.read,
+            'myradio.book-text':self.my_radio.book_text,
+            'myradio.upload-begin':self.my_radio.upload_begin,
+            'myradio.upload-chunk':self.my_radio.upload_chunk,
+            'myradio.upload-finish':self.my_radio.upload_finish,
+            'myradio.metadata':self.my_radio.metadata,
+            'myradio.artwork':self.my_radio.artwork,
+            'myradio.artwork-url':self.my_radio.artwork_url,
+            'myradio.progress':self.my_radio.progress,
+            'myradio.lookup':self.my_radio.lookup,
+            'myradio.stations':self.my_radio.stations,
+            'myradio.station-save':self.my_radio.station_save,
+            'myradio.station-check':self.my_radio.station_check,
+            'myradio.station-source':self.my_radio.station_source,
+            'myradio.podcasts':self.my_radio.feeds,
+            'myradio.podcast-add':self.my_radio.feed_add,
+            'myradio.podcast-refresh':self.my_radio.feed_refresh,
+            'myradio.import-url':lambda r:self.my_radio.queue_url(r,self.ctx.state.enqueue), 'myradio.resume-download':lambda r:self.my_radio.retry_download(r,self.ctx.state.enqueue), 'myradio.episode-download':lambda r:self.my_radio.episode_download(r,self.ctx.state.enqueue),
+            'raid.recovery-status':self.array_recovery.status,
+            'raid.inspect-plan':lambda r:self.array_recovery.plan({**r,'mode':'readonly'}), 'raid.inspect-apply':lambda r:self.array_recovery.apply(r,'readonly'),
+            'raid.resume-plan':lambda r:self.array_recovery.plan({**r,'mode':'resume'}), 'raid.resume-apply':lambda r:self.array_recovery.apply(r,'resume'),
+            'raid.mount-plan':lambda r:self.array_recovery.plan({**r,'mode':'mount'}), 'raid.mount-apply':lambda r:self.array_recovery.apply(r,'mount'),
+            'raid.backup-read':self.array_recovery.download,
+            'raid.backups':self.array_recovery.backup_list, 'raid.backup-remove':self.array_recovery.backup_remove,
+            'system.button-status':power_button_status,
             'notifications.status':self.notifications.status, 'notifications.save':self.notifications.save, 'notifications.push-key':self.notifications.public_key, 'notifications.subscribe':self.notifications.subscribe, 'notifications.unsubscribe':self.notifications.unsubscribe, 'notifications.test':self.notifications.test, 'notifications.retry-plan':self.notifications.retry_plan, 'notifications.retry':self.notifications.retry, 'notifications.discard':self.notifications.discard,
             'ddns.status':self.ddns.status, 'ddns.plan':self.ddns.plan, 'ddns.save':self.ddns.apply, 'ddns.remove':self.ddns.remove, 'ddns.update':self.ddns.request_update,
             'vpn.peers-status':self.vpn.peer_status, 'smart.status':self.disk_reports.status, 'smart.history':self.disk_reports.history, 'smart.schedule':self.disk_reports.save, 'notifications.rules':self.alert_rules.status, 'notifications.rules-save':self.alert_rules.save, 'notifications.buzzer':self.alert_rules.sound, 'health.alerts':self.alerts.list, 'health.acknowledge':self.alerts.acknowledge, 'health.settings':self.alerts.settings,
@@ -149,7 +201,8 @@ class Backend:
             'repositories.prune': self.backups.prune,
             'files.archive-plan':self.archives.plan, 'files.bundle':self.bundles.start,'files.bundle-info':self.bundles.info,'files.bundle-node':self.bundles.node,'files.bundle-read':self.bundles.read,
             'files.pool-list':lambda r:self.external.list_files(r,registered_pool=True), 'files.pool-read':lambda r:self.external.read_file(r,registered_pool=True),
-            'files.list': self.files.list, 'files.read': self.files.read, 'files.mkdir': self.files.mkdir,
+            'files.metadata-read':self.file_metadata.read,'files.metadata-plan':self.file_metadata.plan,'files.metadata-apply':self.file_metadata.apply,
+            'files.media-neighbors':self.files.media_neighbors,'files.list': self.files.list, 'files.read': self.files.read, 'files.mkdir': self.files.mkdir,
             'files.upload-begin': self.files.upload_begin, 'files.upload-chunk': self.files.upload_chunk,
             'files.upload-finish': self.files.upload_finish, 'files.move-plan': self.files.move_plan,
             'files.move': self.files.move, 'files.transfer-plan': self.files.transfer_plan,
@@ -157,6 +210,7 @@ class Backend:
             'files.delete-plan': self.files.delete_plan, 'files.trash': self.files.trash_items, 'files.recycle-policy': self.files.policy_apply, 'files.recycle-policy-plan':self.files.policy_plan, 'files.recycle-plan':self.files.recycle_plan,
             'files.purge-plan': self.files.purge_plan, 'files.purge': self.files.purge,
             'recovery.list': self.recovery.list, 'recovery.plan': self.recovery.plan, 'recovery.apply': self.recovery.apply,
+            'photos.metadata-read':self.personal_photos.metadata_read,'photos.metadata-plan':self.personal_photos.metadata_plan,'photos.metadata-apply':self.personal_photos.metadata_apply,
             'photos.status':lambda r:self.personal_photos.status(r), 'photos.configure':self.personal_photos.configure,
             'photos.related':self.personal_photos.related, 'photos.catalog':self.personal_photos.catalog, 'photos.places':self.personal_photos.places,
             'photos.read':self.personal_photos.read, 'photos.annotate':self.personal_photos.annotate,
@@ -171,9 +225,9 @@ class Backend:
         }
         if not isinstance(request, dict):raise ValueError('JSON object required')
         if action in direct:return direct[action](request)
-        if action in ('backup.system-run','backup.run', 'backup.check', 'backup.restore', 'media.scan','files.transfer','files.delete','files.recycle','files.archive'):
+        if action in ('library.storage-apply','myradio.scan','myradio.import-folder','myradio.station-refresh','backup.system-run','backup.run', 'backup.check', 'backup.restore', 'media.scan','files.transfer','files.delete','files.recycle','files.archive'):
             # Queue payloads contain only references, never credentials/unlock material.
-            schema = {'backup.system-run':{'repository'},'files.archive':{'plan_id','digest','confirmation'},'backup.run': {'repository','shares','same_pool_confirmation'}, 'backup.check': {'repository','read_data'}, 'backup.restore': {'repository','snapshot','pool','include'}, 'media.scan': {'library'},'files.transfer':{'plan_id','digest','confirmation'},'files.delete':{'plan_id','digest','confirmation'},'files.recycle':{'plan_id','digest','confirmation'}}
+            schema = {'library.storage-apply':{'plan_id','digest','confirmation'},'myradio.scan':set(),'myradio.import-folder':{'category','share','path'},'myradio.station-refresh':{'group','query','country'},'backup.system-run':{'repository'},'files.archive':{'plan_id','digest','confirmation'},'backup.run': {'repository','shares','same_pool_confirmation'}, 'backup.check': {'repository','read_data'}, 'backup.restore': {'repository','snapshot','pool','include'}, 'media.scan': {'library'},'files.transfer':{'plan_id','digest','confirmation'},'files.delete':{'plan_id','digest','confirmation'},'files.recycle':{'plan_id','digest','confirmation'}}
             if set(request) - schema[action]:
                 raise ValueError('Credentials cannot be saved in a job')
             return {'job_id': self.ctx.state.enqueue(action, request)}
@@ -244,6 +298,7 @@ class Backend:
     def execute(self, job):
         request = json.loads(job['payload'])
         actions = {
+            'library.storage-apply':self.library_storage.apply, 'myradio.scan':self.my_radio.scan, 'myradio.import-folder':self.my_radio.import_folder,'myradio.station-refresh':self.my_radio.station_refresh,'myradio.download':self.my_radio.download,
             'backup.system-run':lambda r:self.system_recovery.backup(r,job['id'],self.backups), 'backup.run': self.backups.backup, 'backup.check': self.backups.check,
             'backup.restore': lambda r: self.backups.restore(r, job['id']),
             'files.archive':lambda r:self.archives.apply(r,job['id']), 'media.scan': self.media.scan, 'files.transfer':lambda r:self.files.transfer(r,job['id']), 'files.delete':self.files.move, 'files.recycle':lambda r:self.files.recycle(r,job['id']),
@@ -262,6 +317,9 @@ class Backend:
             try:
                 job = self.ctx.state.claim()
                 if job:self.execute(job)
+                else:self.personal.one()
+                self.personal.tick()
+                self.social.cleanup()
                 self.health.update(worker_ok=True, last_checked=time.time(), error=None)
             except Exception as error:
                 self.health.update(worker_ok=False, last_checked=time.time(), error=str(error))

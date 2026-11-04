@@ -1,5 +1,5 @@
 #!/bin/sh
-# Installs the local console only. No disk, flash, network or sharing changes.
+# Installs the local console and bounded diagnostic logs. No disk layout, flash, network or sharing changes.
 set -eu
 [ "$(id -u)" = 0 ] || { echo 'Run this on the NAS as root'; exit 1; }
 [ "$(tr '\000' '\n' < /proc/device-tree/compatible | head -n 1)" = qnap,ts-431xeu ]
@@ -23,6 +23,13 @@ for name in freeqnap-console.service freeqnap-collect.service freeqnap-collect.t
  install -m 644 "$base/deploy/$name" "/etc/systemd/system/$name"
 done
 systemd-tmpfiles --create /etc/tmpfiles.d/freeqnap.conf
+# Keep crash evidence across resets without unbounded OS-volume growth.
+install -d -m 755 /etc/systemd/journald.conf.d
+install -m 644 "$base/deploy/freeqnap-journald.conf" /etc/systemd/journald.conf.d/70-freeqnap-retention.conf
+install -d -m 2755 -o root -g systemd-journal /var/log/journal
+systemd-tmpfiles --create --prefix /var/log/journal
+systemctl restart systemd-journald
+journalctl --flush
 systemctl daemon-reload
 systemd-analyze verify /etc/systemd/system/freeqnap-console.service /etc/systemd/system/freeqnap-collect.service /etc/systemd/system/freeqnap-collect.timer
 systemctl start freeqnap-collect.service

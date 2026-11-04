@@ -2,7 +2,7 @@
  'use strict';
  function build({shares=[],pools=[],sessions=[],devices=[]}={}){
   const rows=[];
-  for(const s of shares.filter(s=>s.enabled!==false))rows.push({value:s.name,label:'Shared folder · '+s.name+' — '+s.pool,kind:'share',id:s.name,readOnly:!!s.read_only});
+  for(const s of shares.filter(s=>s.enabled!==false))rows.push({value:s.name,label:(s.personal_root?'Personal / assigned folder · ':'Shared folder · ')+(s.label||s.name)+' — '+s.pool,kind:'share',id:s.name,readOnly:!!s.read_only});
   for(const p of pools)rows.push({value:'pool:'+p.name,label:(p.kind==='usb'?'USB volume':'NAS volume')+' · '+p.name+' — '+(p.mounted?(p.read_only?'read-only':'read/write'):p.encrypted?'locked':'offline'),kind:'pool',id:p.name,readOnly:!!p.read_only,disabled:!p.mounted});
   for(const s of sessions.filter(s=>s.active))rows.push({value:'foreign:'+s.id,label:'Unlocked '+s.format.toUpperCase()+' · '+s.source+' — read-only',kind:'foreign',id:s.id,readOnly:true});
   for(const d of devices){const model=d.usb?.product||d.disk?.model||'USB drive',tail=d.usb?.identity?.serial?.slice(-6)||'',active=sessions.some(s=>s.active&&s.source.startsWith(d.disk?.path||'!'));

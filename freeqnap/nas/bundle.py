@@ -41,7 +41,7 @@ class Bundles:
         if not isinstance(ident,str) or not re.fullmatch('[a-f0-9]{32}',ident):raise ValueError('Unknown ZIP selection')
         record=self.ctx.state.setting('bundle:'+ident);now=time.time()
         if not record or record['expires_at']<now or record['maximum_end']<now:raise ValueError('ZIP selection expired; select files again')
-        pool,_=self.ctx.volume(record['pool']);share=self.files.mapping(record['share'])
+        pool,_=(self.files.validate_volume(record['pool']) if hasattr(self.files,'validate_volume') else self.ctx.volume(record['pool']));share=self.files.mapping(record['share'])
         if pool['filesystem_uuid']!=record['filesystem_uuid'] or not share or share['path']!=record['share_path'] or share['pool']!=record['pool']:raise ValueError('ZIP selection mapping changed')
         if now-record['last_renewed']>=60:record.update(last_renewed=now,expires_at=min(now+3600,record['maximum_end']));self.ctx.state.set('bundle:'+ident,record)
         if path is not None:

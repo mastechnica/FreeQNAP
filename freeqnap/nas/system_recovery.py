@@ -38,7 +38,8 @@ class SystemRecovery:
                 src=sqlite3.connect(path.as_uri()+'?mode=ro',uri=True);dst=sqlite3.connect(output)
                 try:
                     src.backup(dst);tables={r[0] for r in dst.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-                    if 'sessions' in tables:dst.execute('DELETE FROM sessions')
+                    for table in ('sessions','account_sessions','oidc_transactions'):
+                        if table in tables:dst.execute('DELETE FROM '+table)
                     if 'settings' in tables:dst.execute("DELETE FROM settings WHERE key IN ('enrollment','oidc_states')")
                     dst.commit()
                     if dst.execute('PRAGMA integrity_check').fetchone()[0]!='ok':raise ValueError('Recovery database snapshot failed integrity verification')
@@ -65,8 +66,17 @@ class SystemRecovery:
             files[archive_name]={'sha256':hashlib.sha256(output.read_bytes()).hexdigest(),'bytes':size,'original_uid':info.st_uid,'original_gid':info.st_gid,'original_mode':stat.S_IMODE(info.st_mode),'sqlite_consistent':sqlite}
         # Only selected state/configuration, never arbitrary user paths or logs.
         copy(self.ctx.state.database,'state/nas/state.sqlite3',True)
-        # Console authentication lives in a separate service-owned directory.
-        # Keep the broker's write boundary intact; recovery creates a fresh admin.
+        # Read consistent identity snapshots without writing into console state.
+        console=self.host('/var/lib/freeqnap/state.sqlite3')
+        if console.exists():copy(console,'state/console/state.sqlite3',True)
+        personal=self.ctx.directory/'personal'
+        if personal.exists():
+            for owner in sorted(personal.iterdir()):
+                if owner.is_symlink() or not re.fullmatch('[a-f0-9]{32}',owner.name):raise ValueError('Unexpected personal state directory')
+                database=owner/'state.sqlite3'
+                if database.exists():copy(database,'state/nas/personal/'+owner.name+'/state.sqlite3',True)
+        # Apple session cookies and pending logins are deliberately excluded.
+
         for directory in ('secrets','headers','network','vpn'):
             source=self.ctx.directory/directory
             if source.exists():
@@ -120,7 +130,7 @@ class SystemRecovery:
             fd=os.open(directory,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
             try:os.fsync(fd)
             finally:os.close(fd)
-        manifest={'format':'freeqnap-system-recovery-v1','created_at':time.time(),'installation_id':required.read_text().strip(),'kernel':kernel,'files':files,'total_bytes':total,'sessions_and_enrollment_excluded':True,'console_login_database_included':False,'fresh_console_administrator_required':True,'root_authorized_keys_included':False,'contains_credentials_and_private_keys':True,'automatic_restore_supported':False,'identity_files_require_rebinding':['system/etc/freeqnap-install-id','system/etc/mdadm/mdadm.conf','system/etc/fstab','system/etc/ssh'],'os_disk_image_included':False,'flash_image_included':False,'review':'Restore privately to staging. Never copy these databases live or publish this bundle as a file share. Reconcile jobs, schedules, device identities, accounts and export policies before activation.'}
+        manifest={'format':'freeqnap-system-recovery-v1','created_at':time.time(),'installation_id':required.read_text().strip(),'kernel':kernel,'files':files,'total_bytes':total,'sessions_and_enrollment_excluded':True,'console_login_database_included':console.exists(),'fresh_console_administrator_required':True,'local_user_ids_and_library_shares_included':console.exists(),'icloud_sessions_included':False,'root_authorized_keys_included':False,'contains_credentials_and_private_keys':True,'automatic_restore_supported':False,'identity_files_require_rebinding':['system/etc/freeqnap-install-id','system/etc/mdadm/mdadm.conf','system/etc/fstab','system/etc/ssh'],'os_disk_image_included':False,'flash_image_included':False,'review':'Restore privately to staging. Never copy these databases live or publish this bundle as a file share. Reconcile jobs, schedules, device identities, accounts and export policies before activation.'}
         atomic(stage/'manifest.json',manifest)
         self.verify(stage);return stage
     def verify(self,stage):

@@ -15,5 +15,6 @@
   "hardware/ts431xeu/mcu-safe-full.c": "40c6af3f179211d5cff84a6fde3d25ec590c0448235846dadb841bb7c997afc7",
   "hardware/ts431xeu/restore-factory-macs.c": "0dc65e644c6f5fd9a85b86473490e927e0dbc5ffb8ef35eb469b91d1ff61a334",
   "hardware/ts431xeu/features-nas.config": "2040ae346bfaeacb4ab3af461bbcbf9bddf2572bdaa0d6fddafaff9f693eb1a6",
-  "hardware/ts431xeu/freeqnap-poweroff.c": "646107e2208c495b4cc6303346808c6376417546fad3540e14616f1b64f44aed"
+  "hardware/ts431xeu/freeqnap-poweroff.c": "646107e2208c495b4cc6303346808c6376417546fad3540e14616f1b64f44aed",
+  "hardware/ts431xeu/shutdown-melody.json": "981cd602613f0119636f8301ff56f87c7ad8a9e7f5b4130cbe21dab39c590178"
 }

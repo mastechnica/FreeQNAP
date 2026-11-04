@@ -18,28 +18,13 @@ def initialize(state):
         raise ValueError('Passwords do not match')
     state.set('administrator', password_hash(a))
 
-def login(state, password):
-    stored = state.setting('administrator')
-    if not stored:
-        return None
-    try:
-        actual = password_hash(password, stored['salt'])['hash']
-    except ValueError:
-        return None
-    if not secrets.compare_digest(actual, stored['hash']):
-        return None
-    token = secrets.token_urlsafe(32)
-    csrf = secrets.token_urlsafe(24)
-    with state.connect() as db:
-        db.execute('INSERT INTO sessions VALUES(?,?,?)', (hashlib.sha256(token.encode()).hexdigest(), csrf, time.time() + 43200))
-    return (token, csrf)
+def login(state,password,username='admin'):
+    from .accounts import login as account_login
+    return account_login(state,username,password)
 
-def session(state, token):
-    if not isinstance(token, str) or len(token) > 128:
-        return None
-    with state.connect() as db:
-        r = db.execute('SELECT csrf,expires FROM sessions WHERE token_hash=?', (hashlib.sha256(token.encode()).hexdigest(),)).fetchone()
-    return dict(r) if r and r['expires'] > time.time() else None
+def session(state,token):
+    from .accounts import session as account_session
+    return account_session(state,token)
 
 def enrollment(state):
     """A short-lived, one-use bootstrap secret; never a shared default password."""

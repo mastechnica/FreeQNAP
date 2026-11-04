@@ -18,6 +18,7 @@ def archive_folder(filename):
 class Archives:
     def __init__(self,ctx,files,bundles):self.ctx=ctx;self.files=files;self.bundles=bundles
     def plan(self,request):
+        self.files.writable(request.get('share'))
         operation=request.get('operation');share=request.get('share');target_path=request.get('target_path','');maximum=request.get('max_output_bytes',64*1024**3)
         if isinstance(maximum,bool) or not isinstance(maximum,int) or not 1<=maximum<=16*1024**4:raise ValueError('Choose an output limit up to 16 TiB')
         with self.files.directory(share,target_path) as (fd,mapping,pool):
@@ -46,6 +47,7 @@ class Archives:
     def apply(self,request,job_id=None):
         with self.ctx.lock():
             plan_path,plan=self.ctx.reviewed(request,'file-archive');b=plan['body']
+            self.files.writable(b['share'])
             with self.files.directory(b['share'],b['target_path']) as (target,share,pool):
                 if [os.fstat(target).st_dev,os.fstat(target).st_ino]!=b['target_identity'] or pool['filesystem_uuid']!=b['filesystem_uuid']:raise ValueError('Archive destination changed')
                 self.ctx.consume(plan_path,plan);ident=job_id or self.ctx.operation('files.archive',{'plan_id':plan['id']});token=secrets.token_hex(16)

@@ -120,3 +120,12 @@ Real-account inventory completeness, authentication renewal, actual download thr
 and representative personal-library playback remain unaccepted until that session.
 The map is an offline geographic overview, not a street-level mapping service. There
 is no facial recognition or automatic semantic image classification in this release.
+
+
+## Family identities and sharing
+
+Each local user has independent catalogs, storage and iCloud settings/session
+files. See [local users, optional Authentik and scoped sharing](LOCAL-USERS-AND-AUTHENTIK.md).
+Whole libraries, albums or selected photos/videos can be shared read-only with
+other local users, separately from their own collections. Sharing includes selected
+content metadata and locations, never Apple credentials or session cookies.

@@ -1,0 +1,2033 @@
+{
+  "format": 1,
+  "project": "FreeQNAP",
+  "source_commit": "36ffa57d7854d5db0cbd2af20f86531e23257267",
+  "scope": "Committed source and public documentation only; no Git history or OS binaries",
+  "files": [
+    {
+      "path": ".github/ISSUE_TEMPLATE/bug-report.yml",
+      "bytes": 1218,
+      "sha256": "7c571f7dde000ebd33586908153e19529de13fd22afb0e8b21c98ef4ff17511e"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/config.yml",
+      "bytes": 27,
+      "sha256": "13064e7bea658e01e718b414fbb7b3b244f36411fe25ee2055c151f7b534547a"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 146,
+      "sha256": "1e57c1550d3f1aaf31b0e684b246cb5b7ee1ab54152ebbeb72167808082f4656"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 2386,
+      "sha256": "342045b1afea1b46cad6cf05fa4ad8b97d8a8129cd303e413bb64f2044655bdc"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "bytes": 33327,
+      "sha256": "8f1a0bebce156f58e9af6c66ee50865d525fd209320a173d6ae6cfca559acd41"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "bytes": 894,
+      "sha256": "c811306a9813f1ff397004ca63d9229c69f30603efd32f3e6451e952e6a3e5a5"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1078,
+      "sha256": "b894c9fc063f81267e9c1d0b71cb5dcbb4f35d86271dfbfc5821fb55239267f4"
+    },
+    {
+      "path": "README.md",
+      "bytes": 12968,
+      "sha256": "b5ed6f2355cc030ea8e13796219cc86f43ed43b59d2c26cbcb2837281e0934b7"
+    },
+    {
+      "path": "SECURITY.md",
+      "bytes": 2098,
+      "sha256": "d0007888c94a398b63d270bfe4c322b13ca90d4f71b77bfb2e5d9455567471e9"
+    },
+    {
+      "path": "deploy/configure-hardening.py",
+      "bytes": 2948,
+      "sha256": "1878bccbeeb3102468d253893dc5b06ef79610071b7ff299802b34f23fefc746"
+    },
+    {
+      "path": "deploy/configure-security-updates.sh",
+      "bytes": 2086,
+      "sha256": "701f42a1da7dc56f1da22e3950033d1ea72ce78b4ab9273c4c1da14259ab21a5"
+    },
+    {
+      "path": "deploy/configure-watchdog.py",
+      "bytes": 4528,
+      "sha256": "7b57fda10bcf590070e8e701e9ec58afbf492674bb391200fa0daf40bb42be5f"
+    },
+    {
+      "path": "deploy/freeqnap-afp.service",
+      "bytes": 244,
+      "sha256": "00138a1fdd9aa8620e2a7b94bff4a58bf76a1eac8fed804750360c49d8febee5"
+    },
+    {
+      "path": "deploy/freeqnap-broker.service",
+      "bytes": 627,
+      "sha256": "58ebb033ba33283bdc6d210c0efac9f680d914dbd3eccf6d412d807962a1f3ce"
+    },
+    {
+      "path": "deploy/freeqnap-collect.service",
+      "bytes": 350,
+      "sha256": "205b29df2b9a017507c416f7bbacb3b6d0666f324a2e189977b3246ccd840ff7"
+    },
+    {
+      "path": "deploy/freeqnap-collect.timer",
+      "bytes": 155,
+      "sha256": "5aa7648b5b046ab04dc2b4fafa082d20cdcbbc5b4b8b28f340c57747afc65e3b"
+    },
+    {
+      "path": "deploy/freeqnap-console.service",
+      "bytes": 710,
+      "sha256": "d4c502ae18d15e1b2f9e99e0e779cd1efd942033ef92c87d2b968d6c29a715b1"
+    },
+    {
+      "path": "deploy/freeqnap-cooling-guard.service",
+      "bytes": 661,
+      "sha256": "f1d2ebcaefe698415f221cd5a7ed47b1bb17428e48b265b896d280a0126d0672"
+    },
+    {
+      "path": "deploy/freeqnap-cooling.service",
+      "bytes": 779,
+      "sha256": "b443f1e3146bd646345ffa8377acb3150896a85be45bbf897c431d725aaa9f9b"
+    },
+    {
+      "path": "deploy/freeqnap-dhcp.service",
+      "bytes": 940,
+      "sha256": "1cab7a952687ef34165ff51a990e1e958f4766f3b34c8afef67dce342c7e0ce0"
+    },
+    {
+      "path": "deploy/freeqnap-discovery.service",
+      "bytes": 250,
+      "sha256": "87b840732bdff6c2d0bf7af33b3607eb5cedc67f49b63ac3e50357778d5fa425"
+    },
+    {
+      "path": "deploy/freeqnap-dlna.service",
+      "bytes": 587,
+      "sha256": "b0d53780861f5b46a94a6141d65b03b9b71f05b881fb8cb6655d25419039985c"
+    },
+    {
+      "path": "deploy/freeqnap-downloads.service",
+      "bytes": 788,
+      "sha256": "b18710b74429ddd405a9169c9a8b568bf4c6b5cf3add47926a5685761699753a"
+    },
+    {
+      "path": "deploy/freeqnap-https.service",
+      "bytes": 1166,
+      "sha256": "89dbcd8c7aa89a16ad79ed0190cff7cc7bf3e7495fab2026d3d0a495dfb4b932"
+    },
+    {
+      "path": "deploy/freeqnap-journald.conf",
+      "bytes": 86,
+      "sha256": "af26703d37aa5f3dc0d55aa7fd0590ea28ac4defee5e592278c29ed6355bc861"
+    },
+    {
+      "path": "deploy/freeqnap-network.service",
+      "bytes": 760,
+      "sha256": "cf475021e5d4e2955bd7d63357ff3045dbb3651f46ba17036767d9653b8290eb"
+    },
+    {
+      "path": "deploy/freeqnap-nfs.service",
+      "bytes": 270,
+      "sha256": "305a0c20c0864f027858fe4842fe268ed21cae06bc8309fd5b137bbd966ad477"
+    },
+    {
+      "path": "deploy/freeqnap-smb.service",
+      "bytes": 293,
+      "sha256": "612fd9a1b401c6ef208d0b0e6c94d04913404d4e0bf520c13e1c1772c3a1ca2a"
+    },
+    {
+      "path": "deploy/freeqnap-usb-pcie.service",
+      "bytes": 498,
+      "sha256": "cd7b5e7c7606c1bb561739f1c5787979fe400ad979b037a93d6753e011f4c6c6"
+    },
+    {
+      "path": "deploy/freeqnap-vpn-firewall.service",
+      "bytes": 556,
+      "sha256": "3d4d4795bfdb3043753e46827f2f2ba8d150c3924b643b91ca88b6b2f0311a8f"
+    },
+    {
+      "path": "deploy/freeqnap-vpn.service",
+      "bytes": 623,
+      "sha256": "d6203a9f8038ea6c0bbb06980be4bc835e7367b7fd94ecdf8f28c9778ca9d048"
+    },
+    {
+      "path": "deploy/freeqnap.tmpfiles.conf",
+      "bytes": 86,
+      "sha256": "c082f31ee65d38ee4d4fb70fdb2b080cd87766f171b525f47c5c64a4de258371"
+    },
+    {
+      "path": "deploy/install-console.sh",
+      "bytes": 3325,
+      "sha256": "de28d03d1476b69045cf70bcfc8d6968438b2544637197f523017c17a950eeec"
+    },
+    {
+      "path": "deploy/install-cooling.sh",
+      "bytes": 1121,
+      "sha256": "d7bb1e0cccaea7c54aa7f4519ffad1e6c1cc9f093db527899bca17999fba7f85"
+    },
+    {
+      "path": "deploy/install-identity.sh",
+      "bytes": 399,
+      "sha256": "36cdec32bc6110185bd7d0d95134002041cd6d47a9ed947bfdff961026fd7a91"
+    },
+    {
+      "path": "deploy/install-local-https.py",
+      "bytes": 4683,
+      "sha256": "761849b5b3cb5d14096a2891b49149bb0784baf76b68b3e7d74621898ce67d88"
+    },
+    {
+      "path": "deploy/install-myradio.sh",
+      "bytes": 492,
+      "sha256": "e487f131fe5dfd163a54dd7f90ea1ea21c9a79246b817ebe1ff9bdd48efd9c13"
+    },
+    {
+      "path": "deploy/install-nas-services.sh",
+      "bytes": 5067,
+      "sha256": "badc3a25e4de1e1de2a4316d5d8a82580d8e0d1c91933accb87ce8e805df040b"
+    },
+    {
+      "path": "deploy/install-personal-photos.sh",
+      "bytes": 2122,
+      "sha256": "0be216d229ff6beca77ac4f2a4d5b034e00da84c674c9c674f0b72029473ffe9"
+    },
+    {
+      "path": "deploy/install-poweroff.sh",
+      "bytes": 1334,
+      "sha256": "66d957cc8930e2d4e34d4151ce81ea09afa06f378bafd3fa4a967d2b06b63e9d"
+    },
+    {
+      "path": "deploy/install-usb-pcie.sh",
+      "bytes": 508,
+      "sha256": "ef9022db2de07ef558e4aeef8d147b2f7ca67930d654ad36c5e8aa06a6101d5f"
+    },
+    {
+      "path": "docs/.nojekyll",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/ACCEPTANCE.md",
+      "bytes": 13301,
+      "sha256": "4af22e21cb84664a488e89f1d3453461c84c69f79ca3cad332012e9ca4a328b9"
+    },
+    {
+      "path": "docs/ADMINISTRATION.md",
+      "bytes": 4830,
+      "sha256": "36f7c065d326b34e4760858640b42402f18820900637575c03c03eeef17ce9f7"
+    },
+    {
+      "path": "docs/AGENT-API.md",
+      "bytes": 15227,
+      "sha256": "2ffd7b1d74aa3762364d7b6219f2b172abb59d63151d724a5dfef8555a9cf9d7"
+    },
+    {
+      "path": "docs/BOOT-RECOVERY-CANDIDATE.md",
+      "bytes": 3087,
+      "sha256": "d3c144997358c00aadd12400730c49e3b3f81e02ea3d98438f09bbda261c3f6d"
+    },
+    {
+      "path": "docs/CONFIGURATION-RECOVERY.md",
+      "bytes": 5839,
+      "sha256": "6bad5725bbefee4fb18f67986f5ee0cdb54e79374fec35f6996c0070fb891721"
+    },
+    {
+      "path": "docs/COOLING-VALIDATION-2026-11-01.md",
+      "bytes": 11881,
+      "sha256": "2f672f1dab945216869b9cc69a46318976a41fbc38618fc09fb995f302434d50"
+    },
+    {
+      "path": "docs/COOLING.md",
+      "bytes": 7293,
+      "sha256": "8a6d1483d84d52f314194b9b75b2c961378525e7a7409c93eea698e0cf1d90cc"
+    },
+    {
+      "path": "docs/CPU-IBE-EXPERIMENT.md",
+      "bytes": 3351,
+      "sha256": "5f85fb9eea11f8c28bbd3d26240969e0c17afc17ce87b92e2d62fae5d2e7a465"
+    },
+    {
+      "path": "docs/CURRENT-STATUS.md",
+      "bytes": 24782,
+      "sha256": "f3ab5f9ad455eda50f7e6057395ebf9f46d92d777d8b508d7a50258e6dd5a23e"
+    },
+    {
+      "path": "docs/DASHBOARD-UX.md",
+      "bytes": 14042,
+      "sha256": "b3f8bdf6749f51a2305983985c69203f0c4fb8e83222fef7f12d33c0ea4bb3a6"
+    },
+    {
+      "path": "docs/DISK-HEALTH-AND-NOTIFICATIONS.md",
+      "bytes": 3102,
+      "sha256": "1da65a34ac7af1aa7de92264366d854f5c9e5cd773701aea33f6a1a8b8272f59"
+    },
+    {
+      "path": "docs/DYNAMIC-DNS.md",
+      "bytes": 4573,
+      "sha256": "ed51e52b1337d1b9acb2798a85eadc0b6717f8036fb768e78bed273b7e0e9558"
+    },
+    {
+      "path": "docs/ENCRYPTED-USB.md",
+      "bytes": 12296,
+      "sha256": "24809baf13c5b5de9ed1b3deaac5367744be4c40e8166854063773e46c1f9218"
+    },
+    {
+      "path": "docs/FILE-MANAGER.md",
+      "bytes": 1901,
+      "sha256": "5f2c556a222943b5dfc13c742fa47ca3000c0a6033c7fe77268becccf8a7a3a8"
+    },
+    {
+      "path": "docs/FRONT-BUTTON.md",
+      "bytes": 2115,
+      "sha256": "76b98d613ef5c0ea8b1a49061e9d1dd8ae1c54bf434cde0a12760247114c9556"
+    },
+    {
+      "path": "docs/HARDWARE.md",
+      "bytes": 13619,
+      "sha256": "fadb02060378fe5a16084653463709163b3696a81808b109ad5aebe8d5aa810f"
+    },
+    {
+      "path": "docs/HEALTH-NOTIFICATIONS.md",
+      "bytes": 7951,
+      "sha256": "ef57e6a1d85aefd9c8040817c1ed08b1a281510ffd831a67188f7035a835630d"
+    },
+    {
+      "path": "docs/INSTALLING.md",
+      "bytes": 10011,
+      "sha256": "020586fdb393921027b82f7079a35e7d20e7afa3553f2638bad1fc65d95e8044"
+    },
+    {
+      "path": "docs/INTERRUPTED-RAID-RECOVERY.md",
+      "bytes": 5126,
+      "sha256": "70e1f3519025bdba5a1bb6c094ccefa5c9ca15c6a4d4dc9901bba8eea156b221"
+    },
+    {
+      "path": "docs/KERNEL-INSTALLATION-REVIEW-2026-11-02.md",
+      "bytes": 2664,
+      "sha256": "59974a08159a68bd2ac1a42c222d17c8a2150ae5e5a4ec2cf8977d9f7d1d9662"
+    },
+    {
+      "path": "docs/KERNEL-SECURITY.md",
+      "bytes": 13869,
+      "sha256": "494bae212847a1a2b4d695b6b36837f8aa2d07788c2a46e2e9620da36a142249"
+    },
+    {
+      "path": "docs/KERNEL-VALIDATION-2026-11-01.md",
+      "bytes": 8094,
+      "sha256": "da529dafb06a8545f81b2de135b2b0164fde107c1f6c85fdaf3873461354e870"
+    },
+    {
+      "path": "docs/LICENSE.txt",
+      "bytes": 1078,
+      "sha256": "b894c9fc063f81267e9c1d0b71cb5dcbb4f35d86271dfbfc5821fb55239267f4"
+    },
+    {
+      "path": "docs/LOCAL-HTTPS.md",
+      "bytes": 7336,
+      "sha256": "76e6e6870835c0347236c0fb3158012b204a8a00343f7bf49c2d0671af34af70"
+    },
+    {
+      "path": "docs/LOCAL-REVIEW-RESULTS.md",
+      "bytes": 6429,
+      "sha256": "18eb86dd8a035cf9101baabd515daac6d739afc3797df6ff8a78172375bf7b90"
+    },
+    {
+      "path": "docs/LOCAL-USERS-AND-AUTHENTIK.md",
+      "bytes": 7412,
+      "sha256": "cdd7d52dbc784726e0bf0a1c8c7c1463aca4de7a7a05616c5b7624a0bbfa2e4b"
+    },
+    {
+      "path": "docs/LOCKUP-RECOVERY-2026-11-03.md",
+      "bytes": 7007,
+      "sha256": "ab122d598262155fbec77b4fb9dd1f77e7251dc3889d35abc43148be2b8f994d"
+    },
+    {
+      "path": "docs/MEDIA-LIBRARY.md",
+      "bytes": 4640,
+      "sha256": "22fd6ec7a4b30f3a335cbdeaf08f6f9fa347a44eed92a097c4c04b70397604f3"
+    },
+    {
+      "path": "docs/METADATA-AND-SOCIAL-SHARING.md",
+      "bytes": 4304,
+      "sha256": "2a16dbfc38b37a3c8a89a93a0736a0cda0d2c6acfb7eeb860d98e29384831dbe"
+    },
+    {
+      "path": "docs/MY-RADIO-AND-RECOVERY-API.md",
+      "bytes": 10328,
+      "sha256": "1ec10228a37e6e1cbad07e19881bf7d685fd05de62f7ec0c5526709cf5c3cf55"
+    },
+    {
+      "path": "docs/MY-RADIO-VALIDATION-2026-11-04.md",
+      "bytes": 7253,
+      "sha256": "dea1d067c1ce7ff05da1258c4ec2802b0d9ce50f2a4f92acdaddc8095a288365"
+    },
+    {
+      "path": "docs/MY-RADIO.md",
+      "bytes": 11398,
+      "sha256": "27b2227e1ad292eb5a5dfd1985524a6ad840f217471f6f6d35703c8419c7256f"
+    },
+    {
+      "path": "docs/NAS-ARCHITECTURE.md",
+      "bytes": 6802,
+      "sha256": "49a1f25653cf02bc66478f2154c22f7b70390a6f1a8243ae30e7c24b6722b1be"
+    },
+    {
+      "path": "docs/NETWORK-CONTROL.md",
+      "bytes": 4627,
+      "sha256": "d15effc3836d2afa1376be3620f770236edff59a38174c4d847f30d9f6142e25"
+    },
+    {
+      "path": "docs/OS-EXPANSION-128G.md",
+      "bytes": 7585,
+      "sha256": "5b7562a5c9241066af246bfca09710b556dce1d3a85446905337d2f0480b900f"
+    },
+    {
+      "path": "docs/OS-EXPANSION-VALIDATION-2026-11-02.md",
+      "bytes": 4909,
+      "sha256": "2db0b5cfa5b307d797cd8bd393be77bb8829f27e75e6a3b7c92d3ff3fa023272"
+    },
+    {
+      "path": "docs/PERSONAL-PHOTOS.md",
+      "bytes": 7644,
+      "sha256": "22e95b2e0ca966e247d0707e7a3855e1dd5e90a35bbd04cdee6a4b1cf5568b7f"
+    },
+    {
+      "path": "docs/PRODUCTION-READINESS.md",
+      "bytes": 15169,
+      "sha256": "4f52015d6fff75e6a3c865ac3c7d17e2266976c65d50c4f04e6de133c95d6139"
+    },
+    {
+      "path": "docs/PUBLICATION-PACKAGE.md",
+      "bytes": 4877,
+      "sha256": "b62d1ea8035ff18a0c1c28016e76ee766dfd790eabc26caeb635c1739de0a159"
+    },
+    {
+      "path": "docs/RELEASE-REVIEW.md",
+      "bytes": 3221,
+      "sha256": "3a610afbf9a11d2cc128d1304e240fd609826b9605b1b72bc41685d0cfb59ae9"
+    },
+    {
+      "path": "docs/ROOT-SPACE-MAINTENANCE.md",
+      "bytes": 3829,
+      "sha256": "8bb270de65c91ec0883d7b4d2d4b372419c2728e26b2004e3b1cad0768985831"
+    },
+    {
+      "path": "docs/SECURITY.md",
+      "bytes": 2098,
+      "sha256": "d0007888c94a398b63d270bfe4c322b13ca90d4f71b77bfb2e5d9455567471e9"
+    },
+    {
+      "path": "docs/SHARING-VALIDATION-2026-11-04.md",
+      "bytes": 2877,
+      "sha256": "331105ab0c97e3f104aa2eadfb1a2d86361fb610e4a5407dd63d621b0e4715ce"
+    },
+    {
+      "path": "docs/SHUTDOWN-FOLLOWUP.md",
+      "bytes": 6408,
+      "sha256": "a0078aa6eb596bbd2d47ff100ce8fee825de3c0954bae5f5f6d0d0146dccc972"
+    },
+    {
+      "path": "docs/SOURCES.md",
+      "bytes": 4940,
+      "sha256": "efa97bae2b577d7bcecbcbb3a4911badf906ea2876394cc6d1b13679f07d486d"
+    },
+    {
+      "path": "docs/STORAGE-BACKUPS.md",
+      "bytes": 11149,
+      "sha256": "06b6cfe0dad60714ca1927e2e93fb9a33a3a851b13694d8ce3e98cff9224bd5b"
+    },
+    {
+      "path": "docs/TR004-VALIDATION-2026-11-02.md",
+      "bytes": 4601,
+      "sha256": "ec676ccd48810b6ce4358abd141ea4b4467e6cec426930e63092e2506ce6cd25"
+    },
+    {
+      "path": "docs/UNATTENDED-VALIDATION-2026-11-01.md",
+      "bytes": 6135,
+      "sha256": "d725117b8765e01f6bf7a06d7afe3bf8937fd9036db5258a861317c95015735c"
+    },
+    {
+      "path": "docs/USB-ENCRYPTION.md",
+      "bytes": 6525,
+      "sha256": "4476150e66e116027871c587d25eee15e4f5f8662bd04151fee8515c64f0a5fa"
+    },
+    {
+      "path": "docs/USB-PLAIN-MEDIA.md",
+      "bytes": 759,
+      "sha256": "400220a28cf65a6811695cad5d311865a081d5a69a584af85e33dbbc0c0dc95f"
+    },
+    {
+      "path": "docs/USB-TR004.md",
+      "bytes": 22677,
+      "sha256": "ed4c0c43a7ba0704bd8e25407ff4b2c110ce2cdc80a3949da55894dc61d4cbc3"
+    },
+    {
+      "path": "docs/USB-VALIDATION-2026-11-01.md",
+      "bytes": 5527,
+      "sha256": "220e71a38adbbe9877c48049660570c6dd3202f7c2c934ed6674bb3e69bc6637"
+    },
+    {
+      "path": "docs/VALIDATION-2026-11-01.md",
+      "bytes": 11888,
+      "sha256": "3b414a6fcc0a623d67ce3519a73ae4c76d8f782f4be6feaadaada118c9f187b5"
+    },
+    {
+      "path": "docs/VALIDATION-PLAN.md",
+      "bytes": 24633,
+      "sha256": "a82cba130ef465b95b1f1897b460bd15db8dc3cc165f8a0f875e7da7b1847ad9"
+    },
+    {
+      "path": "docs/VPN-DOWNLOADS-MEDIA-ACCESS.md",
+      "bytes": 11480,
+      "sha256": "2994ab77d24fa6e88c5db213ebe9657609b3204dc79660c9a83dd93b983f7fe5"
+    },
+    {
+      "path": "docs/WATCHDOG-COOLING-PLAN.md",
+      "bytes": 7273,
+      "sha256": "23bdaa1b8ea9e90375cd704d5ac0ca5f0470becdba7561fc9bedf9951d56ba35"
+    },
+    {
+      "path": "docs/WATCHDOG-VALIDATION-2026-11-01.md",
+      "bytes": 8477,
+      "sha256": "411865e1bdc25bb99beca985d05fed58d9e0ca783bc1570ddc027908cf89524d"
+    },
+    {
+      "path": "docs/assets/freeqnap-share-v1.png",
+      "bytes": 460988,
+      "sha256": "ca5b103f554a8d788654fe860b3b94bbec9e7657b76f60f78a7b25bf80cb6d80"
+    },
+    {
+      "path": "docs/assets/freeqnap.svg",
+      "bytes": 332,
+      "sha256": "b4f52e64ff75955159824889423802252b82187044a0047c132ef478ccba5002"
+    },
+    {
+      "path": "docs/assets/screenshots/PROVENANCE.md",
+      "bytes": 1669,
+      "sha256": "e60d746c1d4bf38c2231d0a6b5860060113c319fcb25131c41dfb21a82f971d1"
+    },
+    {
+      "path": "docs/assets/screenshots/files.png",
+      "bytes": 760551,
+      "sha256": "a610bdc9db616fbab842d75c24e5498aabb3e49fd84e7d79fa7a9542bf1d6f7f"
+    },
+    {
+      "path": "docs/assets/screenshots/network.png",
+      "bytes": 1107348,
+      "sha256": "aa96874e07bb528f6d39703a5302af870727e5df0d7a2e704a7a2bc912ded351"
+    },
+    {
+      "path": "docs/assets/screenshots/overview.png",
+      "bytes": 874606,
+      "sha256": "373c209b4e064e343dc4f652af7c710fd1b789f97cef4646e2edf7b583db2329"
+    },
+    {
+      "path": "docs/assets/screenshots/receipts.json",
+      "bytes": 2200,
+      "sha256": "1def33005c54d6828f54f24dcdd36956da48f7dd3960fcbe22a23875814d3635"
+    },
+    {
+      "path": "docs/assets/ts431xeu-front.svg",
+      "bytes": 3553,
+      "sha256": "886d686e7ff98a66922a79ee2b0a5be7a8592e65430e020c6418221d18f35972"
+    },
+    {
+      "path": "docs/hardware-source-files.json",
+      "bytes": 1992,
+      "sha256": "87a35051cc27ff47cb997f970b2bf5f5998c61fb2eabc89a7a1935261deb103c"
+    },
+    {
+      "path": "docs/index.html",
+      "bytes": 22872,
+      "sha256": "08650b80f547d474f8d2af18fc106e695699285312dcfe1d78d59ac301377d8f"
+    },
+    {
+      "path": "docs/showcase.css",
+      "bytes": 12626,
+      "sha256": "d17d151e7f961f5c5ceb52608a490f80f6df9484683f54e8d5aa2ad2fa99f237"
+    },
+    {
+      "path": "docs/showcase.js",
+      "bytes": 744,
+      "sha256": "ed7e5e01cb90e7feb5d51d17d416c8569b7864ea49282b7b5161386fbedb5d78"
+    },
+    {
+      "path": "docs/tutorial/PHOTO-PROVENANCE.md",
+      "bytes": 1439,
+      "sha256": "77f57f5362c126ad7d452dcaf9d889aa90ef4768910ab1d67ce984c029252c3d"
+    },
+    {
+      "path": "docs/tutorial/assets/motherboard-redacted.png",
+      "bytes": 9246354,
+      "sha256": "f7dc2c8a8cd204fc500ce393bd2244f56120ceb50056b2ca6b9872c68e0ba7ff"
+    },
+    {
+      "path": "docs/tutorial/assets/motherboard-redacted.redaction.json",
+      "bytes": 800,
+      "sha256": "5d55192953d64854bc085a99c29e4a1b57339bf0c64e2e75c52a71a0b96fc76f"
+    },
+    {
+      "path": "docs/tutorial/assets/uart-pinout.svg",
+      "bytes": 1597,
+      "sha256": "85fe5ff1b1a25225756dd6c1895d2b49c8bb6baebb139949830ef9dab322918a"
+    },
+    {
+      "path": "docs/tutorial/assets/uart0-debug-redacted.png",
+      "bytes": 8060658,
+      "sha256": "c40c947d235ae5b89fd4a9116b460c743f0e4655ca237a75df873890d8bf09b1"
+    },
+    {
+      "path": "docs/tutorial/assets/uart0-debug-redacted.redaction.json",
+      "bytes": 389,
+      "sha256": "dadb04fec70e070c1c061294607b971ddfbf2a3884b0080ed58055c12bf66386"
+    },
+    {
+      "path": "docs/tutorial/index.html",
+      "bytes": 20070,
+      "sha256": "c4acbada26381d274a79917080103162faea48fb1e64e55fc863c39f1adc1a50"
+    },
+    {
+      "path": "docs/tutorial/tutorial.css",
+      "bytes": 3609,
+      "sha256": "bd6089d8833e52e10b86659e395f461d4cca1164680ded327de57b83ff5f4cfb"
+    },
+    {
+      "path": "freeqnap/__init__.py",
+      "bytes": 83,
+      "sha256": "8f9d1f4cc33f0f50ca0b36eabec6abe27f588b3bcd239badc3056eb84b0101ea"
+    },
+    {
+      "path": "freeqnap/accounts.py",
+      "bytes": 11591,
+      "sha256": "b6d4704b0a218fe266c8c20b2dede5188d507096cbdbe4dbe0d0819d368be2c2"
+    },
+    {
+      "path": "freeqnap/agent_operations.json",
+      "bytes": 5145,
+      "sha256": "d6be5ead360ef61aceff97b38a9d67be85ca72fe77db4fb37c88b9586968a4d6"
+    },
+    {
+      "path": "freeqnap/agents.py",
+      "bytes": 11865,
+      "sha256": "20462976c3114dcf39dd5e9042a8b21a416902db6b3570acd9dcc229f0527e39"
+    },
+    {
+      "path": "freeqnap/archive_reader.py",
+      "bytes": 4607,
+      "sha256": "0c9ed362ad5cf9a4a891efe3c00126b37a22da99bdcecd9f2359400ebf0d65ee"
+    },
+    {
+      "path": "freeqnap/auth.py",
+      "bytes": 2734,
+      "sha256": "37372ecf6c57f4ae3ab67f901d1cf0723df21e1882072fb111a0555acddfd743"
+    },
+    {
+      "path": "freeqnap/backups.py",
+      "bytes": 11317,
+      "sha256": "3c3b504d4a319492e804e87067d2ffed14e4936fbe12f0b91b2abec759d17a9b"
+    },
+    {
+      "path": "freeqnap/cli.py",
+      "bytes": 4051,
+      "sha256": "abff72e35aa29cbe0e16b649249e0907a4d0e894c79f45b60c05fe06d471d65d"
+    },
+    {
+      "path": "freeqnap/collector.py",
+      "bytes": 461,
+      "sha256": "399928216c09a65b54358dc45ab4ddbc87478f8391add994c67d15bcdf30935f"
+    },
+    {
+      "path": "freeqnap/cooling.py",
+      "bytes": 12114,
+      "sha256": "6e78b81c62a60815502b48707e7c6ecce7849dabb18c5544d98a3599b62bda34"
+    },
+    {
+      "path": "freeqnap/cooling_policy.py",
+      "bytes": 1564,
+      "sha256": "99856d21d287b9ef25dcb2f48f7606e7003da2ff8cac41e52c15229eafdbf081"
+    },
+    {
+      "path": "freeqnap/demo.py",
+      "bytes": 2271,
+      "sha256": "9b3b6e5e4b463a2962a393cffc01bd1cdc73ad62048b8d79741c88dddd85db7c"
+    },
+    {
+      "path": "freeqnap/identity.py",
+      "bytes": 11425,
+      "sha256": "202bfe99e8af95d4b1442731efa1c84daa2a500f079b5f45b1af6192af90d534"
+    },
+    {
+      "path": "freeqnap/inventory.py",
+      "bytes": 4552,
+      "sha256": "fde5d5aaf908d82018a617d58970bbcd2a5597ef62297888fc4d647172a3efe2"
+    },
+    {
+      "path": "freeqnap/jobs.py",
+      "bytes": 2731,
+      "sha256": "7d0237dc7b9cf9cf75a1a93db01f50c70179cc90a2e0772358e1033675bbac44"
+    },
+    {
+      "path": "freeqnap/library_shares.py",
+      "bytes": 4023,
+      "sha256": "fcd67381213585be6a03e30301463757e4f94652fbe0eeedcf6a799c30392146"
+    },
+    {
+      "path": "freeqnap/media_http.py",
+      "bytes": 2103,
+      "sha256": "8b9f1de7092cb9d8b07f42275bff1d6f66552b7575e64955bce864466184b60e"
+    },
+    {
+      "path": "freeqnap/nas/__init__.py",
+      "bytes": 85,
+      "sha256": "3163b79bc45fb04af9686b8887a2dcc556471deba38a5d8215f4ecc2898640c9"
+    },
+    {
+      "path": "freeqnap/nas/alert_rules.py",
+      "bytes": 2850,
+      "sha256": "a428f944e972b953f487acd788d1cd4058a27fe7847b2af3f62fac1b3c390b76"
+    },
+    {
+      "path": "freeqnap/nas/archives.py",
+      "bytes": 11660,
+      "sha256": "d1eec919c6beb1e0be698e416c93819ad27903fbee30508e3774d3510ee8b361"
+    },
+    {
+      "path": "freeqnap/nas/array_recovery.py",
+      "bytes": 22837,
+      "sha256": "5faa5d238e38c8a59f5522146fb3105a2afe6075c4b9a4a4f87be615f24f8da6"
+    },
+    {
+      "path": "freeqnap/nas/backend.py",
+      "bytes": 31720,
+      "sha256": "3f6eb41775c1d1c3bd37d54cbd053e524da63397e04e6eb7a4255954a2845ded"
+    },
+    {
+      "path": "freeqnap/nas/backup_schedules.py",
+      "bytes": 12025,
+      "sha256": "916e53143c313089323bda8c96505ccab432b44fe9f70f84f4351c39aeeb3251"
+    },
+    {
+      "path": "freeqnap/nas/broker.py",
+      "bytes": 5639,
+      "sha256": "3d4c6a0ae490e185ff8291b60073f489e951bacf9d37333346c53be9db119b1e"
+    },
+    {
+      "path": "freeqnap/nas/bundle.py",
+      "bytes": 5964,
+      "sha256": "c7bea440bd96b87eba96d2a30c5e1509113f24f21d1a8f4d56ff09b232a7f53c"
+    },
+    {
+      "path": "freeqnap/nas/common.py",
+      "bytes": 7507,
+      "sha256": "f122ff333d8b0228a644d4982b2d3862a8283ee7ff343d8238ab23782a8e9dce"
+    },
+    {
+      "path": "freeqnap/nas/cooling.py",
+      "bytes": 5978,
+      "sha256": "473a3e2413e1466e445b4c53f578bcb9553501ae20466fcf3b4e18d2e241441a"
+    },
+    {
+      "path": "freeqnap/nas/crypto_profiles.py",
+      "bytes": 1113,
+      "sha256": "23dd144bcb3a1598b092b347455532f46ef343bcc794a98eea5a472271716b8d"
+    },
+    {
+      "path": "freeqnap/nas/ddns.py",
+      "bytes": 15237,
+      "sha256": "f18fa2f080d0d4928fbe2d02d0dcf7fe1c82a77581319752945d2828ce21aa60"
+    },
+    {
+      "path": "freeqnap/nas/disk_reports.py",
+      "bytes": 6170,
+      "sha256": "26b92ebcd36172013b8a77b314a3abef440c0424ed84cf289147f30f43ff936c"
+    },
+    {
+      "path": "freeqnap/nas/dlna.py",
+      "bytes": 11202,
+      "sha256": "4e14d611d7d7e7d23a58a47ca9a91698dc7e64bd46154feb6e8302ef8b091f3f"
+    },
+    {
+      "path": "freeqnap/nas/downloads.py",
+      "bytes": 18917,
+      "sha256": "6049536066a0648f017aa1f05edad487014601d9d6142e60b144af25aceb1a0a"
+    },
+    {
+      "path": "freeqnap/nas/external.py",
+      "bytes": 30894,
+      "sha256": "13cc35b2a9cc6533d6af39a4a7bd24d4ee1f8cc6a7cee4d556bba9aad880e7bd"
+    },
+    {
+      "path": "freeqnap/nas/file_metadata.py",
+      "bytes": 10070,
+      "sha256": "e93393d951da9e020815261f340b9ded85494dc06a7afe49fb0c3b45e8d0aed1"
+    },
+    {
+      "path": "freeqnap/nas/filebackup.py",
+      "bytes": 14358,
+      "sha256": "72f704b22592284b61f1c131d8b78970b2b81f761d784bb3d25f3dd927d310f9"
+    },
+    {
+      "path": "freeqnap/nas/fileops.py",
+      "bytes": 24233,
+      "sha256": "576b2593f93f3775f7d30a85d59ea09c8af2bc04d622529d81b05ea6081941bc"
+    },
+    {
+      "path": "freeqnap/nas/files.py",
+      "bytes": 16887,
+      "sha256": "5d27424149e46c059abf5d5b7233b9fe4ec9291902c6a14b9fd1255c2ddce07f"
+    },
+    {
+      "path": "freeqnap/nas/foreign.py",
+      "bytes": 15847,
+      "sha256": "c47a34d26f4f01bc292eb872c704c8aa325a3a65caa52fd17e300fdb491d712b"
+    },
+    {
+      "path": "freeqnap/nas/foreign_worker.py",
+      "bytes": 1945,
+      "sha256": "e8a07cfadb0e03a4e6c1d443bed33b2d6cfa4482e51c0d435126ae8e1a73b4ba"
+    },
+    {
+      "path": "freeqnap/nas/frontpanel.py",
+      "bytes": 2016,
+      "sha256": "2b59515b57e7c459ec160e89c001a6a3010723594c7ebf5c4eebee2fa9d83b02"
+    },
+    {
+      "path": "freeqnap/nas/gpt.py",
+      "bytes": 4859,
+      "sha256": "fe0feec3d25d3e672d7d3f2a395024668a2ed4fe8f18d1c5b59ab36ca5411f03"
+    },
+    {
+      "path": "freeqnap/nas/health.py",
+      "bytes": 13928,
+      "sha256": "8b827263b514e63345638150f37778c839e215aa2e254b37ad1054b4f6adf002"
+    },
+    {
+      "path": "freeqnap/nas/library_lock.py",
+      "bytes": 188,
+      "sha256": "26c9702f1a8ead979596b093a50517dd1c1deb8363afeea6c9c2e7cc2dbe2965"
+    },
+    {
+      "path": "freeqnap/nas/library_storage.py",
+      "bytes": 14222,
+      "sha256": "9e04ec2726febcb192df7f52f0816c0a2dcb07412ac7010bf5624dbad50cbe66"
+    },
+    {
+      "path": "freeqnap/nas/library_storage_source.py",
+      "bytes": 573,
+      "sha256": "40c11a05994991976e219dcd3f993d68d2e00326f3e1956403fc32a193886aa1"
+    },
+    {
+      "path": "freeqnap/nas/limits.py",
+      "bytes": 720,
+      "sha256": "dbc644512335bf5dc7ea05b38d88c8a86e8fb096741f41ee4fa73c6e1284908f"
+    },
+    {
+      "path": "freeqnap/nas/local_recovery.py",
+      "bytes": 8534,
+      "sha256": "dfc5b77d07a12f69520400d48f854c129c212d3a1477888cd6c5cc45bb57f666"
+    },
+    {
+      "path": "freeqnap/nas/management_tls.py",
+      "bytes": 6259,
+      "sha256": "14350827d0faf8292e64202411f6dd7e0a2c16c602b0f3e4651bfac2a9a326bb"
+    },
+    {
+      "path": "freeqnap/nas/media.py",
+      "bytes": 24441,
+      "sha256": "7eaf343e3cd324e59bda1b595706dc3462198eb538c1ac7efe6001ea33039c7a"
+    },
+    {
+      "path": "freeqnap/nas/metrics.py",
+      "bytes": 5221,
+      "sha256": "bb031c3e0f69ffcc06d2a5aa997558f770e429be4d8b117cd74918fab1ade63c"
+    },
+    {
+      "path": "freeqnap/nas/myradio.py",
+      "bytes": 57050,
+      "sha256": "2e72cbfadec347ff5824283cebdd739c4666dbd982a2c854bce5ccf653fb8b1f"
+    },
+    {
+      "path": "freeqnap/nas/network.py",
+      "bytes": 20757,
+      "sha256": "2bf076b6221d4b21db894cbcf2ff681bed1cfe83843b654355e426130d4d3448"
+    },
+    {
+      "path": "freeqnap/nas/network_runtime.py",
+      "bytes": 11364,
+      "sha256": "00d4131830f40ed42c0ec06c47b0ad91e22d100ad3374d57b11483b185ff9eac"
+    },
+    {
+      "path": "freeqnap/nas/notifications.py",
+      "bytes": 20830,
+      "sha256": "66aa2e4b7c482fdd2d77367f062cf5f33ae9d290ff84b9580052df30cf2752b2"
+    },
+    {
+      "path": "freeqnap/nas/personal.py",
+      "bytes": 13135,
+      "sha256": "b7f270ba0a64d3e0887c0ba2300e60ac92cdaacf5e88edfcf0fc85556ad2a346"
+    },
+    {
+      "path": "freeqnap/nas/personal_cloud.py",
+      "bytes": 13768,
+      "sha256": "95fafa39c0610ceda92d6613aacbc9588b63538c8a47eef30daa482eb7e8c551"
+    },
+    {
+      "path": "freeqnap/nas/personal_metadata.py",
+      "bytes": 7937,
+      "sha256": "f3037b1f3cfddfd45914562b5e53a9dbf918b592c776ad97f2dbbe38a9142242"
+    },
+    {
+      "path": "freeqnap/nas/personal_photos.py",
+      "bytes": 35683,
+      "sha256": "8851c6e01bb18b5b92af481872cbe9ee0d815c68c00cef5af656e5636d6df84a"
+    },
+    {
+      "path": "freeqnap/nas/power_button.py",
+      "bytes": 969,
+      "sha256": "3b3a395c4a82dc7d662e60d8b053a3cf7720540b17c8856d1194a7dfd979bd51"
+    },
+    {
+      "path": "freeqnap/nas/public_http.py",
+      "bytes": 5212,
+      "sha256": "404586778917c547cd9bceb13f6d23affbfdea551431ef958e75d17f613517f5"
+    },
+    {
+      "path": "freeqnap/nas/push.py",
+      "bytes": 5420,
+      "sha256": "672ba5b6a837177c50628de82e95e7f809516fe44c5d567606815e4f1f76537c"
+    },
+    {
+      "path": "freeqnap/nas/radio_metadata.py",
+      "bytes": 10608,
+      "sha256": "0b434ba2d78195b7ceb25ab739e4293bdca43f51cb656af376ebe029f805a151"
+    },
+    {
+      "path": "freeqnap/nas/recovery.py",
+      "bytes": 5578,
+      "sha256": "0f66551f8805d3701a45c5e37f7a3cca3f96c69afc02f3055d8d3678f7b42178"
+    },
+    {
+      "path": "freeqnap/nas/sharing.py",
+      "bytes": 12162,
+      "sha256": "8838f33fb61ef6505a423ec01c998e3098e448b2c55b6263175486c502233fbb"
+    },
+    {
+      "path": "freeqnap/nas/social_media.py",
+      "bytes": 5231,
+      "sha256": "ba780f7cfe0f7f94550dab9fc2486bca8dfa1dac32d4366e593b3ad72cb751eb"
+    },
+    {
+      "path": "freeqnap/nas/social_worker.py",
+      "bytes": 4171,
+      "sha256": "0e97f85de9be21f59563b11b5944a6acf68f729fcc3bbb4f9f0828c3e12a05e1"
+    },
+    {
+      "path": "freeqnap/nas/status_light.py",
+      "bytes": 833,
+      "sha256": "5dfaa3575851d80b3edaa12508d80326cb82477ea129fb15b25c3e1059f203e4"
+    },
+    {
+      "path": "freeqnap/nas/storage.py",
+      "bytes": 40558,
+      "sha256": "7f844a5bc7f578b0bbdedaeeb9a6e8e37d8e2467e096f1afa34902e8699ad25e"
+    },
+    {
+      "path": "freeqnap/nas/storage_boundary.py",
+      "bytes": 865,
+      "sha256": "3287834d061e02862d0efbea609c74438baee49d394df713787e2997d33d89cb"
+    },
+    {
+      "path": "freeqnap/nas/system_recovery.py",
+      "bytes": 15262,
+      "sha256": "2527d3b93a25224a516ccd44e619910bb81d92219b1bf7f98ecd5826356284b7"
+    },
+    {
+      "path": "freeqnap/nas/vpn.py",
+      "bytes": 27156,
+      "sha256": "298ed249e52b71f5718e6af51064b524b6370f28622c0560775b120a45e4a9a9"
+    },
+    {
+      "path": "freeqnap/nas/vpn_pki.py",
+      "bytes": 4446,
+      "sha256": "9130d458792d798a8aecb60764e48b8172ea248ae3240c52ff734da101d2b157"
+    },
+    {
+      "path": "freeqnap/nas/vpn_runtime.py",
+      "bytes": 10432,
+      "sha256": "1bf4932fe9ab13741991196c93d618a104ffa15bf2fab6f337f69bf19c31e95f"
+    },
+    {
+      "path": "freeqnap/personal_access.py",
+      "bytes": 7513,
+      "sha256": "8632526e2a3067a68f24b70ec3e4ad7ffe8a9164fc6b8dbcabdce463f46823b3"
+    },
+    {
+      "path": "freeqnap/plans.py",
+      "bytes": 3469,
+      "sha256": "8ee373727a4e256386c097b61af2abce323066f2e4f89413e9c898c0be584fa7"
+    },
+    {
+      "path": "freeqnap/players.py",
+      "bytes": 17011,
+      "sha256": "6a3c102866b6df19ebb598f79dac3bd55cf83f23245ddfbc00af319ad99028d8"
+    },
+    {
+      "path": "freeqnap/radio_stations.json",
+      "bytes": 35425,
+      "sha256": "565f34ed158a7d934eefcf08eeab6eaf86c5bbb6864a04d3d664fdd9d989540f"
+    },
+    {
+      "path": "freeqnap/server.py",
+      "bytes": 38065,
+      "sha256": "13560e7fc9bbb013271cc1839f41678d5f47af05da395e0cc33eef22a83dbcbe"
+    },
+    {
+      "path": "freeqnap/state.py",
+      "bytes": 4330,
+      "sha256": "0b2095daa7520e039556f9df2607425bcab95122cb0112abcae830f917d881a7"
+    },
+    {
+      "path": "freeqnap/zipstream.py",
+      "bytes": 4446,
+      "sha256": "eec1b06b2de3d36481f94bd7eb21b54499ca05f4fb61ee895eac6abacd93e65a"
+    },
+    {
+      "path": "hardware/ts431xeu/alpine-qnap-ts431xeu.dts",
+      "bytes": 5582,
+      "sha256": "613b1df6b4fb5da3342e45a58848ac686f6b43b07aabeeb500460dd3c5e4d63e"
+    },
+    {
+      "path": "hardware/ts431xeu/apply-board-patches.py",
+      "bytes": 5222,
+      "sha256": "dbfadb9519957df5f4a93e1839ad35eaa7bce53cf34ebb36518c348e90222436"
+    },
+    {
+      "path": "hardware/ts431xeu/complete-mirror-bootstrap/README.md",
+      "bytes": 923,
+      "sha256": "ae11b198fac9aae5afdcf530e692705a27a44cd50a35820211e4e816f2bee290"
+    },
+    {
+      "path": "hardware/ts431xeu/complete-mirror-bootstrap/boot-policy.sh",
+      "bytes": 1486,
+      "sha256": "7e7edbdc068da0a66b7731ebf29d4149bbe038b917ec24850691cda728e8e212"
+    },
+    {
+      "path": "hardware/ts431xeu/complete-mirror-bootstrap/boot-record.sh",
+      "bytes": 1009,
+      "sha256": "4aab945d57d5a6d262214c60620da873dcfd5fe8fe7994f343fd1bfc7189fc9e"
+    },
+    {
+      "path": "hardware/ts431xeu/complete-mirror-bootstrap/select-root.sh",
+      "bytes": 2274,
+      "sha256": "6908efbeb978b6ec4ce706cb28671420d11d48f1fe2193e0e7cd58f943651b49"
+    },
+    {
+      "path": "hardware/ts431xeu/eyeq-buttons.py",
+      "bytes": 4443,
+      "sha256": "651d46fed35a1dbb9bed9ffdec605291f075fa0efc74a33c2b0a7b15ac99db86"
+    },
+    {
+      "path": "hardware/ts431xeu/eyeq-buttons.service",
+      "bytes": 403,
+      "sha256": "dbced8fbe8ab26aeb610bad11e7b7713b8570e345301e4db170f353216388aa6"
+    },
+    {
+      "path": "hardware/ts431xeu/eyeq-cooling.service",
+      "bytes": 307,
+      "sha256": "1fdfa1de5ba1395979f4de9ba2da5bf5dbf32f4b2e4b38a054de53cb75b10d53"
+    },
+    {
+      "path": "hardware/ts431xeu/eyeq-disk-leds.py",
+      "bytes": 7029,
+      "sha256": "97dec3b6ffb5a6155fa5f00d3b44bdddfe145b196f45432efec41d6b1db0a13f"
+    },
+    {
+      "path": "hardware/ts431xeu/eyeq-disk-leds.service",
+      "bytes": 475,
+      "sha256": "a4a0f852841b2e9a0ab05ffc2856d013c889edd5769287cc5146baad40240f14"
+    },
+    {
+      "path": "hardware/ts431xeu/eyeq-drive-green.service",
+      "bytes": 422,
+      "sha256": "af322817496fc1111fd724f30df226e37cad4b5c6f9e221fa2633de743bee2a9"
+    },
+    {
+      "path": "hardware/ts431xeu/eyeq-hwctl.py",
+      "bytes": 9826,
+      "sha256": "367a6fb2ddd5ca820b8842676a7ae00c981d89fe8524abe53868a06cf497fa92"
+    },
+    {
+      "path": "hardware/ts431xeu/eyeq-poweroff.c",
+      "bytes": 3679,
+      "sha256": "625e40b01a16cd47eab50b452b9737f34c6076a3aafbc97b9ca42b78f6c28125"
+    },
+    {
+      "path": "hardware/ts431xeu/eyeq-raid-event",
+      "bytes": 257,
+      "sha256": "a63a0db916dac631dbebc1a78ba84a1262a1ebbf90aaf04a786636762189daf9"
+    },
+    {
+      "path": "hardware/ts431xeu/factory-identity.h",
+      "bytes": 1266,
+      "sha256": "f31aca80b27df95f6f8522ee7858642578ec456b917d00ffaf3201945284f251"
+    },
+    {
+      "path": "hardware/ts431xeu/features-nas.config",
+      "bytes": 731,
+      "sha256": "2040ae346bfaeacb4ab3af461bbcbf9bddf2572bdaa0d6fddafaff9f693eb1a6"
+    },
+    {
+      "path": "hardware/ts431xeu/freeqnap-poweroff.c",
+      "bytes": 3642,
+      "sha256": "646107e2208c495b4cc6303346808c6376417546fad3540e14616f1b64f44aed"
+    },
+    {
+      "path": "hardware/ts431xeu/kernel.config",
+      "bytes": 3472,
+      "sha256": "454096127b9fba5e5b7dfe55cc85fa11d98e61abaf08d9023e4cf55cf6c556c5"
+    },
+    {
+      "path": "hardware/ts431xeu/mcu-safe-full.c",
+      "bytes": 2310,
+      "sha256": "40c6af3f179211d5cff84a6fde3d25ec590c0448235846dadb841bb7c997afc7"
+    },
+    {
+      "path": "hardware/ts431xeu/patches/0001-arm-alpine-ca15-ibe-experiment.patch",
+      "bytes": 1126,
+      "sha256": "ee99596a8773235dc522a228e6cdce844513b5258ed72ffa3b749361ab5cc3fe"
+    },
+    {
+      "path": "hardware/ts431xeu/restore-factory-macs.c",
+      "bytes": 3663,
+      "sha256": "0dc65e644c6f5fd9a85b86473490e927e0dbc5ffb8ef35eb469b91d1ff61a334"
+    },
+    {
+      "path": "hardware/ts431xeu/security-hardening.config",
+      "bytes": 461,
+      "sha256": "3d0280f0807b1782111652e1d78d09465612e43a1411874a9b214fa1e4106362"
+    },
+    {
+      "path": "hardware/ts431xeu/shutdown-melody.json",
+      "bytes": 339,
+      "sha256": "981cd602613f0119636f8301ff56f87c7ad8a9e7f5b4130cbe21dab39c590178"
+    },
+    {
+      "path": "installer/README.md",
+      "bytes": 4384,
+      "sha256": "46430745e87214753a0d54c477bb1dba1a2bb05b1fce9e7312d06cd1d26cf78f"
+    },
+    {
+      "path": "installer/artifacts.py",
+      "bytes": 2866,
+      "sha256": "53346834f04a973ce7f0d492900d848279bbef26ca75cfcffc7c78fe2a387b04"
+    },
+    {
+      "path": "installer/audit-base.py",
+      "bytes": 2359,
+      "sha256": "c2fa2f310245abf2e2a36a89b8614f5933f853ec5b142f548785d98d3d548856"
+    },
+    {
+      "path": "installer/audit-initramfs.py",
+      "bytes": 7210,
+      "sha256": "16b615538d4ce9134cb800115a81e2101b9f00402d4769572fdbd83766228298"
+    },
+    {
+      "path": "installer/backups.py",
+      "bytes": 5351,
+      "sha256": "63b6e1aafc23103096314692925e716f39bc5478c72e7acf9429227b16845001"
+    },
+    {
+      "path": "installer/build-base-rootfs.sh",
+      "bytes": 6169,
+      "sha256": "00d8fda518d0959f0e372b798a2b8197d6b06c9f22535740761a73c7f819bb26"
+    },
+    {
+      "path": "installer/build-generic-image.sh",
+      "bytes": 3905,
+      "sha256": "27efad484b64b389ca6fe92f6d77b0e6af222b723b9f9e5aa891739e46d5e632"
+    },
+    {
+      "path": "installer/capture.py",
+      "bytes": 8027,
+      "sha256": "5f50abcf9b76d2f569e7db6acee0834b59ac69e4f9c77bdaa6a8623716dfb963"
+    },
+    {
+      "path": "installer/core.py",
+      "bytes": 15045,
+      "sha256": "38cd29f7d82db0e5f2869ca1dbc8c955bb8e51465921adb3e42d5f1640142472"
+    },
+    {
+      "path": "installer/flash-backup.py",
+      "bytes": 5774,
+      "sha256": "5f18a21814dfdcd1ab4941c797ea03d8be4c30f5de665dbf83933aedca89e1a1"
+    },
+    {
+      "path": "installer/flash-install.py",
+      "bytes": 10019,
+      "sha256": "a3edb6abb8aded699a5185c948a413a3f8008cc6686c25c8b3470b76a46e515c"
+    },
+    {
+      "path": "installer/freeqnap.py",
+      "bytes": 16300,
+      "sha256": "a40a7c1851447c3a03be68fb1725f5f50e77fa429ca1de872648481f01922d13"
+    },
+    {
+      "path": "installer/recovery.py",
+      "bytes": 5212,
+      "sha256": "de541f2a682b48c4de129934239b7ee402911c1ff82198bcaf1373d6bfbc8794"
+    },
+    {
+      "path": "installer/session_status.py",
+      "bytes": 1733,
+      "sha256": "a3270eb56ef4e65e035f3066990c1d42d461a7a04f94e1caa6de39adb049204c"
+    },
+    {
+      "path": "installer/target/boot-policy.sh",
+      "bytes": 1486,
+      "sha256": "7e7edbdc068da0a66b7731ebf29d4149bbe038b917ec24850691cda728e8e212"
+    },
+    {
+      "path": "installer/target/boot-record.sh",
+      "bytes": 1009,
+      "sha256": "4aab945d57d5a6d262214c60620da873dcfd5fe8fe7994f343fd1bfc7189fc9e"
+    },
+    {
+      "path": "installer/target/credentials-dependency.conf",
+      "bytes": 80,
+      "sha256": "67a1e7b0b62c51cc2562a78cbd97d3cc1a399316b6eeaf26ae817674354be6b2"
+    },
+    {
+      "path": "installer/target/credentials.py",
+      "bytes": 6168,
+      "sha256": "6cd51bf46178bb79e80af53ba63ca7a89e6b79af72ed5435626d0d8ec25f3a8d"
+    },
+    {
+      "path": "installer/target/debian.sources",
+      "bytes": 313,
+      "sha256": "4b17b6cc81a89b08bd1167d9e76690571710d2fd34c7e491f86f0c883a498cb2"
+    },
+    {
+      "path": "installer/target/freeqnap-first-login.service",
+      "bytes": 519,
+      "sha256": "957df3583cddaf85eb6783a87a7637856062eba4ac9531d62eb213d2ccc24ee9"
+    },
+    {
+      "path": "installer/target/init",
+      "bytes": 1512,
+      "sha256": "a5d546ee0fba2abe740254981f034e8ce37eafd25df8ba9cb37799f1ce91a5d1"
+    },
+    {
+      "path": "installer/target/install-disks.py",
+      "bytes": 11868,
+      "sha256": "68eaa8ea9b73c606adc42beb9ae7e05c495df6c22ef1139eb5cbc652c814e834"
+    },
+    {
+      "path": "installer/target/inventory.sh",
+      "bytes": 1525,
+      "sha256": "7420b01a95221d5569a624307fa039a5458365f663f06a2efabe19b471137960"
+    },
+    {
+      "path": "installer/target/ram-debian.sh",
+      "bytes": 2390,
+      "sha256": "ef98369127acb192eb7bcdc6c7b9697008eaec643f174c292fe4158a620fe87d"
+    },
+    {
+      "path": "installer/target/read-mcu-identity.c",
+      "bytes": 1901,
+      "sha256": "acd51e714f483a839633d56a727944f97d5ade2f0a8bd41ee7a7908ac79da723"
+    },
+    {
+      "path": "installer/target/select-root.sh",
+      "bytes": 3778,
+      "sha256": "56078a7afe5a652705ba949587faf685da4d5ae05b8f0925096200eec8a86248"
+    },
+    {
+      "path": "installer/tests/factory_identity.c",
+      "bytes": 1106,
+      "sha256": "18eb09e037b2da5181f6cc514ef89487192c8b208b0c8d35654cca22e78ed9f1"
+    },
+    {
+      "path": "installer/tests/test_artifacts.py",
+      "bytes": 856,
+      "sha256": "cc37a37aa829b677320043ac3fffdf2fac8c80e9904b49dd842aa18ae472bb03"
+    },
+    {
+      "path": "installer/tests/test_backups.py",
+      "bytes": 3651,
+      "sha256": "da44f706c0985f19f0a2fbb5ae6b19af01329e1095b02058242c656abe9de584"
+    },
+    {
+      "path": "installer/tests/test_base_audit.py",
+      "bytes": 1505,
+      "sha256": "397545b0dc70cda32b0db0eeb7b3d620fa5c1b9dd5a1395e18ca6fd8cb43352c"
+    },
+    {
+      "path": "installer/tests/test_boot_policy.py",
+      "bytes": 2585,
+      "sha256": "c7ea1f6cdcb4bef1ad466aa158387adfa3504ed05beae86b1f21cc69d5e660ac"
+    },
+    {
+      "path": "installer/tests/test_capture.py",
+      "bytes": 2639,
+      "sha256": "e5a39c7a5967a402393d6f6823b870b7389676be72be65133e57a90d687f5128"
+    },
+    {
+      "path": "installer/tests/test_credentials.py",
+      "bytes": 3048,
+      "sha256": "d187268c285c1be65c73c6ddd63adcf2681d45c209e4f1e00dce76a89d2a73ac"
+    },
+    {
+      "path": "installer/tests/test_disk_install.py",
+      "bytes": 3198,
+      "sha256": "1aa9b2fbd94f3137cf92103144123b7e2e5b543a1b4f1c0ff02b89549d386a98"
+    },
+    {
+      "path": "installer/tests/test_flash_backup.py",
+      "bytes": 1542,
+      "sha256": "a2243e800a1e558d273cc9a296437dd83a73ab92df8237a06af1bd767cdf407a"
+    },
+    {
+      "path": "installer/tests/test_flash_install.py",
+      "bytes": 3117,
+      "sha256": "8e96ff1db6fa43e7b1aee1c873316b00524e867621afada7dd37764b51dcec39"
+    },
+    {
+      "path": "installer/tests/test_initramfs_audit.py",
+      "bytes": 3252,
+      "sha256": "192374a37facad325be02214b463058ff0201585a5f9e2a6b162cf34b064062d"
+    },
+    {
+      "path": "installer/tests/test_invariants.py",
+      "bytes": 7381,
+      "sha256": "3d5b8b6b608232f96eed03cad30db7da317cb8e32b852b4caa7dbf09be0e4207"
+    },
+    {
+      "path": "installer/tests/test_recovery.py",
+      "bytes": 2664,
+      "sha256": "e9a2a783c88587c857a1fc9bfa628bda2c7736fdf03be4d54786de966e10e20c"
+    },
+    {
+      "path": "installer/tests/test_session_status.py",
+      "bytes": 2119,
+      "sha256": "f63d1dd0961e394be83e772df35a9e1952f0c0d22fe01a990f9944aff6418908"
+    },
+    {
+      "path": "installer/tests/test_transfer.py",
+      "bytes": 6246,
+      "sha256": "4f130e5ebffc58ede4fbf4784f1f2a0212051201000f9f38531e71d7ff1ab63a"
+    },
+    {
+      "path": "installer/transfer.py",
+      "bytes": 8816,
+      "sha256": "03f61eb237bcd53af80b9926ccdd32880b74ed2a4df5865ebe35963f12f2258f"
+    },
+    {
+      "path": "licenses/GPL-2.0.txt",
+      "bytes": 18729,
+      "sha256": "f6b78c087c3ebdf0f3c13415070dd480a3f35d8fc76f3d02180a407c1c812f79"
+    },
+    {
+      "path": "licenses/PERSONAL-PHOTOS.md",
+      "bytes": 1314,
+      "sha256": "2e38dc85b148cb93d58a84726d68db25ec60650bbaa3878394267d0830594ffd"
+    },
+    {
+      "path": "licenses/README.md",
+      "bytes": 1402,
+      "sha256": "3239da1007be10399de94ae424b059e195e36ce9f4d844d522e29489e73e7066"
+    },
+    {
+      "path": "tests/book-voice.test.cjs",
+      "bytes": 2381,
+      "sha256": "52502aac4d6c7d87989bc6197dc50399a1230e98d7b4f5ab8c91136bade570f0"
+    },
+    {
+      "path": "tests/dashboard-loading.test.cjs",
+      "bytes": 3746,
+      "sha256": "ceacf7d9c55335534e08292d132398cf141f1acd58e156b85170aca743f4aca9"
+    },
+    {
+      "path": "tests/download-view.test.cjs",
+      "bytes": 845,
+      "sha256": "8104baf9169f2a2530ee2d7f55569d2a7f774bd11902289805bafbece2483a3c"
+    },
+    {
+      "path": "tests/file-desktop.test.cjs",
+      "bytes": 1898,
+      "sha256": "8f3dbe92b780f8e6c2437ba282a8859e0c3fdbba502df1b1cc83a9ac8ec1b06e"
+    },
+    {
+      "path": "tests/file-locations.test.cjs",
+      "bytes": 2242,
+      "sha256": "bff323e721a1871f65261e778914998b881f5f44ef4c45052cb5fa8d9bc54d01"
+    },
+    {
+      "path": "tests/health-alert-view.test.cjs",
+      "bytes": 595,
+      "sha256": "0d466d63e37db306f0b010ff31e0056de44330aaaba66fde51738e6d640ebff5"
+    },
+    {
+      "path": "tests/navigation.test.cjs",
+      "bytes": 1063,
+      "sha256": "c58417c1c96b620cafea91de2885730ec9f466b19ec1f88566f7f711643d0b86"
+    },
+    {
+      "path": "tests/pwa.test.cjs",
+      "bytes": 2007,
+      "sha256": "00b824dc3bf2dcd9cde682a3ffe4a1bf0e13b8ef826d9350654359a2ad775e53"
+    },
+    {
+      "path": "tests/social-share.cjs",
+      "bytes": 2407,
+      "sha256": "dec20afdc6de584cf079913fb256531920cf6deed17f4165ddc12ba809a1b8c8"
+    },
+    {
+      "path": "tests/storage-totals.test.cjs",
+      "bytes": 790,
+      "sha256": "b77a3250f1435fc178cd3130a3774057ca58a2e846df71ca7dd78a1649a14f01"
+    },
+    {
+      "path": "tests/test_accounts.py",
+      "bytes": 15787,
+      "sha256": "b021fc4ecbbbfa7ea3d81c188ce93bed4de35f73222807c4666ff9077ba5a73c"
+    },
+    {
+      "path": "tests/test_agents.py",
+      "bytes": 6152,
+      "sha256": "ab9422170093566869127b669172cbbc6610070dd33ac940857f1f81f6eda5d1"
+    },
+    {
+      "path": "tests/test_alert_rules.py",
+      "bytes": 1389,
+      "sha256": "3d0085630b35b1a33f9894bd77a8b7c8986b328669a14e33890d6ccba2bcd3ea"
+    },
+    {
+      "path": "tests/test_archives.py",
+      "bytes": 6906,
+      "sha256": "528f1d7c40817d266721f3bad7316dd1ff725881bf18e6a1efcd69f54d00f260"
+    },
+    {
+      "path": "tests/test_array_recovery.py",
+      "bytes": 6566,
+      "sha256": "9da1dfb743b490aacc05bc722dd0303f660a900a769bf5114f9064cf0fe35177"
+    },
+    {
+      "path": "tests/test_backup_schedules.py",
+      "bytes": 6935,
+      "sha256": "9418a65fb811da1f39bc15a7ff7463bf5642cdf8d3b67479e2e8beaf5b30b724"
+    },
+    {
+      "path": "tests/test_cooling_controls.py",
+      "bytes": 2025,
+      "sha256": "ddb380f413d10bb433e9bbfff68e802ee7252d4d1d4ea04bf9db375b9f16ba06"
+    },
+    {
+      "path": "tests/test_cooling_fault_scope.py",
+      "bytes": 1140,
+      "sha256": "91f0a93c6c053e20560012b639e66774c11afcbe71522e7a12264419e28d4b94"
+    },
+    {
+      "path": "tests/test_cooling_history.py",
+      "bytes": 1649,
+      "sha256": "26a53e5de16923644589a7d3d301067d22bf7f68d346c9d1b16a82ca4f5cdf95"
+    },
+    {
+      "path": "tests/test_cooling_load_scope.py",
+      "bytes": 1083,
+      "sha256": "9ae35f3e7cc19af15d2a59fe75e3acb061ef75c2a17e904198a1c2829f6616b4"
+    },
+    {
+      "path": "tests/test_cooling_policy.py",
+      "bytes": 1579,
+      "sha256": "ddab4b1efef48fa86623f72ae75cdc880708cda9768bc5adffbd288ccfab606c"
+    },
+    {
+      "path": "tests/test_cooling_runtime.py",
+      "bytes": 4500,
+      "sha256": "3bfa660b11bcd586e23032c54a4b2594e8bfd3db501b42849874e0546403ade3"
+    },
+    {
+      "path": "tests/test_crypto_profiles.py",
+      "bytes": 660,
+      "sha256": "895eb6f4e1b1fe652af827b157be4399119b306c35a651929b1c85942be56b80"
+    },
+    {
+      "path": "tests/test_ddns.py",
+      "bytes": 5497,
+      "sha256": "76c917137e6fa22316a94627578448fd80d4e948ed47e6ebc6e995be7ccd7832"
+    },
+    {
+      "path": "tests/test_disk_reports.py",
+      "bytes": 1423,
+      "sha256": "b9d79401fd054ea6ae4cad96f89661533a6b678b9076e1760e8f94249dd0e913"
+    },
+    {
+      "path": "tests/test_dlna_options.py",
+      "bytes": 1163,
+      "sha256": "9da58876851cce2cb7342760096c4741187de81ea318088cf6d1836eb05f1598"
+    },
+    {
+      "path": "tests/test_external.py",
+      "bytes": 17177,
+      "sha256": "5bb7814a4b030817a3a7ca2d9c1be667ac7fd3e35597d0622fdd93ca5ab3f094"
+    },
+    {
+      "path": "tests/test_fan_guard.py",
+      "bytes": 1650,
+      "sha256": "e31a12e7d5e9b1d5a1a6361eee60d47b66e9016ce00f06447d6243ad03ca34da"
+    },
+    {
+      "path": "tests/test_file_metadata.py",
+      "bytes": 3311,
+      "sha256": "fa19586047b572ff01053e5a1f03cba7b773eeb468d7207a4342a12718787eb2"
+    },
+    {
+      "path": "tests/test_fileops.py",
+      "bytes": 9503,
+      "sha256": "99f75d03d6e490550ec348f53d904965b94dcac7353070ae028906e05f890c35"
+    },
+    {
+      "path": "tests/test_foreign.py",
+      "bytes": 8250,
+      "sha256": "59a4f08652aee5b2fb71ff3d028913a12536730da180c98a375df5000259f544"
+    },
+    {
+      "path": "tests/test_frontpanel.py",
+      "bytes": 1460,
+      "sha256": "ed9912a6006dbe7d8f41939096ba1d43a82cc708ea6e533e03e3b3f0ffbac712"
+    },
+    {
+      "path": "tests/test_gpt.py",
+      "bytes": 2953,
+      "sha256": "21e234006fad8c01c37cc2a0b79ff1d51a2b0c341eb77cd30221e14d727f7767"
+    },
+    {
+      "path": "tests/test_hardening_policy.py",
+      "bytes": 2968,
+      "sha256": "390e0ddfa6d5cc6a0d485239f27675a36d80f327c6b309b86130db0352b35f7d"
+    },
+    {
+      "path": "tests/test_health.py",
+      "bytes": 5902,
+      "sha256": "fd60c82a0ee82b7eb15342ada0067e1ec0f4229fb7f26b459a60f732c7751a26"
+    },
+    {
+      "path": "tests/test_kernel_build_profiles.py",
+      "bytes": 1567,
+      "sha256": "719828a195c024aa28338a110b409ac1fe2ce5bbfcc88a51b3583cef5a1f180c"
+    },
+    {
+      "path": "tests/test_kernel_hardening.py",
+      "bytes": 3456,
+      "sha256": "557e7a82877707593edd8ba2ce666f4c9d6e869ab6aaccedf6a5d7d927dad3d4"
+    },
+    {
+      "path": "tests/test_library_storage.py",
+      "bytes": 6461,
+      "sha256": "f7b0ad58ffbdd6e4d59056f82e03ae8f66afe6e7b0354741d7cc5b8e425231c0"
+    },
+    {
+      "path": "tests/test_local_recovery.py",
+      "bytes": 3368,
+      "sha256": "d557db9ef05f3a92c7c0f583b92d21faaa08a12ab1f230e738f806f05c7281da"
+    },
+    {
+      "path": "tests/test_management.py",
+      "bytes": 13765,
+      "sha256": "f354f7f17e8a7cdad781a1b1624bca3885274ceee0121267cb66b87e21644ea0"
+    },
+    {
+      "path": "tests/test_management_tls.py",
+      "bytes": 5059,
+      "sha256": "aec4954a14977710d9e47aead855f361b2ea1e34d37fe481bb331e52ec100b7a"
+    },
+    {
+      "path": "tests/test_media_decoder.py",
+      "bytes": 3128,
+      "sha256": "1dbf2dcb699685b88a9ea893e243148f99779527ff067982d2ac43358ef3948d"
+    },
+    {
+      "path": "tests/test_media_http.py",
+      "bytes": 6014,
+      "sha256": "445efeb4b20a10cd8a18862dd71b4a1be0fac168a12bf8974903113a987fd836"
+    },
+    {
+      "path": "tests/test_media_library.py",
+      "bytes": 3315,
+      "sha256": "d922c3c4ebc1877d531dcbd6022f42dce897eeb4f3bb9de4f36fcf3abc71a1d2"
+    },
+    {
+      "path": "tests/test_metrics.py",
+      "bytes": 1727,
+      "sha256": "b3e67d3a7558b78bcacde39f2e36480e34da02dadb9dfdd885d656a726a3e8f4"
+    },
+    {
+      "path": "tests/test_myradio.py",
+      "bytes": 15692,
+      "sha256": "7c0f79040ce962f57ffb03aee277b80784eb031b4e52bce4b5d2799bac4a2aa7"
+    },
+    {
+      "path": "tests/test_nas.py",
+      "bytes": 13319,
+      "sha256": "796afddd9988bd3c151816c071862913f4c73ae8f6e42922fd6bd32348bfd4ba"
+    },
+    {
+      "path": "tests/test_network.py",
+      "bytes": 10058,
+      "sha256": "d0ca1888b776a1a6523b99dc1f3c6616c779870f9ba303b90d80d11e387a5c81"
+    },
+    {
+      "path": "tests/test_network_control.py",
+      "bytes": 8290,
+      "sha256": "bee673c0d413ac2d9906c768f820e7117686082a2dfebfc11139dcb9eed8ce03"
+    },
+    {
+      "path": "tests/test_notifications.py",
+      "bytes": 6565,
+      "sha256": "4b27de763f4cd4018b215b3aed781b46c1da4b61e1044cc5dd26249ae19b2b5c"
+    },
+    {
+      "path": "tests/test_personal_photos.py",
+      "bytes": 10219,
+      "sha256": "2d94f553bcf41f2356d1311371013513e1a756e7bf33059802b7e8e66ef44ed9"
+    },
+    {
+      "path": "tests/test_players.py",
+      "bytes": 6580,
+      "sha256": "a46b1435eec6a5909d87e66791a6e07b3d5e7abff5b229de2dd6e00851012440"
+    },
+    {
+      "path": "tests/test_pool_browser.py",
+      "bytes": 2333,
+      "sha256": "21e0453c69d32996d307b8070900cedf682cc3e05da81c1f3e77b7623444e83b"
+    },
+    {
+      "path": "tests/test_push.py",
+      "bytes": 4935,
+      "sha256": "03e33e833e9c0676bb76199572732fc4769c3e5abecb94a53f3a01cd4a609c31"
+    },
+    {
+      "path": "tests/test_raid_completion_state.py",
+      "bytes": 1280,
+      "sha256": "6b13ad0a53cd53a0199556f2dc2b8b0a2a0a10ab040c26603bb8b1f863617cd6"
+    },
+    {
+      "path": "tests/test_social_media.py",
+      "bytes": 4566,
+      "sha256": "18304160c9bb69e2369195c077bc1c4187242293ba602a06346a4799be8f676d"
+    },
+    {
+      "path": "tests/test_split_storage.py",
+      "bytes": 4768,
+      "sha256": "237128c234af8955b4df5959bedafae0e5355cff795bb35f33d430ccd35e189e"
+    },
+    {
+      "path": "tests/test_status_light.py",
+      "bytes": 878,
+      "sha256": "f5f6dc7da431273671b9000c6f2f4b5713449b507cfa99091fdfe5ec920100b9"
+    },
+    {
+      "path": "tests/test_storage_boundary.py",
+      "bytes": 3275,
+      "sha256": "701c6ab1e21f1100c0216dd853482ba3390c298630984f814bed0267517e89da"
+    },
+    {
+      "path": "tests/test_storage_startup.py",
+      "bytes": 2728,
+      "sha256": "e028ae727610ebf6dcc3ca56736e8420065744bde9564f9a6275dea563117268"
+    },
+    {
+      "path": "tests/test_system_recovery.py",
+      "bytes": 7486,
+      "sha256": "f8c489704a81f46a1066bd27a03369df50c5febb26c2d8ca8b7b61dd4e65a473"
+    },
+    {
+      "path": "tests/test_usb_pcie.py",
+      "bytes": 990,
+      "sha256": "93f67d457d97db88e1e355f27c9f4e7140abead7e5db2c2edc914c47f688cadd"
+    },
+    {
+      "path": "tests/test_vpn_peers_view.py",
+      "bytes": 1056,
+      "sha256": "210c952633ee4ba80ae8411ad45d311fdd5e400d384ae6447e2f1f11a6cb4134"
+    },
+    {
+      "path": "tests/test_watchdog_health.py",
+      "bytes": 1119,
+      "sha256": "716f58ecb5105f9d3724ca3e014e6aae1beaa67aab711b29b0afd298135e1316"
+    },
+    {
+      "path": "tests/test_watchdog_policy.py",
+      "bytes": 1806,
+      "sha256": "87081ff776c319eb683a50bb148688386457c332495313308be77057df3b762f"
+    },
+    {
+      "path": "tools/backup-failure-smoke.py",
+      "bytes": 6608,
+      "sha256": "b8eb68f656e19b8f580a843e432eb1df4668d54a36a5ab4ec043f270c0190152"
+    },
+    {
+      "path": "tools/build-apfs-reader.sh",
+      "bytes": 1512,
+      "sha256": "c04b15385078a203944c0ce267414fd06ff4dc3d51931fdbef69230d9af5bf6e"
+    },
+    {
+      "path": "tools/build-native-kernel.sh",
+      "bytes": 9137,
+      "sha256": "324331b243ab15cc1d41f98b1ed6b7e952c225b6b74a360e159309a12f080db2"
+    },
+    {
+      "path": "tools/build-optional-module.sh",
+      "bytes": 2045,
+      "sha256": "bdfbc7f1e905260e9fc831e4d83204095d45c455ed6860b86159842c5aabdf07"
+    },
+    {
+      "path": "tools/build-share-image.swift",
+      "bytes": 2384,
+      "sha256": "55dd0bea73d0beced71a4cdd1efc9b389ff549533dd5ca268a333d6953682a51"
+    },
+    {
+      "path": "tools/check-hardening.py",
+      "bytes": 3601,
+      "sha256": "8e323c0a2c3672e95c8a5dc6c18fbad8f0ea92ebe4d9eb66aed1855d8c8fab91"
+    },
+    {
+      "path": "tools/check-kernel.py",
+      "bytes": 2202,
+      "sha256": "ada82b98e4c77cec3b8df5e2d04c265ec108efd788346202706761b923d0d6bc"
+    },
+    {
+      "path": "tools/check-package.py",
+      "bytes": 1724,
+      "sha256": "0a3270c423fc6801f2f92f0d2009946d6d6223061a7eeb026dbcdc6c54732ac5"
+    },
+    {
+      "path": "tools/check-showcase.py",
+      "bytes": 2207,
+      "sha256": "08ab01708326bd2edc8d616067dec20b0a536046189c760414cc59f2ca0f71c0"
+    },
+    {
+      "path": "tools/configure-smartd.py",
+      "bytes": 2872,
+      "sha256": "850818cbd494159573bfc8d2ba6dfba1477d3584b890b4c95c966cb3aa74726d"
+    },
+    {
+      "path": "tools/cooling-fault-validation.py",
+      "bytes": 7038,
+      "sha256": "49c6061de2b61b4227a0f1e464863e21723eec81db8b87fe8fd906c1b6d666b1"
+    },
+    {
+      "path": "tools/cooling-load-validation.py",
+      "bytes": 8335,
+      "sha256": "aef8dccb1b19808032e0b7e806ff085d3b2697f28757fdd1b88c4eae4b0ded9c"
+    },
+    {
+      "path": "tools/download-smoke.py",
+      "bytes": 6709,
+      "sha256": "8454aef0e2183ed7fea71848df7ab9749e7029d603434bb12d24d9d9cabdf332"
+    },
+    {
+      "path": "tools/external-smoke.py",
+      "bytes": 5734,
+      "sha256": "d17f05947fe6dd41d7d4b03e6a1fcb1629c311c00b18fa6f9bbb678fa424f6fe"
+    },
+    {
+      "path": "tools/external-split-smoke.py",
+      "bytes": 5452,
+      "sha256": "fb8d04b30b561534ad13e59b935d7ad894f81adc6695706c6e17a91a50e54cef"
+    },
+    {
+      "path": "tools/fan-step-validation.py",
+      "bytes": 7247,
+      "sha256": "97a2ccf1dbcde433f5019a3d0d4490cb535e134d3d31ed54d4e743d8a7b7934a"
+    },
+    {
+      "path": "tools/foreign-reader-fixture.py",
+      "bytes": 5202,
+      "sha256": "198e81a9e85d1972525be2e1cba8414a6d0eb4f1e7b678994fae6831e3d3cfe9"
+    },
+    {
+      "path": "tools/foreign-unlock-smoke.py",
+      "bytes": 4124,
+      "sha256": "03b2813c8e8fc67d9ad77002d9b371c7145e07ed4575ea97672e62415825562b"
+    },
+    {
+      "path": "tools/kernel-network-cycle.py",
+      "bytes": 5435,
+      "sha256": "4498b0adac74fcd60f1671b7ac01c6b39a124d9ab7d263621cd60976c9099ffc"
+    },
+    {
+      "path": "tools/local-https.py",
+      "bytes": 4498,
+      "sha256": "6162be2a06909d5fbff47bde1a17e31eb1b202436c22432220e156947378fe51"
+    },
+    {
+      "path": "tools/native-communications-smoke.py",
+      "bytes": 9130,
+      "sha256": "ff88f5b3ed60285407a347c9ac0fea553f4b0d87b854dc57e6a817405f9d3d7b"
+    },
+    {
+      "path": "tools/native-data-member-validation.py",
+      "bytes": 10084,
+      "sha256": "a9e3f6de398ecc15356dbcf82e0769d69fa53fd40d67aef574a27829345848a6"
+    },
+    {
+      "path": "tools/native-data-volume-smoke.py",
+      "bytes": 12936,
+      "sha256": "11c435e411452dc63215749620875bba8e88b4d29b9663488f845f7efc99b043"
+    },
+    {
+      "path": "tools/native-https-smoke.py",
+      "bytes": 6078,
+      "sha256": "b05ff5a0c30a0a310c4045dc752a5dc78c18bd5ecac9a691f360807807dad885"
+    },
+    {
+      "path": "tools/native-nas-smoke.py",
+      "bytes": 14201,
+      "sha256": "518a49b813905defc13a00000ba040b247e78b25f32ad42137c63b66e3b07d67"
+    },
+    {
+      "path": "tools/native-raid-recovery-smoke.py",
+      "bytes": 6588,
+      "sha256": "58d9598e9babd47e8575b5ed5bc045f95a6a5670196e00cbe106840800288a5d"
+    },
+    {
+      "path": "tools/native-recovery-smoke.py",
+      "bytes": 3048,
+      "sha256": "428af3cd4be2f38e2a4a908dadd16541c514632a0d0b99adf8b90bea217b5756"
+    },
+    {
+      "path": "tools/native-root-survivor-smoke.py",
+      "bytes": 3947,
+      "sha256": "27509ec029d2e7468e984ce8f16506e381e8d4a3ccb0583a16658d7281427831"
+    },
+    {
+      "path": "tools/native-split-raid-smoke.py",
+      "bytes": 4430,
+      "sha256": "7eba4771196f07df9dbdd2c120b506a7401370ce6466134b70b5c3d88df4345b"
+    },
+    {
+      "path": "tools/native-usb-crypto-validation.py",
+      "bytes": 12798,
+      "sha256": "06a4ed2a6b40a0dcf3dcf15e8a02b309980768d56ec7b322a35c7650358d1eff"
+    },
+    {
+      "path": "tools/network-smoke.py",
+      "bytes": 12665,
+      "sha256": "e8b95f053c9784ac5f5632e8b5f237c9507ab928ce55e3238deaed5d8c76b5da"
+    },
+    {
+      "path": "tools/os-expand-loop-smoke.py",
+      "bytes": 5314,
+      "sha256": "b18624045b05985ff7d9c0f7f35e77dfadf29e3bda69ec255ff996c1303b35cd"
+    },
+    {
+      "path": "tools/os-expansion-rescue-init",
+      "bytes": 1060,
+      "sha256": "2d6a2c591c5dbe7efb8171312f93ebc8ccf4c89b1d9c58f8c2b4b9eb65f5423e"
+    },
+    {
+      "path": "tools/package-console.py",
+      "bytes": 928,
+      "sha256": "151b485819f86b7df65830734c949dae3966f0d55765588d2935b3e53f0e2969"
+    },
+    {
+      "path": "tools/package-review.py",
+      "bytes": 2696,
+      "sha256": "bfbe10bb8e8ec6eec74c750d861e12b0d727c0559b82e06c07b354f640b5f9cb"
+    },
+    {
+      "path": "tools/prepare-screenshots.py",
+      "bytes": 2136,
+      "sha256": "2db07c9c5845319f15876674c5fd7d815c6fbfaa3310fed08a10dc0ee5c240e4"
+    },
+    {
+      "path": "tools/private-lan-smoke.py",
+      "bytes": 9432,
+      "sha256": "222d8dcf57584775dab724d0540194ad65b8151d143e2b9e805c7c220348181a"
+    },
+    {
+      "path": "tools/raid_completion_state.py",
+      "bytes": 944,
+      "sha256": "747c75f6ce69497f5ca5a3f993a6640e37f3d15cbda1113b51ec4d94751aaa3c"
+    },
+    {
+      "path": "tools/redact-photos.py",
+      "bytes": 2555,
+      "sha256": "c467e588e5005f8a56e2cfc5a6235a75630363aef6348dc4aba121a216cbcc51"
+    },
+    {
+      "path": "tools/render-pwa-icons.py",
+      "bytes": 1664,
+      "sha256": "9796a58295421572e11411de8a0327e6888698a4558c53688e917a151741bf57"
+    },
+    {
+      "path": "tools/systemd-mount-smoke.py",
+      "bytes": 4101,
+      "sha256": "b64d21b0aa8457264ef7ca3e665dff5383b5a59eedcb25aa98ec1fb965dd92c9"
+    },
+    {
+      "path": "tools/torrent-failure-smoke.py",
+      "bytes": 9013,
+      "sha256": "a9da8384381ca293c044daa7f9e6ba1936d126a8407eee02862be556f9381a6a"
+    },
+    {
+      "path": "tools/usb-pcie-workaround.py",
+      "bytes": 1856,
+      "sha256": "7aefc29967ee1e1b1aaba97c180da5ff0aa6f39bee3c4536f6cedccc9d7434d2"
+    },
+    {
+      "path": "tools/watchdog-ram-probe.c",
+      "bytes": 5325,
+      "sha256": "dd784404d6a2dbcb71fe3b44c491934733a617f44759375f530e3f1fc830af6b"
+    },
+    {
+      "path": "tools/watchdog-rescue-init",
+      "bytes": 1004,
+      "sha256": "90203f8962f8fd20cb1a204b281d01589652e8341fde79f8a405a0d011eae12e"
+    },
+    {
+      "path": "web/accounts.js",
+      "bytes": 15906,
+      "sha256": "08a9a2bd0913538fb9cfb70d91d89bf4cc1ea8b717f5af33f28f7eb1d2ea6505"
+    },
+    {
+      "path": "web/agents.js",
+      "bytes": 7876,
+      "sha256": "d8c2846a07d500822c07495bee47a490f05d12ffe1d10ce0dfe2338795006fe9"
+    },
+    {
+      "path": "web/app.js",
+      "bytes": 187956,
+      "sha256": "a5813b6aaf8cfd65a8672aedc50b4646352254aff4eb16d21ca775806ee6e18d"
+    },
+    {
+      "path": "web/array-recovery.js",
+      "bytes": 5841,
+      "sha256": "44806664a439dcca4fd011b6bd55b399f2537f47370beb74ea68f084320d0983"
+    },
+    {
+      "path": "web/ddns.js",
+      "bytes": 5333,
+      "sha256": "efd9b3161be9210fb42fa92658b93c1b2756f154752897b10aed48200e9d7dc8"
+    },
+    {
+      "path": "web/demo-media/audio.wav",
+      "bytes": 64044,
+      "sha256": "20eaebffe1816e0ffa6f7f854f5ef4ea80d5349faaf0ce1fec1b713e7fde58fa"
+    },
+    {
+      "path": "web/demo-media/picture.png",
+      "bytes": 11205,
+      "sha256": "6ba78be955f0bb86670dbb1b3a22881476db9aadc3ee8a7bbf541688fc9dca9c"
+    },
+    {
+      "path": "web/demo-media/video.mp4",
+      "bytes": 66007,
+      "sha256": "bc2804b6101987ae91572fc49d3a46b2193bad00e07f9b8a515cabfd1f25f8d0"
+    },
+    {
+      "path": "web/file-actions.js",
+      "bytes": 4121,
+      "sha256": "ca23588575e1982dc7157563ed107cd5292109196e266e6fd5e3069ef5b1d49d"
+    },
+    {
+      "path": "web/file-desktop.js",
+      "bytes": 3848,
+      "sha256": "d686e98384cefd57b654f4d40842e87385580eeb2039dae42af09a95df25ed58"
+    },
+    {
+      "path": "web/file-locations.js",
+      "bytes": 1922,
+      "sha256": "3e17e5204a27465baf71758254f01a04258dd934049b617e9aff2080390639e9"
+    },
+    {
+      "path": "web/health.js",
+      "bytes": 5211,
+      "sha256": "a7dce2af2818a30320c2f9e3554c836da3c8e45367125fe78abc109413410527"
+    },
+    {
+      "path": "web/icon-192.png",
+      "bytes": 17322,
+      "sha256": "1c466e5e31c426b666f4d73940cafbdfd680041974bba6252b56a431d27d696c"
+    },
+    {
+      "path": "web/icon-512.png",
+      "bytes": 49549,
+      "sha256": "7d43d560c60d00f41dea4034706538552a17be5a3df9b96f95c1ea82ef5d836f"
+    },
+    {
+      "path": "web/icon.svg",
+      "bytes": 332,
+      "sha256": "b4f52e64ff75955159824889423802252b82187044a0047c132ef478ccba5002"
+    },
+    {
+      "path": "web/index.html",
+      "bytes": 4873,
+      "sha256": "461b2c594b271b1284a2105bf69a3ae7057ce5d602999ca8786e874664ff0225"
+    },
+    {
+      "path": "web/manifest.webmanifest",
+      "bytes": 450,
+      "sha256": "49c3f5b260774884c83f73539685f66dedc80748366fb3dbc5f120ef5498cd8f"
+    },
+    {
+      "path": "web/metadata-editor.js",
+      "bytes": 6936,
+      "sha256": "eab84a09e388b6b683897b73cb24836df2fae2f68574dbbeb22dfcb425c6e7de"
+    },
+    {
+      "path": "web/myradio.js",
+      "bytes": 41112,
+      "sha256": "2e7250083b54db5ea1f2fea6e02d9cf26843971c8002837aa6393384978f2b90"
+    },
+    {
+      "path": "web/navigation.js",
+      "bytes": 2934,
+      "sha256": "29beca8c4fe95fbff4aabf64b393a1d9207560d09bd4ca2615240c51c21ebb6d"
+    },
+    {
+      "path": "web/notifications.js",
+      "bytes": 9265,
+      "sha256": "3a62f38620386d98b29d4745a8f8153ff67e13747b44d0fd9a01e933cc5b5afe"
+    },
+    {
+      "path": "web/photo-land.json",
+      "bytes": 138160,
+      "sha256": "9e0729ee253ca7d7a5c4ae9395fb1902264c5377c52e224d13dd85010e2835d9"
+    },
+    {
+      "path": "web/photos.js",
+      "bytes": 24814,
+      "sha256": "430fc5da31b2d26726bd278df814dcb23bfd48967e98e9fc897d5031f62703f1"
+    },
+    {
+      "path": "web/social-share.js",
+      "bytes": 4751,
+      "sha256": "29dea0b21fdf4b4e95a1dc0db6d5c1caa97dd4cd538d8fdd68d95209866fa5fa"
+    },
+    {
+      "path": "web/style.css",
+      "bytes": 61186,
+      "sha256": "64e8910ba61d5627bdc911a8a90ce4f67abff70f29a785aadb691e5e7d29d414"
+    },
+    {
+      "path": "web/sw.js",
+      "bytes": 1208,
+      "sha256": "80bd2630f7f483d6f3f512d1d2d4fdb6c976f7c4fcabf5b9e92bf4b2831b493e"
+    },
+    {
+      "path": "web/ts431xeu-front.svg",
+      "bytes": 3553,
+      "sha256": "886d686e7ff98a66922a79ee2b0a5be7a8592e65430e020c6418221d18f35972"
+    }
+  ]
+}

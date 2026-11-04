@@ -12,7 +12,7 @@ class MediaHTTPTests(unittest.TestCase):
   class Broker:
    def request(self,action,payload):
     if action in ('files.read','files.pool-read','external.session-read'):return {'data_base64':base64.b64encode(test.data[payload['offset']:payload['offset']+payload['count']]).decode(),'etag':'stable','total_bytes':len(test.data),'modified_at':1700000000}
-    if action=='photos.read':return {'filename':'fixture.mp4','data_base64':base64.b64encode(test.data[payload['offset']:payload['offset']+payload['count']]).decode(),'etag':'photo-fixture','total_bytes':len(test.data)}
+    if action in ('photos.read','myradio.read','raid.backup-read'):return {'filename':'fixture.mp4','data_base64':base64.b64encode(test.data[payload['offset']:payload['offset']+payload['count']]).decode(),'etag':'photo-fixture','total_bytes':len(test.data)}
     if action=='files.bundle-info':return {'ticket':payload['ticket'],'filename':'files.zip','roots':[{'path':'test','name':'test'}]}
     if action=='files.bundle-node':return {'directory':False,'bytes':len(test.data),'modified_at':1700000000,'etag':'stable'}
     if action=='files.bundle-read':return self.request('files.read',payload)
@@ -48,3 +48,13 @@ class MediaHTTPTests(unittest.TestCase):
   self.assertEqual(self.request(path,authorized=False)[0],401)
   code,headers,data=self.request(path,Range='bytes=2-5')
   self.assertEqual((code,data),(206,b'2345'));self.assertEqual(headers['Cache-Control'],'no-store');self.assertEqual(headers['Cross-Origin-Resource-Policy'],'same-origin')
+
+ def test_private_radio_and_recovery_backup_routes_keep_auth_and_ranges(self):
+  for path in ['/api/radio-file?id='+'a'*32+'&inline=1','/api/raid-backup?id='+'b'*32]:
+   self.assertEqual(self.request(path,authorized=False)[0],401)
+   code,headers,data=self.request(path,Range='bytes=1-3');self.assertEqual((code,data),(206,b'123'));self.assertEqual(headers['Cache-Control'],'no-store')
+  self.assertTrue(self.request('/api/radio-file?id='+'a'*32+'&inline=1&download=1')[1]['Content-Disposition'].startswith('attachment'))
+ def test_station_stream_requires_browser_session_and_new_assets_are_public_code_only(self):
+  self.assertEqual(self.request('/api/radio-stream?id='+'a'*32,authorized=False)[0],401)
+  for path in ['/navigation.js','/myradio.js','/array-recovery.js']:
+   code,headers,body=self.request(path,authorized=False);self.assertEqual(code,200);self.assertIn('javascript',headers['Content-Type'])

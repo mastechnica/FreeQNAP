@@ -4,7 +4,9 @@ from http.cookies import SimpleCookie, CookieError
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit, parse_qs, unquote
-from . import auth, backups, demo, inventory
+from . import auth, backups, demo, inventory, accounts, library_shares
+from .identity import Identity
+from .personal_access import Gateway as PersonalGateway
 from .state import State
 from .agents import Agents, Denied, Limited, PLAYER_OPERATIONS
 from .players import Players
@@ -15,8 +17,10 @@ WEB = Path(__file__).resolve().parents[1] / 'web'
 def handler(state, destination, snapshot=None, preview=False, broker=None, origins=()):
     from .nas.broker import Client
     nas = broker or Client()
+    identity = Identity(state,origins)
     agents = Agents(state)
     players = Players(state,nas,agents)
+    radio_slots=threading.BoundedSemaphore(4)
     if not preview:players.resume()
 
     class Handler(BaseHTTPRequestHandler):
@@ -52,11 +56,36 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                 return None
             return auth.session(state, token)
 
+        def gateway(self):
+            query=parse_qs(urlsplit(self.path).query);share=self.headers.get('X-Library-Share') or query.get('shared',[None])[0]
+            return PersonalGateway(nas,state,self.authenticated,share,self.headers.get('X-Personal-User'))
+
+        def redirect(self,url,cookie=None):
+            self.send_response(303);self.send_header('Location',url);self.send_header('Cache-Control','no-store');self.send_header('Referrer-Policy','no-referrer')
+            if cookie:self.send_header('Set-Cookie',cookie)
+            self.send_header('Content-Length','0');self.end_headers()
+
+        def session_cookie(self,token):return 'freeqnap_session='+token+'; HttpOnly; SameSite=Strict; Path=/; Max-Age=43200'+('; Secure' if self.headers.get('X-Forwarded-Proto')=='https' else '')
+
+        def identity_get(self,path):
+            if path not in ('/auth/oidc/start','/auth/oidc/callback'):return False
+            if self.client_address[0] not in ('127.0.0.1','::1') or self.headers.get('X-Forwarded-Proto')!='https':self.send(403,{'error':'Use trusted HTTPS for cloud sign-in'});return True
+            try:
+                if path.endswith('/start'):
+                    url,binding=identity.begin();self.redirect(url,'freeqnap_oidc='+binding+'; HttpOnly; SameSite=Lax; Secure; Path=/auth/oidc/; Max-Age=300')
+                else:
+                    query=parse_qs(urlsplit(self.path).query);cookies=SimpleCookie(self.headers.get('Cookie',''));session=self.authenticated()
+                    result=identity.finish(query.get('state',[''])[0],query.get('code',[''])[0],cookies['freeqnap_oidc'].value,session['user'] if session else None)
+                    self.redirect('/#account' if result.get('linked') else '/#myradio',self.session_cookie(result['token']) if result.get('token') else 'freeqnap_oidc=; HttpOnly; SameSite=Lax; Secure; Path=/auth/oidc/; Max-Age=0')
+            except (ValueError,OSError,KeyError,CookieError):self.send(400,{'error':'Cloud sign-in could not be completed. Use local sign-in and check the provider/link settings.'})
+            return True
+
         def do_GET(self):
             if not self.safe_host():
                 self.send(403, {'error': 'Unrecognized host'})
                 return
             path = urlsplit(self.path).path
+            if self.identity_get(path):return
             if path.startswith('/api/agent/v1'):
                 self.agent_request(path)
                 return
@@ -64,10 +93,10 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
             if path in tutorial:
                 filename,kind=tutorial[path];source=WEB.parent/'docs'/'tutorial'/filename
                 if not source.is_file():self.send(404,{'error':'Tutorial asset is not installed'});return
-                raw=source.read_bytes();self.send_response(200);self.send_header('Content-Type',kind);self.send_header('Content-Length',str(len(raw)));self.send_header('X-Content-Type-Options','nosniff');self.send_header('Content-Security-Policy',"default-src 'self'; style-src 'self'; frame-ancestors 'none'");self.end_headers();
+                raw=source.read_bytes();self.send_response(200);self.send_header('Content-Type',kind);self.send_header('Content-Length',str(len(raw)));self.send_header('X-Content-Type-Options','nosniff');self.send_header('Content-Security-Policy',"default-src 'self'; style-src 'self'; frame-ancestors 'self'");self.end_headers();
                 if self.command!='HEAD':self.wfile.write(raw)
                 return
-            assets={'/ts431xeu-front.svg':('ts431xeu-front.svg','image/svg+xml'),'/':('index.html','text/html; charset=utf-8'),'/style.css':('style.css','text/css'),'/app.js':('app.js','text/javascript'),'/photos.js':('photos.js','text/javascript'),'/photo-land.json':('photo-land.json','application/json'),'/agents.js':('agents.js','text/javascript'),'/file-desktop.js':('file-desktop.js','text/javascript'),'/file-locations.js':('file-locations.js','text/javascript'),'/health.js':('health.js','text/javascript'),'/notifications.js':('notifications.js','text/javascript'),'/ddns.js':('ddns.js','text/javascript'),'/sw.js':('sw.js','text/javascript'),'/manifest.webmanifest':('manifest.webmanifest','application/manifest+json'),'/icon.svg':('icon.svg','image/svg+xml'),'/icon-192.png':('icon-192.png','image/png'),'/icon-512.png':('icon-512.png','image/png')}
+            assets={'/ts431xeu-front.svg':('ts431xeu-front.svg','image/svg+xml'),'/':('index.html','text/html; charset=utf-8'),'/style.css':('style.css','text/css'),'/app.js':('app.js','text/javascript'),'/accounts.js':('accounts.js','text/javascript'),'/metadata-editor.js':('metadata-editor.js','text/javascript'),'/social-share.js':('social-share.js','text/javascript'),'/photos.js':('photos.js','text/javascript'),'/photo-land.json':('photo-land.json','application/json'),'/navigation.js':('navigation.js','text/javascript'),'/myradio.js':('myradio.js','text/javascript'),'/array-recovery.js':('array-recovery.js','text/javascript'),'/agents.js':('agents.js','text/javascript'),'/file-desktop.js':('file-desktop.js','text/javascript'),'/file-actions.js':('file-actions.js','text/javascript'),'/file-locations.js':('file-locations.js','text/javascript'),'/health.js':('health.js','text/javascript'),'/notifications.js':('notifications.js','text/javascript'),'/ddns.js':('ddns.js','text/javascript'),'/sw.js':('sw.js','text/javascript'),'/manifest.webmanifest':('manifest.webmanifest','application/manifest+json'),'/icon.svg':('icon.svg','image/svg+xml'),'/icon-192.png':('icon-192.png','image/png'),'/icon-512.png':('icon-512.png','image/png')}
             if path in assets:
                 name,kind=assets[path];raw=(WEB/name).read_bytes();self.send_response(200)
                 self.send_header('Content-Type',kind);self.send_header('Content-Length',str(len(raw)))
@@ -88,11 +117,27 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                 self.download(Sample(),{'share':['synthetic'],'path':[name],'inline':['1']});return
             if path == '/api/session':
                 s = self.authenticated()
-                self.send(200, {'authenticated': bool(s), 'csrf': s['csrf'] if s else None, 'setup_required': not bool(state.setting('administrator')), 'demo': preview})
+                self.send(200, {'authenticated': bool(s), 'csrf': s['csrf'] if s else None, 'setup_required': not bool(state.setting('administrator')), 'demo': preview,'user':s['user'] if s else None,'cloud_login':bool(identity.config().get('enabled'))})
                 return
             if not preview and (not self.authenticated()):
                 self.send(401, {'error': 'Administrator login required'})
                 return
+            session=self.authenticated() if not preview else None
+            if not preview:
+                user=session['user']
+                if path=='/api/account':
+                    with state.connect() as db:links=[dict(v) for v in db.execute('SELECT issuer,subject FROM external_identities WHERE user_id=?',(user['id'],))]
+                    self.send(200,{'user':user,'identities':links,'cloud_enabled':bool(identity.config().get('enabled'))});return
+                if user['must_change']:self.send(403,{'error':'Change your temporary password first'});return
+                if path=='/api/library-shares':self.send(200,library_shares.listing(state,user));return
+                if path in ('/api/users','/api/identity'):
+                    if user['role']!='administrator':self.send(403,{'error':'Administrator access required'});return
+                    if path=='/api/users':
+                        result=accounts.listing(state);options=nas.request('personal.options',{});result['storage_options']=options['shares'];self.send(200,result)
+                    else:self.send(200,identity.status())
+                    return
+                member_allowed={'/api/nas/status','/api/status','/api/backups','/api/jobs','/api/radio-file','/api/radio-stream','/api/photo-file','/api/file','/api/zip'}
+                if user['role']!='administrator' and path not in member_allowed:self.send(403,{'error':'Administrator access required'});return
             if path == '/api/agents/players':
                 self.send(200,players.listing());return
             if path == '/api/agents/catalog':
@@ -100,7 +145,7 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
             if path == '/api/agents':
                 self.send(200, agents.listing());return
             if path == '/api/nas/status':
-                try:self.send(200, demo.nas() if preview else nas.request('nas.status'))
+                try:self.send(200, demo.nas() if preview else self.gateway().status())
                 except (ValueError, OSError) as error:self.send(503, {'error': str(error), 'available': False})
                 return
             if path == '/api/zip':
@@ -109,43 +154,83 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                 try:
                     from .zipstream import write_zip
                     from urllib.parse import quote
-                    info=nas.request('files.bundle-info',{'ticket':query['ticket'][0]})
+                    info=self.gateway().request('files.bundle-info',{'ticket':query['ticket'][0]})
                     self.send_response(200);self.send_header('Content-Type','application/zip');self.send_header('Content-Disposition',"attachment; filename*=UTF-8''"+quote(info['filename']));self.send_header('Cache-Control','no-store');self.send_header('X-Content-Type-Options','nosniff');self.send_header('Cross-Origin-Resource-Policy','same-origin');self.send_header('Connection','close');self.end_headers();self.download_started=True;self.close_connection=True
-                    if self.command!='HEAD':write_zip(self.wfile,nas.request,info)
-                except (ValueError,OSError,KeyError) as error:
+                    if self.command!='HEAD':write_zip(self.wfile,self.gateway().request,info)
+                except (ValueError,OSError,KeyError,PermissionError) as error:
                     if getattr(self,'download_started',False):self.close_connection=True
-                    else:self.send(400,{'error':str(error)})
+                    else:self.send(403 if isinstance(error,PermissionError) else 400,{'error':str(error)})
                 return
             if path in ('/api/artifact','/api/system-backup'):
                 if preview:self.send(403,{'error':'Preview cannot read private artifacts'});return
-                try:self.download(nas,parse_qs(urlsplit(self.path).query),artifact=path=='/api/artifact',system_backup=path=='/api/system-backup')
-                except (ValueError,OSError,KeyError) as error:
+                try:self.download(self.gateway(),parse_qs(urlsplit(self.path).query),artifact=path=='/api/artifact',system_backup=path=='/api/system-backup')
+                except (ValueError,OSError,KeyError,PermissionError) as error:
                     if getattr(self,'download_started',False):self.close_connection=True
-                    else:self.send(400,{'error':str(error)})
+                    else:self.send(403 if isinstance(error,PermissionError) else 400,{'error':str(error)})
+                return
+            if path == '/api/radio-stream':
+                if preview:self.send(403,{'error':'Live radio is unavailable in preview'});return
+                if not radio_slots.acquire(blocking=False):self.send(503,{'error':'Four radio streams are already active'});return
+                try:
+                    from .nas.public_http import open_url
+                    query=parse_qs(urlsplit(self.path).query);station=self.gateway().request('myradio.station-source',{'id':query['id'][0]})
+                    with open_url(station['url'],timeout=15) as (response,_):
+                        kind=(response.getheader('Content-Type') or '').split(';')[0].lower()
+                        if not (kind.startswith('audio/') or kind in ('application/ogg','application/octet-stream')):raise ValueError('Station did not return direct audio')
+                        self.download_started=True;self.close_connection=True;self.send_response(200)
+                        self.send_header('Content-Type',kind if kind!='application/octet-stream' else 'audio/mpeg');self.send_header('Cache-Control','no-store');self.send_header('Connection','close');self.send_header('X-Content-Type-Options','nosniff');self.send_header('Cross-Origin-Resource-Policy','same-origin');self.end_headers()
+                        if self.command!='HEAD':
+                            until=time.monotonic()+6*3600
+                            while time.monotonic()<until:
+                                raw=response.read(32768)
+                                if not raw:break
+                                self.wfile.write(raw)
+                except (ValueError,OSError,KeyError,PermissionError) as error:
+                    if getattr(self,'download_started',False):self.close_connection=True
+                    else:self.send(403 if isinstance(error,PermissionError) else 400,{'error':str(error)})
+                finally:radio_slots.release()
+                return
+            if path == '/api/radio-file':
+                if preview:self.send(403,{'error':'Private library media is unavailable in preview'});return
+                try:self.download(self.gateway(),parse_qs(urlsplit(self.path).query),radio_file=True)
+                except (ValueError,OSError,KeyError,PermissionError) as error:
+                    if getattr(self,'download_started',False):self.close_connection=True
+                    else:self.send(403 if isinstance(error,PermissionError) else 400,{'error':str(error)})
+                return
+            if path == '/api/raid-backup':
+                if preview:self.send(403,{'error':'Recovery backup unavailable in preview'});return
+                try:self.download(self.gateway(),parse_qs(urlsplit(self.path).query),raid_backup=True)
+                except (ValueError,OSError,KeyError,PermissionError) as error:
+                    if getattr(self,'download_started',False):self.close_connection=True
+                    else:self.send(403 if isinstance(error,PermissionError) else 400,{'error':str(error)})
                 return
             if path in ('/api/file','/api/download-file','/api/volume-file','/api/foreign-file','/api/pool-file','/api/photo-file'):
                 if preview:self.send(403, {'error':'Synthetic preview cannot read files'});return
-                try:self.download(nas, parse_qs(urlsplit(self.path).query),download_job=path=='/api/download-file',volume_file=path=='/api/volume-file',foreign_file=path=='/api/foreign-file',pool_file=path=='/api/pool-file',photo_file=path=='/api/photo-file')
-                except (ValueError, OSError, KeyError) as error:
+                try:self.download(self.gateway(), parse_qs(urlsplit(self.path).query),download_job=path=='/api/download-file',volume_file=path=='/api/volume-file',foreign_file=path=='/api/foreign-file',pool_file=path=='/api/pool-file',photo_file=path=='/api/photo-file')
+                except (ValueError, OSError, KeyError,PermissionError) as error:
                     if getattr(self,'download_started',False):self.close_connection=True
-                    else:self.send(400, {'error': str(error)})
+                    else:self.send(403 if isinstance(error,PermissionError) else 400, {'error': str(error)})
                 return
             if path == '/api/status':
                 try:
-                    value = demo.inventory() if preview else inventory.snapshot(snapshot)
+                    value = demo.inventory() if preview else {'stale':False,'errors':[]} if session['user']['role']!='administrator' else inventory.snapshot(snapshot)
                     self.send(200, {'inventory': value, 'demo': preview, 'capabilities': {'storage_status': True, 'pool_planning': True, 'pool_execution': False, 'configuration_backup': not preview, 'data_backup': False, 'restore_preview': True, 'restore_execution': False, 'smb_nfs_commissioned': False}})
                 except (OSError, ValueError, RuntimeError) as error:
                     self.send(503, {'error': str(error), 'stale': True})
             elif path == '/api/backups':
-                self.send(200, {'backups': [] if preview else backups.list_backups(destination), 'scope': 'FreeQNAP configuration and consistent SQLite snapshots; no shared files, OS or flash'})
+                self.send(200, {'backups': [] if preview or session['user']['role']!='administrator' else backups.list_backups(destination), 'scope': 'FreeQNAP configuration and consistent SQLite snapshots; no shared files, OS or flash'})
             elif path == '/api/jobs':
-                self.send(200, {'jobs': [] if preview else state.jobs(), 'worker': getattr(self.server, 'worker_health', {'mode': 'read-only preview'})})
+                self.send(200, {'jobs': [] if preview else self.gateway().jobs().get('jobs',[]) if session['user']['role']!='administrator' else state.jobs(), 'worker': getattr(self.server, 'worker_health', {'mode': 'read-only preview'})})
             else:
                 self.send(404, {'error': 'Unknown endpoint'})
 
-        def download(self, nas, query, artifact=False, download_job=False, volume_file=False,foreign_file=False,system_backup=False,pool_file=False,photo_file=False):
+        def download(self, nas, query, artifact=False, download_job=False, volume_file=False,foreign_file=False,system_backup=False,pool_file=False,photo_file=False,raid_backup=False,radio_file=False):
             import base64
-            if photo_file:
+            if radio_file:
+                payload={'id':query['id'][0],'variant':query.get('variant',['original'])[0]};read_action='myradio.read';path='original.bin'
+            elif raid_backup:
+                payload={'id':query['id'][0]};read_action='raid.backup-read';path='raid-metadata.tar'
+            elif photo_file:
                 payload={'id':query['id'][0],'variant':query.get('variant',['original'])[0]};read_action='photos.read';path='photo.jpg'
             elif system_backup:
                 payload={'id':query['id'][0]};read_action='backup.local-read';path='freeqnap-recovery.tar.gz.gpg'
@@ -162,7 +247,7 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
             else:
                 payload={'share':query['share'][0],'path':query['path'][0]};read_action='files.read';path=payload['path']
             first=nas.request(read_action,{**payload,'offset':0,'count':1})
-            if artifact or system_backup or photo_file:path=first['filename']
+            if artifact or system_backup or photo_file or raid_backup or radio_file:path=first['filename']
             total=first['total_bytes'];etag='"'+hashlib.sha256(first['etag'].encode()).hexdigest()+'"'
             try:start,end,partial=byte_range(self.headers.get('Range'),total,etag,self.headers.get('If-Range'))
             except ValueError:
@@ -170,7 +255,7 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
             self.download_started=True;self.send_response(206 if partial else 200)
             self.send_header('Content-Type',content_type(path));self.send_header('Content-Length',str(max(0,end-start+1)))
             from urllib.parse import quote
-            disposition='inline' if query.get('inline')==['1'] and media_kind(path) else 'attachment'
+            disposition='inline' if query.get('inline')==['1'] and query.get('download')!=['1'] and media_kind(path) else 'attachment'
             self.send_header('Content-Disposition',disposition+"; filename*=UTF-8''"+quote(Path(path).name))
             self.send_header('Accept-Ranges','bytes');self.send_header('Cache-Control','no-store');self.send_header('ETag',etag)
             self.send_header('X-Content-Type-Options','nosniff');self.send_header('Cross-Origin-Resource-Policy','same-origin')
@@ -206,7 +291,7 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                 if self.headers.get('Transfer-Encoding') or self.headers.get('Content-Type','').split(';')[0]!='application/json':raise ValueError('Content-Length JSON required')
                 size=int(self.headers.get('Content-Length','0'))
                 operation=path[len(prefix):]
-                limit=2*1024**2 if operation=='media.artwork' else 1024**2 if operation in ('files.upload-chunk','downloads.add','vpn.plan') else 32768
+                limit=2*1024**2 if operation=='myradio.artwork' else 2*1024**2 if operation=='media.artwork' else 1024**2 if operation in ('myradio.upload-chunk','files.upload-chunk','downloads.add','vpn.plan') else 32768
                 if not 0<size<=limit:raise ValueError('Request size invalid')
                 payload=json.loads(self.rfile.read(size))
                 class Gateway:
@@ -231,7 +316,7 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                 return
             try:
                 size = int(self.headers.get('Content-Length', '0'))
-                limit = 2*1024**2 if urlsplit(self.path).path == '/api/nas/media.artwork' else 1024**2 if urlsplit(self.path).path in ('/api/nas/files.upload-chunk','/api/nas/downloads.add','/api/nas/vpn.plan') else 32768
+                limit = 256*1024 if urlsplit(self.path).path in ('/api/nas/files.metadata-plan','/api/nas/photos.metadata-plan') else 128*1024 if urlsplit(self.path).path=='/api/library-shares/change' else 2*1024**2 if urlsplit(self.path).path == '/api/nas/myradio.artwork' else 2*1024**2 if urlsplit(self.path).path == '/api/nas/media.artwork' else 1024**2 if urlsplit(self.path).path in ('/api/nas/myradio.upload-chunk','/api/nas/files.upload-chunk','/api/nas/downloads.add','/api/nas/vpn.plan') else 32768
                 if not 0 < size <= limit:
                     raise ValueError('Request size invalid')
                 value = json.loads(self.rfile.read(size))
@@ -251,7 +336,7 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                             self.send(429, {'error': 'Wait before trying again'})
                             return
                         self.server.login_attempts.append(now)
-                    s = auth.login(state, value.get('password'))
+                    s = auth.login(state, value.get('password'),value.get('username','admin'))
                     if not s:
                         self.send(401, {'error': 'Login failed'})
                         return
@@ -262,6 +347,52 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                 if not s or not secrets.compare_digest(self.headers.get('X-CSRF-Token', ''), s['csrf']):
                     self.send(403, {'error': 'Authenticated session and CSRF token required'})
                     return
+                user=s['user']
+                if path.startswith('/api/social/'):
+                    self.send(200,PersonalGateway(nas,state,self.authenticated,value.get('shared')).social(path.removeprefix('/api/social/'),value));return
+                if path=='/api/account/password':self.send(200,accounts.change_password(state,user,value));return
+                if user['must_change'] and path!='/api/logout':self.send(403,{'error':'Change your temporary password first'});return
+                if path=='/api/library-shares/change':
+                    if value.get('action')=='share' and value.get('kind')=='photos':
+                        scope=value.get('scope',{'mode':'library'})
+                        if isinstance(scope,dict) and scope.get('mode')=='items':
+                            for ident in scope.get('ids',[]):
+                                result=PersonalGateway(nas,state,self.authenticated).request('photos.catalog',{'id':ident,'limit':1})
+                                if not any(v['id']==ident for v in result['items']):raise ValueError('Select items from your own library')
+                        elif isinstance(scope,dict) and scope.get('mode')=='albums':
+                            albums=PersonalGateway(nas,state,self.authenticated).request('photos.catalog',{'limit':1})['albums']
+                            if any(ident not in {v['id'] for v in albums} for ident in scope.get('ids',[])):raise ValueError('Select albums from your own library')
+                    self.send(200,library_shares.change(state,user,value));return
+                if path=='/api/identity/link':
+                    with state.connect() as db:row=db.execute('SELECT * FROM local_accounts WHERE id=?',(user['id'],)).fetchone()
+                    if not row or not accounts.verify(row,value.get('current_password')):raise ValueError('Confirm your local password')
+                    url,binding=identity.begin(user);self.send(200,{'url':url},'freeqnap_oidc='+binding+'; HttpOnly; SameSite=Lax; Secure; Path=/auth/oidc/; Max-Age=300');return
+                if path=='/api/identity/unlink':self.send(200,identity.unlink(user,value));return
+                if path=='/api/users/storage':
+                    if user['role']!='administrator':raise PermissionError('Administrator access required')
+                    target=value.get('id');rows=value.get('assignments')
+                    if not isinstance(rows,list) or len(rows)>32:raise ValueError('Choose up to 32 shared folders')
+                    options=nas.request('personal.options',{});valid={v['name']:v for v in options['shares']};pinned=[]
+                    for row in rows:
+                        if not isinstance(row,dict) or set(row)!={'share','access'} or row['access'] not in ('read','write') or row['share'] not in valid:raise ValueError('Choose valid shared folders and read/write access')
+                        if row['share'] in ('my-radio','my-photos','my-files'):raise ValueError('This shared-folder name is reserved for personal storage')
+                        source=valid[row['share']];pinned.append({**row,'pool':source['pool'],'path':source['path'],'filesystem_uuid':options['pools'][source['pool']]['filesystem_uuid']})
+                    if len({v['share'] for v in pinned})!=len(pinned):raise ValueError('Choose each shared folder once')
+                    self.send(200,accounts.set_storage(state,user,target,pinned));return
+                if path in ('/api/users/change','/api/identity/save'):
+                    if user['role']!='administrator':self.send(403,{'error':'Administrator access required'});return
+                    result=accounts.change(state,user,value) if path=='/api/users/change' else identity.save(user,value)
+                    if path=='/api/users/change':
+                        with state.connect() as db:target=db.execute('SELECT * FROM local_accounts WHERE id=?',(result['id'],)).fetchone()
+                        if not target['primary_admin']:
+                            try:nas.request('personal.control',{'owner':target['id'],'label':target['label'],'enabled':bool(target['enabled']),'permissions':accounts.DEFAULT if target['role']=='administrator' else json.loads(target['permissions']),'assignments':accounts.assignments(state,target['id'])})
+                            except (ValueError,OSError):result['warning']='Account access changed, but background library control could not be verified. Check Activity.'
+                    self.send(200,result);return
+                if path.startswith('/api/nas/'):
+                    operation=path.removeprefix('/api/nas/')
+                    if operation.startswith('personal.') or operation=='photos.share-view':self.send(403,{'error':'Internal operation unavailable'});return
+                    self.send(200,self.gateway().request(operation,value));return
+                if user['role']!='administrator' and path!='/api/logout':self.send(403,{'error':'Administrator access required'});return
                 if path == '/api/agents/players/configure':
                     self.send(200,players.configure(value));return
                 if path == '/api/agents/players/discover':
@@ -293,8 +424,10 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                     self.send(404, {'error': 'Unknown or unavailable operation'})
                     return
                 self.send(202, {'job_id': ident})
+            except PermissionError as error:
+                self.send(403,{'error':str(error)})
             except (ValueError, KeyError, TypeError, OSError) as error:
-                self.send(400, {'error': str(error)})
+                self.send(403 if isinstance(error,PermissionError) else 400, {'error': str(error)})
     return Handler
 
 class NASHTTPServer(ThreadingHTTPServer):

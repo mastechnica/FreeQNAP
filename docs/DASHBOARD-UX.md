@@ -1,3 +1,7 @@
+## Navigation update — 4 November 2026
+
+The main menu now keeps everyday collections and operations prominent. **Settings** groups System & access, Connections, and Protection & help; Network, AI agent access, VPN & gateway, Dynamic DNS, Backup & restore, and the local installation guide live there. **Storage & RAID** contains Volumes & encryption and RAID & recovery. Old links still work. **My Radio** has Music, Books, Podcasts and Internet Radio, with a persistent player and separate private collection storage. See [My Radio](MY-RADIO.md), [guided recovery](INTERRUPTED-RAID-RECOVERY.md), and [front-button capability limits](FRONT-BUTTON.md).
+
 # Dashboard usability review
 
 The dashboard uses action labels rather than implementation steps: Restart, Shut down, Save network settings, Create storage, Restore files, and Eject safely. The ellipsis means another screen follows. Existing exact-identity checks, typed destructive confirmations and review expiry remain enforced. Power dialogs explain the connection interruption before the final confirmation.
@@ -83,3 +87,22 @@ pending network-change confirmations stay visible. Long noncritical footnotes
 are expandable; no status, error or confirmation is discarded. Share editing
 opens its settings automatically. Mobile controls retain larger touch targets;
 small displays and large datasets still require scrolling.
+
+## Connection handling — 3 November 2026
+
+Read requests have a 15-second deadline; the main native-status request has an
+8-second deadline. Base inventory can render when native status is unavailable,
+and storage operations remain disabled. Refresh polls do not overlap. A forced
+refresh requested during a running refresh is retained, and a change in native
+availability redraws the current workspace. Initial failures show connection
+feedback rather than leaving the header indefinitely at Connecting.
+
+Write operations retain their existing completion semantics: the browser does
+not automatically abort long-running writes or retry them.
+
+The live incident showed responsive static files, session and base-inventory
+requests, with native status left pending. The NAS also accepted SSH connections
+without completing its greeting, including from a second LAN host. The underlying
+cause remains unconfirmed. This source fix was subsequently deployed after the owner performed a hard reset;
+its served HTTPS asset matches the tested source. See the dated lockup-recovery
+report for the separate RAID recovery approvals and current acceptance limits.

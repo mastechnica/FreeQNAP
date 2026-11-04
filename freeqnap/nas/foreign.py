@@ -7,7 +7,7 @@ from .storage import walk
 from .limits import require_ext4_size
 from ..state import atomic
 
-FORMATS={'crypto_LUKS':'luks','BitLocker':'bitlk','apfs':'apfs'}
+FORMATS={'crypto_LUKS':'luks','BitLocker':'bitlk','apfs':'apfs','ntfs':'ntfs','exfat':'exfat','vfat':'vfat'}
 
 def unlock_secret(value):
     if not isinstance(value,dict):raise ValueError('Enter the existing disk password or upload a key')
@@ -59,17 +59,23 @@ class Foreign:
     def plan(self,request):
         row,item=self.source(request);volume=request.get('volume_index',0)
         if isinstance(volume,bool) or not isinstance(volume,int) or not 0<=volume<=255:raise ValueError('APFS volume index must be 0–255')
-        body={'id':row['id'],'source':item['path'],'disk_identity':row,'item':item,'format':FORMATS[item['fstype']],'volume_index':volume,'review':'Read-only unlock only. No formatting, filesystem repair, journal replay, automatic shares or saved password. Unsupported inner filesystems/protectors are rejected. Existing short disk passwords are accepted; new-volume password policy is unchanged.'}
-        return self.ctx.plan('foreign-unlock',body,'UNLOCK USB READ ONLY')
+        body={'id':row['id'],'source':item['path'],'disk_identity':row,'item':item,'format':FORMATS[item['fstype']],'volume_index':volume,'review':'Read-only mount/unlock only. No formatting, filesystem repair, journal replay, automatic shares or saved password. Unsupported inner filesystems/protectors are rejected. Existing short disk passwords are accepted; new-volume password policy is unchanged.'}
+        return self.ctx.plan('foreign-unlock',body,'MOUNT USB READ ONLY' if item['fstype'] in ('ntfs','exfat','vfat') else 'UNLOCK USB READ ONLY')
     def unlock(self,request):
         with self.ctx.lock():
             plan_path,plan=self.ctx.reviewed(request,'foreign-unlock');b=plan['body'];row,item=self.source(b)
             if row!=b['disk_identity'] or item!=b['item']:raise ValueError('USB identity/attachment changed since review')
-            password=unlock_secret(request.get('secret'));ident=secrets.token_hex(16);mapping='freeqnap-foreign-'+ident;target=Path('/srv/freeqnap/foreign')/ident;unit='freeqnap-foreign-'+ident+'.service';opened=False
-            self.ctx.consume(plan_path,plan);self.prepare_target(target);record={'id':ident,'source':b['source'],'external_id':b['id'],'disk_identity':row,'item':item,'format':b['format'],'mountpoint':str(target),'created_at':time.time(),'read_only':True,'unit':unit,'mapping':mapping if b['format']!='apfs' else None,'status':'opening'}
+            plain=b['format'] in ('ntfs','exfat','vfat');password=b'' if plain else unlock_secret(request.get('secret'));ident=secrets.token_hex(16);mapping='freeqnap-foreign-'+ident;target=Path('/srv/freeqnap/foreign')/ident;unit='freeqnap-foreign-'+ident+'.service';opened=False
+            self.ctx.consume(plan_path,plan);self.prepare_target(target);record={'id':ident,'source':b['source'],'external_id':b['id'],'disk_identity':row,'item':item,'format':b['format'],'mountpoint':str(target),'created_at':time.time(),'read_only':True,'unit':unit,'mapping':mapping if b['format'] not in ('apfs','ntfs','exfat','vfat') else None,'status':'opening'}
             atomic(self.ctx.directory/'foreign'/ (ident+'.json'),record)
             try:
-                if b['format']=='apfs':
+                if plain:
+                    kind=b['format'];options='ro,nodev,nosuid,noexec'
+                    if kind=='ntfs':
+                        if not shutil.which('ntfs-3g') or not Path('/dev/fuse').exists():raise ValueError('NTFS needs ntfs-3g and the FUSE module')
+                        kind='ntfs-3g';options+=',norecover'
+                    self.ctx.run('systemd-mount','--collect','--type='+kind,'--options='+options,b['source'],str(target),timeout=90)
+                elif b['format']=='apfs':
                     if not Path('/usr/local/libexec/freeqnap-apfs-fuse').is_file() or not Path('/dev/fuse').exists():raise ValueError('Install the reviewed APFS reader and matching FUSE module first')
                     if 'password' not in request['secret']:raise ValueError('APFS expects a password or personal recovery key in the password field')
                     # FUSE checks the mounter's group as well as UID. Match the broker's
@@ -120,7 +126,7 @@ class Foreign:
         rows=json.loads(self.ctx.run('findmnt','-J','-M',record['mountpoint'],'-o','TARGET,SOURCE,FSTYPE,FSROOT,OPTIONS'))['filesystems'];rows=list({json.dumps(r,sort_keys=True):r for r in rows}.values())
         if len(rows)!=1 or rows[0].get('target')!=record['mountpoint'] or rows[0].get('fsroot')!='/' or not {'ro','nodev','nosuid','noexec'}<=set(rows[0]['options'].split(',')):raise ValueError('USB session mount is missing or not safely read-only')
         current=[r for r in walk(row['disk']) if r.get('path')==record['source']]
-        if len(current)!=1 or any(current[0].get(k)!=record['item'].get(k) for k in ('uuid','partuuid','size','fstype')):raise ValueError('Encrypted USB partition identity changed')
+        if len(current)!=1 or any(current[0].get(k)!=record['item'].get(k) for k in ('uuid','partuuid','size','fstype')):raise ValueError('USB partition identity changed')
         source='/dev/mapper/'+record['mapping'] if record['mapping'] else record['source']
         expected=os.stat(source);actual=os.stat(rows[0]['source'])
         if not stat.S_ISBLK(expected.st_mode) or not stat.S_ISBLK(actual.st_mode) or expected.st_rdev!=actual.st_rdev:raise ValueError('USB session mounted source changed')
@@ -147,8 +153,8 @@ class Foreign:
                 units=self.ctx.run('systemctl','list-units','--all','--no-legend','--plain',record['unit'])
                 if any(line.split() and line.split()[0]==record['unit'] for line in units.splitlines()):self.ctx.run('systemctl','stop',record['unit'],timeout=90)
             return {'locked':True}
-    def files(self,request,read=False):
-        record=self.validate(self.record(request.get('session')));owner=self
+    def file_view(self,session):
+        record=self.validate(self.record(session));owner=self
         class View(Files):
             @contextlib.contextmanager
             def directory(self,share_id,path=''):
@@ -159,7 +165,9 @@ class Foreign:
                     for component in relative(path):
                         child=os.open(component,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=fd);os.close(fd);fd=child
                         if os.fstat(fd).st_dev!=device:raise ValueError('Nested mounted filesystems are not followed')
-                    owner.validate(record);yield fd,{},{}
+                    owner.validate(record);pool={'name':'foreign:'+record['id'],'mountpoint':str(mount),'read_only':True,'filesystem_uuid':str(record.get('item',{}).get('uuid') or record.get('item',{}).get('partuuid') or 'session:'+record['id'])+':'+str(record.get('volume_index',0))};yield fd,{'name':'foreign:'+record['id'],'path':str(mount),'gid':os.getegid(),'pool':pool['name'],'read_only':True},pool
                 finally:os.close(fd)
-        fs=View(self.ctx);payload={**request,'share':'foreign'}
+        return View(self.ctx)
+    def files(self,request,read=False):
+        fs=self.file_view(request.get('session'));payload={**request,'share':'foreign'}
         return fs.read(payload) if read else fs.list(payload)

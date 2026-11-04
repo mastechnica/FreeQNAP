@@ -1,0 +1,14 @@
+'use strict';
+const settingsSections = [
+ {title:'System & access',items:[['settings','General & power','Cooling, safe shutdown and local access'],['agents','AI agent access','Credentials and exact permissions'],['users','Local users & Authentik','Family accounts and optional cloud login']]},
+ {title:'Libraries',items:[['libraries','Library locations','Music, books, podcasts and personal photos storage']]},
+ {title:'Connections',items:[['network','Network','Ports, addresses and private LAN'],['vpn','VPN & gateway','WireGuard, OpenVPN and routing'],['ddns','Dynamic DNS','Public names and update providers']]},
+ {title:'Protection & help',items:[['backups','Backup & restore','Settings, file backups and restores'],['guide','Installation guide','Install, recover and maintain your NAS']]}
+];
+function workspaceRoute(hash){let value=(hash||'').replace(/^#/,'').split('?')[0];if(value.startsWith('settings/'))value=value.slice(9);if(value==='storage/recovery')value='recovery';if(value==='storage/volumes')value='storage';return value||'overview';}
+function workspaceParent(page){return ['network','vpn','ddns','backups','agents','guide','libraries','users'].includes(page)?'settings':page==='recovery'?'storage':page;}
+function settingsHref(page){return page==='settings'?'#settings':'#settings/'+page;}
+function settingsNavigation(w,page){const nav=el('nav',null,{class:'workspace-subnav','aria-label':'Settings sections'});for(const group of settingsSections)for(const [id,label]of group.items){if(typeof familyMember==='function'&&familyMember()&&id!=='libraries')continue;nav.append(el('a',label,{href:settingsHref(id),class:id===page?'selected':''}));}w.append(nav);}
+function settingsHome(w){const grid=el('div',null,{class:'settings-directory'});for(const group of settingsSections){const section=el('section',null,{class:'settings-group'});section.append(el('h2',group.title));for(const [id,label,description]of group.items){if(id==='settings')continue;const link=el('a',null,{href:settingsHref(id),class:'settings-link'});link.append(el('strong',label),el('span',description),el('b','→',{'aria-hidden':'true'}));section.append(link);}grid.append(section);}w.append(grid);}
+function storageNavigation(w,page){const nav=el('nav',null,{class:'workspace-subnav','aria-label':'Storage sections'});nav.append(el('a','Volumes & encryption',{href:'#storage',class:page==='storage'?'selected':''}),el('a','RAID & recovery',{href:'#storage/recovery',class:page==='recovery'?'selected':''}));w.append(nav);}
+function installationGuide(w){const p=panel('Installation & recovery guide','The complete local guide remains available even without internet access.');p.append(el('a','Open guide in a separate window ↗',{href:'/tutorial/',target:'_blank',rel:'noopener',class:'button'}),el('iframe',null,{src:'/tutorial/',title:'FreeQNAP installation and recovery guide',class:'installation-guide-frame',loading:'lazy'}));w.append(p);}

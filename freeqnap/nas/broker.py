@@ -79,7 +79,7 @@ def main():
     args.state.mkdir(mode=0o700,parents=True,exist_ok=True)
     lock = (args.state / '.broker.lock').open('a');fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     if args.socket.exists():args.socket.unlink()
-    backend = Backend(Context(args.state));backend.ctx.state.reconcile_interrupted();backend.notifications.reconcile_sending();backend.storage.startup()
+    backend = Backend(Context(args.state));backend.ctx.state.reconcile_interrupted();backend.notifications.reconcile_sending();backend.my_radio.reconcile_downloads();backend.storage.startup()
     with Server(args.socket, backend, account.pw_uid) as server:
         os.chown(args.socket, 0, group.gr_gid);args.socket.chmod(0o660)
         # Two independent jobs permit a slow repository to coexist with other work.
@@ -93,6 +93,12 @@ def main():
         threading.Thread(target=backend.ddns_worker, daemon=True).start()
         threading.Thread(target=backend.metrics_worker, daemon=True).start()
         threading.Thread(target=backend.disk_report_worker, daemon=True).start()
+        def radio_refresh():
+            import time
+            while not backend.stop_event.wait(60):
+                try:backend.my_radio.refresh_due_feeds()
+                except Exception:pass
+        threading.Thread(target=radio_refresh,daemon=True).start()
         threading.Thread(target=backend.personal_photo_worker, daemon=True).start()
         print('FreeQNAP privileged broker ready on private Unix socket', flush=True)
         try:server.serve_forever()

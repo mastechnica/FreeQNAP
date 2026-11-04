@@ -39,9 +39,29 @@ class Files:
     def mapping(self, share_id):
         if isinstance(share_id,str) and share_id.startswith('pool:'):
             pool,mount=self.ctx.volume(name(share_id[5:]))
-            if pool.get('read_only'):raise ValueError('This volume is read-only')
-            return {'name':share_id,'pool':pool['name'],'path':str(mount),'gid':os.getegid(),'volume_root':True}
+            return {'name':share_id,'pool':pool['name'],'path':str(mount),'gid':os.getegid(),'volume_root':True,'read_only':bool(pool.get('read_only'))}
         return self.ctx.config()['shares'].get(name(share_id))
+
+    def writable(self,share_id):
+        share=self.mapping(share_id)
+        if not share or share.get('read_only'):raise ValueError('This folder is read-only or access was removed')
+        pool,_=self.ctx.volume(share['pool'])
+        if pool.get('read_only'):raise ValueError('This volume is read-only')
+        return share
+
+    def protect_library_parent(self,share_id,path):
+        share=self.mapping(share_id)
+        if not share:raise ValueError('Unknown shared folder')
+        candidate=Path(share['path']).joinpath(*relative(path))
+        pools=self.ctx.config()['pools']
+        extra=[v for values in self.ctx.state.setting('personal-library-locations',{}).values() for v in values]
+        for key in ('myradio','personal-photos','personal-files'):
+            cfg=self.ctx.state.setting(key,{})
+            for location in ([cfg] if cfg else [])+cfg.get('previous_locations',[])+extra:
+                pool=pools.get(location.get('pool'))
+                if not pool:continue
+                protected=Path(pool['mountpoint'])/location['folder']
+                if candidate==protected or candidate in protected.parents:raise ValueError('This folder contains a personal library or retained archive. Change its location in Settings instead of moving or deleting it.')
 
     @contextlib.contextmanager
     def directory(self, share_id, path=''):
@@ -49,9 +69,18 @@ class Files:
         if not share:
             raise ValueError('Unknown shared folder')
         pool, mount = self.ctx.volume(share['pool'])
-        if (Path(share['path']) if share.get('volume_root') else Path(share['path']).parent) != mount:
+        if not share.get('personal_root') and (Path(share['path']) if share.get('volume_root') else Path(share['path']).parent) != mount:
             raise ValueError('Share root mapping changed')
-        descriptor = os.open(share['path'], os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        if share.get('personal_root'):
+            try:components=Path(share['path']).relative_to(mount).parts
+            except ValueError:raise ValueError('Personal folder mapping escaped its volume') from None
+            descriptor=os.open(mount,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
+            try:
+                for component in relative(str(Path(*components))):
+                    child=os.open(component,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=descriptor);os.close(descriptor);descriptor=child
+                    if os.fstat(descriptor).st_dev!=mount.stat().st_dev:raise ValueError('Personal folder contains a nested mount')
+            except Exception:os.close(descriptor);raise
+        else:descriptor = os.open(share['path'], os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
         try:
             self.ctx.volume(share['pool'])
             device = os.fstat(descriptor).st_dev
@@ -79,7 +108,23 @@ class Files:
                                 'modified_at': info.st_mtime, 'mode': oct(stat.S_IMODE(info.st_mode))})
             return {'entries':entries,'limit':limit,'offset':offset,'total_entries':len(names),'truncated':offset+limit<len(names),'next_offset':offset+limit if offset+limit<len(names) else None}
 
+    def media_neighbors(self,request):
+        from ..media_http import kind
+        leaf=request.get('name');query=request.get('query','')
+        if len(relative(leaf))!=1 or not isinstance(query,str) or len(query)>255:raise ValueError('Choose a media filename in this folder')
+        with self.directory(request['share'],request.get('path','')) as (fd,_,_):
+            names=[];device=os.fstat(fd).st_dev
+            for filename in sorted(os.listdir(fd)):
+                if filename.startswith('.freeqnap') or query.casefold() not in filename.casefold() or not kind(filename):continue
+                info=os.stat(filename,dir_fd=fd,follow_symlinks=False)
+                if stat.S_ISREG(info.st_mode) and info.st_dev==device:names.append(filename)
+            if leaf not in names:raise ValueError('The media file is no longer in this folder')
+            index=names.index(leaf)
+            def item(i):return {'name':names[i],'directory':False,'symlink':False} if 0<=i<len(names) else None
+            return {'previous':item(index-1),'next':item(index+1),'position':index+1,'total':len(names)}
+
     def mkdir(self, request):
+        self.writable(request['share'])
         folder = request.get('name', '')
         if len(relative(folder)) != 1:
             raise ValueError('Choose one new folder name')
@@ -105,6 +150,7 @@ class Files:
                 'total_bytes': info.st_size, 'modified_at':info.st_mtime, 'etag': f'{info.st_dev}-{info.st_ino}-{info.st_size}-{info.st_mtime_ns}'}
 
     def upload_begin(self, request):
+        self.writable(request['share'])
         parts = relative(request.get('path', ''));total = int(request.get('bytes', -1))
         if not parts or not 0 <= total <= 64 * 1024**3:raise ValueError('Choose a file of at most 64 GiB')
         with self.directory(request['share'], str(Path(*parts[:-1]))) as (_, share, pool):
@@ -127,6 +173,7 @@ class Files:
             raise ValueError('Unknown upload')
         with self.ctx.lock():
             record = self.ctx.state.setting('upload:' + ident)
+            if record:self.writable(record['share'])
             if not record or record['finished'] or time.time() - record['created_at'] > 86400:
                 raise ValueError('Upload expired or completed; incomplete data was retained')
             self.ctx.volume(record['pool'])
@@ -152,6 +199,7 @@ class Files:
         ident = request.get('upload_id', '')
         with self.ctx.lock():
             record = self.ctx.state.setting('upload:' + ident)
+            if record:self.writable(record['share'])
             if not record or record['finished'] or record['offset'] != record['bytes']:
                 raise ValueError('Upload is unknown, incomplete or already finished')
             pool, _ = self.ctx.volume(record['pool'])
@@ -178,7 +226,9 @@ class Files:
         return {'uploaded': record['path'], 'sha256': checksum, 'existing_file_replaced': False}
 
     def move_plan(self, request):
+        self.writable(request['share'])
         parts = relative(request.get('path', ''))
+        self.protect_library_parent(request['share'],request.get('path',''))
         if not parts:raise ValueError('Share roots cannot be moved or deleted')
         destination = request.get('new_name')
         if destination is not None and len(relative(destination)) != 1:raise ValueError('Choose one destination name')
@@ -192,6 +242,7 @@ class Files:
     def move(self, request):
         with self.ctx.lock():
             plan_path, plan = self.ctx.reviewed(request, 'file-move');body = plan['body'];parts = relative(body['path'])
+            self.writable(body['share']);self.protect_library_parent(body['share'],body['path'])
             with self.directory(body['share'], str(Path(*parts[:-1]))) as (directory, _, pool):
                 info = os.stat(parts[-1], dir_fd=directory, follow_symlinks=False)
                 if (info.st_ino, info.st_dev, info.st_size, info.st_mtime_ns, pool['filesystem_uuid']) != (body['inode'], body['device'], body['size'], body['mtime_ns'], body['filesystem_uuid']):

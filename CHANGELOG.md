@@ -1,3 +1,79 @@
+## Family-focused public showcase — 4 November 2026
+
+- Highlighted private family accounts, separate libraries, selective sharing, metadata/GPS editing and Share Social in the showcase and README.
+- Framed local photo archiving as a path to reducing iCloud storage dependence, with archive verification, independent backup, Apple authentication and direct-upload limits stated explicitly.
+- Updated the stale active-sync statement to the documented completed recovery and its remaining parity/content/replacement limits.
+- Removed a radio seed whose third-party stream URL contained an embedded token before publication.
+- Preserved branded link-preview artwork and original redacted hardware/tutorial assets. Personal-account publication only; no private history or device configuration included.
+
+## Metadata editor and private social sharing — 4 November 2026
+
+- Added viewer-only XMP metadata/GPS editing with stale-plan checks, retained previous sidecars and Personal Photos timeline/map updates; originals remain unchanged.
+- Added Share Social to file, library and photo viewers, privacy removal selected by default, private bounded expiring copies, independent metadata inspection, integrity checks, native share sheet and download fallback.
+- Added separate family permissions for metadata editing and external sharing. Revalidated source access on every private-copy read; no anonymous share links or automatic external sends.
+- Documented format changes, unsupported media, device acceptance and non-anonymization limits. No real messages or social uploads were sent.
+
+## Local family identities, optional Authentik and file usability — 4 November 2026
+
+- Added local account administration, family permissions, forced temporary-password changes, session revocation and stable user IDs; kept the original administrator and local fallback.
+- Added optional owner-configured Authentik/OIDC with explicit issuer/subject linking, PKCE/state/nonce/signed-token validation and an embedded setup guide. No provider was enabled automatically.
+- Isolated personal catalogs, iCloud accounts/session paths and private storage. Added administrator-assigned read/write folders and distinct authenticated read-only library/album/item sharing.
+- Added numbered file paging, Copy to…/Move to… destination pickers, drag/drop choice, verified cross-volume moves with recycled originals, read-only USB copy sources and fullscreen folder media navigation.
+- Expanded private recovery snapshots for user/library identity continuity while excluding sessions and Apple cookies. No account restore or personal import is automatic.
+
+## Explicit library locations and USB imports — 4 November 2026
+
+- Added first-use volume/folder setup and Settings → Library locations for My Radio and Personal Photos & Videos.
+- Added reviewed, checksum-verified relocation with retained old archives, atomic catalog identity/config cutover, serialized library I/O and interruption/stale-plan safeguards.
+- Added named File Manager location shortcuts and folder-import actions, including registered read-only USB and validated foreign unlock sessions; retained source files and agent session ownership.
+- No owner library location was selected automatically and no disk was formatted.
+
+## Regional radio and book voices — 4 November 2026
+
+- Limited radio listings, online searches and stream/check endpoints to US/Canada; refreshed 55 verified regional seeds while retaining existing saved rows.
+- Added explicit US/Canada podcast service classification, search of subscribed episodes and safe handling of older unclassified subscriptions.
+- Added selectable local book voices, pitch and speed, saved per browser; prevented old speech callbacks from restarting canceled reading.
+- No audible test or public publication. Country metadata is not IP geofencing; podcast publisher location is owner-declared.
+
+## Interrupted RAID recovery completion — 4 November 2026
+
+- Confirmed the original four-member data RAID5 is non-degraded and idle after its preserved-checkpoint rebuild.
+- Verified both original mounted 8 MiB proof files through exact identities and direct-read SHA-256; preserved raw results and prior failure/timeout evidence privately.
+- Confirmed the OS mirror remains non-degraded with its scheduled check running, healthy cooling/watchdog and certificate-checked HTTPS, and no new completion-interval kernel errors.
+- Stopped completion monitoring after reporting; no recovery mutation, notification change or public push. Whole-content/parity, physical replacement, cold-start and original lockup-cause limits remain open.
+
+## Native media isolation and deployment validation — 4 November 2026
+
+- Verified the deployed book reader, private upload/range/metadata/archive path, public station samples, current recovery state and safe live mount planning.
+- Fixed cover decoding under service hardening with a separate unprivileged helper; preserved the broker set-ID restriction, read-only originals, network isolation and bounded outputs.
+- Recorded 407 host tests (four skips), 23 JavaScript checks, native fixture/decoder/security evidence and remaining physical/mobile acceptance limits.
+- Updated the embedded tutorial to the 128 GiB OS layout and current hardware evidence. Kept the requested five-tap melody disabled pending a proven hardware path.
+- No NAS reboot, new array mutation, sound test, notification change or publication.
+
+## Private audio/books, guided recovery and navigation — 4 November 2026
+
+- Added My Radio with isolated music/book/podcast storage, cover art, editable sidecars, local text reading/read-aloud, bounded uploads/downloads and opt-in metadata providers.
+- Added grouped Radio Browser stations independently sampled before inclusion, authenticated streaming and explicit refresh/check controls.
+- Added separate reviewed read-only RAID recovery, writable resume and mount operations, verified metadata exports and guarded backup retention. No running-array mutation was repeated for UI testing.
+- Nested connection/access/backup/help pages under Settings and joined volume/encryption and RAID/recovery pages under Storage & RAID; existing bookmarks remain valid.
+- Added exact agent grants, HTTP/auth/range coverage and interrupted-transfer/phase isolation tests. Preserved existing credential rights.
+- Preserved the requested shutdown tune as a disabled note/timing specification. The accepted MCU does not expose quick taps or pitched output; five-tap melody remains a physical validation item.
+
+## Lockup diagnosis and read-only RAID recovery — 3 November 2026
+
+- Captured management recovery after an owner hard reset; the original stall cause remains unconfirmed because prior-boot logs were not persistent.
+- Enabled capped persistent journals and included the configuration in console installation.
+- Identified the dirty/degraded RAID5 assembly refusal, saved independently verified member metadata backups, and completed the separately approved exact-member read-only override.
+- Preserved the rebuilding checkpoint and verified both original initialization proof files without mounts or journal replay. This is sample verification, not full contents/parity acceptance.
+- Separately approved writable recovery resumed near the preserved checkpoint. Both data volumes completed journal recovery, mounted and passed their original direct-read proofs without repeating the timed-out first mount command. OS mirror remains healthy. No publication or notification preference changes.
+
+## Dashboard connection handling — 3 November 2026
+
+- Bound read requests and isolated a stalled native-status request so base inventory can still render with storage operations disabled.
+- Prevented overlapping refresh polls, retained requested refreshes, and added clear connection-error feedback.
+- Added regression coverage for timeouts, unavailable native status, polling overlap and unchanged mutation completion semantics.
+- Deployed the source fix after the owner reset the stalled NAS; verified the served HTTPS asset. The frontend deployment itself required no service restart.
+
 ## Branded sharing preview — 2 November 2026
 
 - Added an explicit 1200 × 630 logo/dashboard sharing image for the showcase and tutorial.

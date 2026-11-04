@@ -2,11 +2,11 @@
 
 FreeQNAP supports provider-neutral agents through local HTTPS. No model provider,
 cloud service, shell, or separate agent runtime is required. The owner controls
-credentials under **AI agent access** in the dashboard.
+credentials under **Settings → AI agent access** in the dashboard.
 
 ## Issue and revoke access
 
-1. Sign in as the administrator and open **AI agent access**.
+1. Sign in as the administrator and open **Settings → AI agent access**.
 2. Name the agent, choose an expiry (1–365 days), and select its functions.
    Presets add explicit permissions; groups can be selected and cleared.
 3. Create the token and save it in the agent's private secret store. It is shown
@@ -206,3 +206,41 @@ versions and original/preview reads; it exposes private media/location data.
 Apple account settings, sign-in and verification codes are administrator-only
 and cannot be granted to agents. Generic file operations cannot enter the
 protected personal-photo namespace. See [Personal Photos](PERSONAL-PHOTOS.md).
+
+## Personal audio, books and interrupted RAID recovery
+
+Separate exact grants and request contracts are documented in [My Radio and recovery](MY-RADIO-AND-RECOVERY-API.md). Existing credentials gain no access automatically. Recovery is never part of a media preset.
+
+
+## Local people and optional identity providers
+
+See [local users and Authentik](LOCAL-USERS-AND-AUTHENTIK.md). Local account,
+provider and sharing administration uses authenticated same-origin session/CSRF
+routes; family members cannot issue NAS agent credentials. Existing agent tokens
+retain their explicit grants and do not gain per-user catalogs automatically.
+New exact NAS operations: `library.files-status` (read-only),
+`library.files-plan` `{pool,folder}`, `library.files-apply`
+`{plan_id,digest,confirmation}` and `files.media-neighbors`
+`{share,path?:"",name,query?:""}` returning previous/next file descriptors, position
+and total. Copy/move results add `recycled_sources`; cross-volume moves verify
+before recycling originals. Foreign-session sources require ownership of that
+agent's session reference. Internal `personal.*` envelopes are unavailable through
+HTTP/agent operation dispatch and are never owner selectors supplied by a client.
+
+
+## Photo/video metadata sidecars
+
+`files.metadata-read` takes `{share,path}`; `photos.metadata-read` takes `{id}`.
+Results include editable `metadata`, an `etag`, technical information and storage
+semantics. Changes use `*.metadata-plan` with the same identity plus `etag` and
+`metadata`; review and apply through `*.metadata-apply` with `plan_id`, `digest`
+and exact `confirmation`. Stale identities/sidecars and read-only targets fail.
+Fields: title, description, creator, copyright, tags, taken (ISO date/time),
+latitude/longitude (both numbers or both null), altitude, make, camera and lens.
+GPS ranges and timestamps are validated. Edits write XMP sidecars, preserve the
+original and update Personal Photos' catalog/map; embedded EXIF is not rewritten.
+These six operations require explicit individual token grants and do not expand
+existing tokens. Browser-family metadata editing additionally requires
+`metadata.edit` and the corresponding file/photo write right. External native-app
+sharing is session-only and never automatically sends content. See
+[privacy and sharing](METADATA-AND-SOCIAL-SHARING.md).

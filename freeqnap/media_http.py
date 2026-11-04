@@ -3,9 +3,9 @@ import mimetypes
 import re
 from pathlib import Path
 VIDEO={'.mp4','.m4v','.mov','.webm','.mkv','.ogv','.oggvideo','.mpeg','.mpg','.ts','.m2ts'}
-AUDIO={'.mp3','.m4a','.aac','.wav','.flac','.ogg','.oga','.opus','.aif','.aiff','.weba'}
+AUDIO={'.m4b','.wma','.mp3','.m4a','.aac','.wav','.flac','.ogg','.oga','.opus','.aif','.aiff','.weba'}
 IMAGE={'.jpg','.jpeg','.png','.gif','.webp','.avif','.bmp','.tif','.tiff','.ico','.heic','.heif'}
-TYPES={'.mp4':'video/mp4','.m4v':'video/mp4','.mov':'video/quicktime','.webm':'video/webm','.mkv':'video/x-matroska','.ogv':'video/ogg','.oggvideo':'video/ogg','.mpeg':'video/mpeg','.mpg':'video/mpeg','.ts':'video/mp2t','.m2ts':'video/mp2t','.mp3':'audio/mpeg','.m4a':'audio/mp4','.aac':'audio/aac','.wav':'audio/wav','.flac':'audio/flac','.ogg':'audio/ogg','.oga':'audio/ogg','.opus':'audio/ogg','.weba':'audio/webm','.aif':'audio/aiff','.aiff':'audio/aiff','.jpg':'image/jpeg','.jpeg':'image/jpeg','.png':'image/png','.gif':'image/gif','.webp':'image/webp','.avif':'image/avif','.bmp':'image/bmp','.tif':'image/tiff','.tiff':'image/tiff','.ico':'image/x-icon','.heic':'image/heic','.heif':'image/heif'}
+TYPES={'.m4b':'audio/mp4','.wma':'audio/x-ms-wma','.mp4':'video/mp4','.m4v':'video/mp4','.mov':'video/quicktime','.webm':'video/webm','.mkv':'video/x-matroska','.ogv':'video/ogg','.oggvideo':'video/ogg','.mpeg':'video/mpeg','.mpg':'video/mpeg','.ts':'video/mp2t','.m2ts':'video/mp2t','.mp3':'audio/mpeg','.m4a':'audio/mp4','.aac':'audio/aac','.wav':'audio/wav','.flac':'audio/flac','.ogg':'audio/ogg','.oga':'audio/ogg','.opus':'audio/ogg','.weba':'audio/webm','.aif':'audio/aiff','.aiff':'audio/aiff','.jpg':'image/jpeg','.jpeg':'image/jpeg','.png':'image/png','.gif':'image/gif','.webp':'image/webp','.avif':'image/avif','.bmp':'image/bmp','.tif':'image/tiff','.tiff':'image/tiff','.ico':'image/x-icon','.heic':'image/heic','.heif':'image/heif'}
 
 def kind(path):
     suffix=Path(path).suffix.lower()

@@ -1,4 +1,5 @@
 """Staged, no-overwrite file transfers and an explicitly managed recycle bin."""
+import contextlib
 import hashlib
 import json
 import os
@@ -33,6 +34,25 @@ def remove_tree(parent,leaf,device,depth=0):
 
 
 class FileManager(Files):
+    def foreign_view(self,share_id):
+        from .external import External
+        from .foreign import Foreign
+        return Foreign(self.ctx,External(self.ctx)).file_view(share_id[8:])
+    def mapping(self,share_id):
+        if isinstance(share_id,str) and share_id.startswith('foreign:'):
+            with self.foreign_view(share_id).directory(share_id) as (_,share,_):return share
+        return super().mapping(share_id)
+    @contextlib.contextmanager
+    def directory(self,share_id,path=''):
+        if isinstance(share_id,str) and share_id.startswith('foreign:'):
+            with self.foreign_view(share_id).directory(share_id,path) as value:yield value
+        else:
+            with super().directory(share_id,path) as value:yield value
+    def validate_volume(self,ident):
+        if ident.startswith('foreign:'):
+            with self.foreign_view(ident).directory(ident) as (_,_,pool):return pool,Path(pool['mountpoint'])
+        return self.ctx.volume(ident)
+
     def policy(self,request=None):
         return self.ctx.state.setting('recycle_policy',{'retention_days':30})
 
@@ -62,17 +82,19 @@ class FileManager(Files):
         if mode not in ('copy','move') or not isinstance(paths,list) or not 1<=len(paths)<=200 or len(set(paths))!=len(paths):raise ValueError('Select 1–200 distinct paths and copy or move')
         new_name=request.get('new_name')
         if new_name is not None and (len(paths)!=1 or len(relative(new_name))!=1):raise ValueError('A custom name is only available for one selected item')
+        self.writable(target_share)
+        if mode=='move':self.writable(source)
         items=[]
         with self.directory(target_share,target_path) as (target,destination,pool):
             parent=os.fstat(target)
             for path in paths:
+                if mode=='move':self.protect_library_parent(source,path)
                 parts=relative(path)
                 if not parts:raise ValueError('Share roots cannot be transferred')
                 leaf=new_name or parts[-1]
                 with self.directory(source,str(Path(*parts[:-1]))) as (fd,share,source_pool):
                     info=os.stat(parts[-1],dir_fd=fd,follow_symlinks=False)
                     if not (stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode)):raise ValueError('Copy/move regular files or folders; symlinks and special files are excluded')
-                    if mode=='move' and source_pool['filesystem_uuid']!=pool['filesystem_uuid']:raise ValueError('Cross-volume moves require a verified copy followed by a separate recycle action')
                     src=Path(share['path']).joinpath(*parts);dst=Path(destination['path']).joinpath(*relative(target_path),leaf)
                     if src==dst or src in dst.parents:raise ValueError('Cannot place an item inside itself')
                     try:os.stat(leaf,dir_fd=target,follow_symlinks=False)
@@ -80,15 +102,18 @@ class FileManager(Files):
                     else:raise ValueError('Destination already exists; existing data will never be overwritten')
                     items.append({'path':path,'name':leaf,'identity':fingerprint(info),'filesystem_uuid':source_pool['filesystem_uuid']})
             if len({v['name'] for v in items})!=len(items):raise ValueError('Selected destination names collide')
-            body={'share':source,'items':items,'target_share':target_share,'target_path':target_path,'target_identity':[parent.st_dev,parent.st_ino], 'target_uuid':pool['filesystem_uuid'],'mode':mode,'review':'Copy is staged and hash-verified before publication; live files are not a consistent filesystem snapshot. Existing targets are never overwritten. Interrupted staging is retained.'}
+            body={'share':source,'items':items,'target_share':target_share,'target_path':target_path,'target_identity':[parent.st_dev,parent.st_ino], 'target_uuid':pool['filesystem_uuid'],'mode':mode,'review':'Copy is staged and hash-verified before publication; live files are not a consistent filesystem snapshot. Existing targets are never overwritten. Interrupted staging is retained. Cross-volume moves verify the copy, then retain the original in its source recycle bin; completed items remain recorded after partial failures.'}
         return self.ctx.plan('file-transfer',body,mode.upper()+' '+str(len(items))+' ITEM(S)')
 
     def transfer(self,request,job_id=None):
         with self.ctx.lock():
             plan_path,plan=self.ctx.reviewed(request,'file-transfer');body=plan['body']
+            self.writable(body['target_share'])
+            if body['mode']=='move':self.writable(body['share'])
             with self.directory(body['target_share'],body['target_path']) as (target,share,pool):
                 if [os.fstat(target).st_dev,os.fstat(target).st_ino]!=body['target_identity'] or pool['filesystem_uuid']!=body['target_uuid']:raise ValueError('Transfer destination changed')
                 for item in body['items']:
+                    if body['mode']=='move':self.protect_library_parent(body['share'],item['path'])
                     parts=relative(item['path'])
                     with self.directory(body['share'],str(Path(*parts[:-1]))) as (source,_,source_pool):
                         if fingerprint(os.stat(parts[-1],dir_fd=source,follow_symlinks=False))!=item['identity'] or source_pool['filesystem_uuid']!=item['filesystem_uuid']:raise ValueError('Transfer source changed since review')
@@ -98,20 +123,33 @@ class FileManager(Files):
                 record=self.ctx.directory/'operations'/(ident+'.json');atomic(record,checkpoint)
                 # Hold the storage-operation lock: eject/reformat cannot race a transfer.
                 for item in body['items']:
+                    if body['mode']=='move':self.protect_library_parent(body['share'],item['path'])
                     parts=relative(item['path'])
                     with self.directory(body['share'],str(Path(*parts[:-1]))) as (source,_,source_pool):
                         if fingerprint(os.stat(parts[-1],dir_fd=source,follow_symlinks=False))!=item['identity']:raise ValueError('Source changed during queued transfer')
-                        if body['mode']=='move':rename_exclusive(source,parts[-1],target,item['name']);os.fsync(source)
+                        if body['mode']=='move' and source_pool['filesystem_uuid']==pool['filesystem_uuid']:rename_exclusive(source,parts[-1],target,item['name']);os.fsync(source)
                         else:
                             staging=Path(pool['mountpoint'])/'.freeqnap'/'transfers';staging.mkdir(mode=0o700,parents=True,exist_ok=True)
                             stage=os.open(staging,os.O_DIRECTORY|os.O_RDONLY|os.O_NOFOLLOW)
                             try:
                                 token=secrets.token_hex(16);checkpoint['partial_stage']=token;atomic(record,checkpoint)
                                 budget={'entries':0,'bytes':0};self.copy_node(source,parts[-1],stage,token,os.fstat(source).st_dev,share['gid'],budget,0,source_pool['name'],pool['name'])
-                                self.ctx.volume(pool['name']);self.ctx.volume(source_pool['name']);rename_exclusive(stage,token,target,item['name']);os.fsync(stage)
+                                self.writable(body['target_share']);self.ctx.volume(pool['name']);self.validate_volume(source_pool['name']);rename_exclusive(stage,token,target,item['name']);os.fsync(stage)
                             finally:os.close(stage)
-                        os.fsync(target);checkpoint['published'].append(item['name']);checkpoint.pop('partial_stage',None);atomic(record,checkpoint)
-                result={'mode':body['mode'],'published':checkpoint['published'],'existing_files_overwritten':False}
+                            os.fsync(target);checkpoint['published'].append(item['name']);checkpoint.pop('partial_stage',None);atomic(record,checkpoint)
+                            if body['mode']=='move':
+                                self.writable(body['share'])
+                                if fingerprint(os.stat(parts[-1],dir_fd=source,follow_symlinks=False))!=item['identity']:raise ValueError('Source changed after verified copy; both source and destination are retained')
+                                trash=Path(source_pool['mountpoint'])/'.freeqnap'/'trash';trash.mkdir(mode=0o700,parents=True,exist_ok=True);trash_id=secrets.token_hex(16);info=os.stat(parts[-1],dir_fd=source,follow_symlinks=False)
+                                entry={'share':body['share'],'path':item['path'],'new_name':None,'pool':source_pool['name'],'filesystem_uuid':source_pool['filesystem_uuid'],'inode':info.st_ino,'device':info.st_dev,'size':info.st_size,'mtime_ns':info.st_mtime_ns,'trash_id':trash_id,'deleted_at':time.time(),'pending':True,'verified_move_destination':{'share':body['target_share'],'path':str(Path(body['target_path'])/item['name'])}}
+                                self.ctx.state.set('trash:'+trash_id,entry);trash_fd=os.open(trash,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
+                                try:rename_exclusive(source,parts[-1],trash_fd,trash_id);os.fsync(source);os.fsync(trash_fd)
+                                finally:os.close(trash_fd)
+                                entry['pending']=False;self.ctx.state.set('trash:'+trash_id,entry);checkpoint.setdefault('recycled_sources',[]).append(trash_id)
+                        os.fsync(target)
+                        if item['name'] not in checkpoint['published']:checkpoint['published'].append(item['name'])
+                        checkpoint.pop('partial_stage',None);atomic(record,checkpoint)
+                result={'mode':body['mode'],'published':checkpoint['published'],'recycled_sources':checkpoint.get('recycled_sources',[]),'existing_files_overwritten':False}
                 if job_id is None:self.ctx.state.finish(ident,result=result)
                 return result
 
@@ -141,7 +179,7 @@ class FileManager(Files):
                 try:
                     digest=hashlib.sha256();written=0
                     while chunk:=os.read(fd,4*1024**2):
-                        self.ctx.volume(source_pool);self.ctx.volume(target_pool)
+                        self.validate_volume(source_pool);self.ctx.volume(target_pool)
                         digest.update(chunk);view=memoryview(chunk)
                         while view:
                             n=os.write(out,view)
@@ -245,6 +283,8 @@ class FileManager(Files):
     def purge(self,request):
         with self.ctx.lock():
             path,plan=self.ctx.reviewed(request,'file-purge');body=plan['body'];pool,mount=self.ctx.volume(body['pool'])
+            record=self.ctx.state.setting('trash:'+body['id'])
+            if record:self.writable(record['share'])
             if pool['filesystem_uuid']!=body['uuid']:raise ValueError('Recycle-bin volume changed')
             fd=os.open(mount/'.freeqnap'/'trash',os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
             try:
