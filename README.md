@@ -5,7 +5,7 @@
 
 ![Running FreeQNAP overview](docs/assets/screenshots/overview.png)
 
-**Experimental source project · 31 October 2026.** FreeQNAP is running on real
+**Experimental source project · 5 November 2026.** FreeQNAP is running on real
 TS-431XeU hardware. The owner approved this source publication under
 [mastechnica/FreeQNAP](https://github.com/mastechnica/FreeQNAP). No prebuilt OS image
 is included. The public installer workflow
@@ -28,8 +28,9 @@ and system permissions separately. Local accounts work without Authentik; linkag
 to your own Authentik provider is optional.
 
 Verify a complete archive **and an independent backup** before reducing iCloud
-storage. The unofficial connector still needs real-account acceptance and periodic
-Apple authentication. Direct automatic iPhone camera-roll backup to the NAS is not
+storage. The unofficial connector has passed live account download and personal-album
+import checks; whole-account completeness and periodic Apple reauthentication
+still need your attention. Direct automatic iPhone camera-roll backup to the NAS is not
 included. Native sharing depends on the phone/browser; privacy copies have format
 and size limits. This is an alternative local archive, not a complete replacement
 for Apple Photos or every iCloud service.
@@ -37,6 +38,32 @@ for Apple Photos or every iCloud service.
 Read [family accounts](docs/LOCAL-USERS-AND-AUTHENTIK.md),
 [Photos & iCloud](docs/PERSONAL-PHOTOS.md), and
 [metadata & Share Social](docs/METADATA-AND-SOCIAL-SHARING.md).
+
+## Music, books, podcasts and internet radio
+
+**My Radio** brings cover-art albums, audiobooks, readable eBooks, podcast shows and
+US/Canadian internet stations into each person's own collection. Search, filter,
+edit metadata and artwork, organize series/collections and share read-only libraries.
+Browser read-aloud offers selectable device voices, speed and pitch. Playback and
+DRM-free book support remain format/device dependent; this NAS is not a 4K
+transcoding appliance.
+
+The iCloud archive also imports personal album membership. Downloaded originals
+join their albums; pending membership attaches as downloads finish. Removing a
+photo or album in iCloud never requests deletion of the retained local archive.
+Smart Albums, nested iCloud folder layout and shared-library album replication are
+not included. See [My Radio](docs/MY-RADIO.md),
+[Photos & iCloud](docs/PERSONAL-PHOTOS.md), and the [live screenshot gallery](https://mastechnica.github.io/FreeQNAP/#experience).
+
+## Optional Authentik integration
+
+Use local NAS accounts independently, or link **your own Authentik** provider
+through **Settings → Local users & Authentik**. The dashboard exposes issuer,
+client ID/secret, trusted callback and group/session options, with a step-by-step
+setup guide. Linked sign-ins use the same NAS profile and permissions. Users may
+set a separate local NAS password for offline access and use the provided local
+password-reset options. Authentik is optional; it never silently grants NAS
+administrator rights. See the [complete setup guide](docs/LOCAL-USERS-AND-AUTHENTIK.md).
 
 ## Your hardware. Your NAS.
 

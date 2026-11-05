@@ -58,7 +58,7 @@ def create(source, destination, keep=7):
                         try:
                             src.backup(dst)
                             tables = {r[0] for r in dst.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-                            for table in ('sessions', 'account_sessions','oidc_states','oidc_transactions'):
+                            for table in ('sessions', 'account_sessions','recent_cloud_auth','oidc_states','oidc_transactions'):
                                 if table in tables:
                                     dst.execute('DELETE FROM ' + table)
                             dst.commit()

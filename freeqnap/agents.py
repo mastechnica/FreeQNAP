@@ -12,7 +12,7 @@ from pathlib import Path
 
 BACKEND_OPERATIONS = frozenset(json.loads(Path(__file__).with_name('agent_operations.json').read_text()))
 PLAYER_OPERATIONS = frozenset(['media.players','media.players-discover','media.play','media.playback-control','media.playback-status'])
-ADMIN_ONLY=frozenset(['photos.icloud-login','photos.icloud-code','photos.icloud-status','photos.icloud-save'])
+ADMIN_ONLY=frozenset(['photos.icloud-check','photos.icloud-login','photos.icloud-code','photos.icloud-status','photos.icloud-save'])
 OPERATIONS = (BACKEND_OPERATIONS | PLAYER_OPERATIONS) - ADMIN_ONLY
 # Explicit lists: a new operation never expands an existing role or token.
 PRESETS = {
@@ -23,11 +23,11 @@ PRESETS = {
     'health-reader': ['health.alerts','smart.status','smart.history','system.frontpanel','system.history','network.status','network.history'],
     'media-editor': ['media.catalog','media.provider-status','media.scanner-status','media.lookup','media.metadata','media.artwork','media.scan'],
     'media-playback': ['media.catalog','media.players','media.play','media.playback-control','media.playback-status'],
-    'file-reader': ['files.list','files.read','files.pool-list','files.pool-read'],
-    'file-editor': ['files.list','files.read','files.mkdir','files.upload-begin','files.upload-chunk','files.upload-finish','files.move-plan','files.move','files.transfer-plan','files.transfer','files.recycle-plan','files.recycle'],
+    'file-reader': ['files.transfers','files.list','files.read','files.pool-list','files.pool-read'],
+    'file-editor': ['files.list','files.read','files.mkdir','files.upload-begin','files.upload-chunk','files.upload-finish','files.move-plan','files.move','files.transfer-plan','files.transfer-resume-plan','files.transfer','files.recycle-plan','files.recycle'],
     'download-manager': ['downloads.status','downloads.add','downloads.control','downloads.files','downloads.read'],
 }
-READ_ONLY = frozenset(PRESETS['my-radio-reader'] + ['files.metadata-read','photos.metadata-read','files.media-neighbors','library.files-status','raid.recovery-status','raid.backups','system.button-status','myradio.station-source'] + PRESETS['personal-photo-reader'] + ['media.players','media.playback-status'] + PRESETS['health-reader'] + PRESETS['file-reader'] + ['nas.status','notifications.status','notifications.rules','ddns.status','vpn.status','vpn.peers-status','downloads.status','downloads.files','downloads.read','media.catalog','media.provider-status','media.scanner-status','media.clients','media.dlna-options','external.discover','external.unlock-capabilities','external.files','external.read','external.session-files','external.session-read','backup.schedule-list','backup.system-stages','backup.local-list','repositories.snapshots','files.stages','files.trash','recovery.list','system.https-status','system.https-ca'])
+READ_ONLY = frozenset(['library.folders','myradio.station-artwork'] + PRESETS['my-radio-reader'] + ['files.metadata-read','photos.metadata-read','files.media-neighbors','library.files-status','raid.recovery-status','raid.backups','system.button-status','myradio.station-source'] + PRESETS['personal-photo-reader'] + ['media.players','media.playback-status'] + PRESETS['health-reader'] + PRESETS['file-reader'] + ['nas.status','notifications.status','notifications.rules','ddns.status','vpn.status','vpn.peers-status','downloads.status','downloads.files','downloads.read','media.catalog','media.provider-status','media.scanner-status','media.clients','media.dlna-options','external.discover','external.unlock-capabilities','external.files','external.read','external.session-files','external.session-read','backup.schedule-list','backup.system-stages','backup.local-list','repositories.snapshots','files.stages','files.trash','recovery.list','system.https-status','system.https-ca'])
 SENSITIVE = frozenset(['myradio.read','myradio.book-text','raid.backup-read','photos.read','photos.places','vpn.wireguard-profile','artifacts.read','backup.local-read','encryption.header-backup'])
 
 class Denied(ValueError): pass

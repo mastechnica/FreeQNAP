@@ -78,6 +78,8 @@ class Context:
         ident = secrets.token_hex(16)
         value = {'id': ident, 'kind': kind, 'created_at': time.time(), 'body': body,
                  'confirmation': confirmation, 'consumed': False}
+        from ..access_scope import current
+        if current():value['actor']=current()
         value['digest'] = hashlib.sha256(canonical(value)).hexdigest()
         atomic(self.directory / 'plans' / (ident + '.json'), value)
         return value
@@ -88,6 +90,8 @@ class Context:
             raise ValueError('A reviewed plan is required')
         path = self.directory / 'plans' / (ident + '.json')
         value = json.loads(path.read_text())
+        from ..access_scope import current
+        if value.get('actor') and value['actor']!=current():raise ValueError('This plan belongs to another account')
         computed=hashlib.sha256(canonical({k:v for k,v in value.items() if k!='digest'})).hexdigest()
         if not secrets.compare_digest(computed,value.get('digest','')):raise ValueError('Stored plan contents changed')
         if value['kind'] != kind or value['consumed'] or not 0 <= time.time() - value['created_at'] < 600:
@@ -116,6 +120,8 @@ class Context:
         pool = self.config()['pools'].get(name(pool_id))
         if not pool:
             raise ValueError('Unknown pool')
+        from ..access_scope import check
+        check(self,pool)
         if pool.get('kind')=='usb':
             from .external import attached
             attached(pool)

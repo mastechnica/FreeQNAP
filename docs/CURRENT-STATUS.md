@@ -1,3 +1,245 @@
+# Accepted personal media maintenance — 5 November 2026
+
+Music reconciliation is applied and verified: 5,487 corrections, 7,958 originals
+preserved, 706 album cards and 7,270 main tracks with expandable alternative files.
+No originals were renamed or deleted. Forty-eight unusable originals and 154
+identification flags remain visible; 523 albums have existing cover art. This is
+not a claim of pristine/full-content acceptance. See [reconciliation evidence](MUSIC-RECONCILIATION-2026-11-05.md).
+
+Eighteen personal iCloud albums imported successfully, using additive retention.
+The accepted pass linked 260 archived memberships and retained 614 pending ones;
+subsequently downloaded originals attach automatically. No Apple session or native
+storage-worker restart occurred. Shared/Smart Album and nested-folder replication
+remain excluded. See [personal photo behavior and acceptance](PERSONAL-PHOTOS.md).
+
+Books contains ten retained audiobooks and three distinct public-domain eBooks:
+Meditations (TXT), The Time Machine (EPUB3) and We (AZW3). All thirteen items have
+title, author, genre, synopsis and cover art. The three new originals passed
+SHA-256, native text-reader and artwork checks; the live family interface and
+metadata editor were verified. See [book import acceptance](BOOK-IMPORT-VALIDATION-2026-11-05.md).
+
+Both internal arrays remained non-degraded and idle. The original long-running
+native worker and active photo work remain intact; optimized full scans still
+need an idle native-worker adoption after transfers finish. Local regression:
+653 Python tests (16 optional/environment skips), 90 JavaScript checks and
+package/showcase checks passed. Source changes and sanitized reports are committed
+locally only; nothing was pushed or published.
+
+# Album-based music and personal listening hub — 5 November 2026
+
+Music now opens as cover-art albums with ordered track/details views. My Radio opens on a personal Overview with honest recent/explore rows and listening statistics starting from actual new playback. Books gains series, reading order and collections. All card editors offer explicit matching searches against enabled metadata providers; none is silently enabled.
+
+Physical maintenance completed: ten checksum-verified M4B replacements, 7,958 music tracks indexed, 5,722 tracks with existing artwork, 593 needing identification, zero final scan errors. Source filenames and 43 release-note NFOs were retained. Only the approved Synology cache trees and replaced NAS AAX copies were removed. See [music maintenance results](MUSIC-REVIEW-VALIDATION-2026-11-05.md).
+
+The active photo copy and original storage worker are preserved. Full-library routine rescans remain gated until a safe optimized-worker reload; the isolated updated scanner already completed the requested indexing. No NAS reboot, new provider disclosure or public push is part of this update. 634 Python tests (sixteen optional/environment skips), ninety JavaScript checks and package/showcase checks passed. Twenty-three focused tests also passed on the NAS. Final live album reads took about 4–5 seconds during the ongoing copy. See [album/hub validation](MY-RADIO-HUB-VALIDATION-2026-11-05.md) for browser acceptance and remaining limits.
+
+# Show-first podcast browser — 4 November 2026
+
+4 November: Show-first podcast browsing deployed; all 13 publisher covers fetched and 3,044 currently indexed episodes available. Personal three-dot card editing is deployed. Ten AAX audiobook originals and their covers/metadata were imported and checksum-verified in the personal catalog; active transfers remain running. Native pagination/AAX upload acceptance awaits a safe storage-worker reload.
+
+Podcasts now opens as a compact show-cover grid. A show opens its own episode view, with Back to shows and an explicit saved-episode play button. Search spans show names, publishers, episode titles and notes. Genre/publisher filters, rolling publish-date filters, downloaded/not-downloaded filters and chronological/title/duration sorting are available. Both views offer 25, 50, 100, 500 or All, with First/Previous/page numbers/Next/Last. Browsing, expanding a show and loading artwork never start audio. Subscription management stays collapsed.
+
+Publisher covers are fetched through a public-address-pinned, bounded local proxy and privately cached. RSS header reads stop before episode bodies; remote SVG/HTML is rejected. Account and library-share authorization is repeated before serving artwork or 304. Client artwork loading is limited to two concurrent images; missing images retain deterministic colorful fallback covers. Original feed URLs are not returned by the browser API.
+
+The console browser works with the already-running broker by gathering its authorized per-show windows; it labels those legacy windows explicitly. Native retained-history pagination is also implemented and byte-budgeted for the existing two-MiB broker frame, but requires a safe broker reload after active copies/imports finish. All means all episodes available in the current view, not every historical episode ever published. No active worker is restarted for this UI update.
+
+Local verification: 594 Python tests with 16 optional/environment skips, 85 JavaScript checks and package/showcase checks passed. Coverage includes real date ordering, genre/search/download filters, every page size, modern cursor following, legacy-window labeling, cache reauthorization, revoked artwork access and Unicode response budgets. Native/live acceptance is recorded after deployment; no public push.
+
+# Watched library folders and verified podcast subscriptions — 4 November 2026
+
+The family music destination is enrolled for automatic source import and is waiting for existing file copies. Multiple source folders, category switches, browse controls and saved-library shortcuts are live in My Radio, Personal Photos and Library Settings. Required source folders were prepared through existing scoped file operations.
+
+The requested ten technology and three cybersecurity subscriptions were populated and verified through the family account's listing, without audio downloads or preference changes. Oversized RSS feeds required the new bounded reader in an isolated metadata import; the ongoing broker still needs an idle reload before its own large-feed refresh handler gains that fix. Active transfer/iCloud workers were preserved.
+
+Final local regression: 582 Python tests (16 optional/environment skips), 82 JavaScript checks, package and showcase checks passed. Real music import/artwork acceptance awaits the running copy's completion. Updates are committed locally only.
+
+# Watched library folders and music-copy enrollment — 4 November 2026
+
+Added persistent account-scoped source folders for My Radio and Personal Photos, separate from the primary private catalog location. Each collection can watch multiple accessible folders, with per-folder enable/category controls, a schedule and manual scan. Saved library locations populate source shortcuts. Successful library-location saves prepare required visible source folders through the existing authorized file service; existing spelling/case is reused. Personal Files already creates its selected folder during its reviewed save.
+
+The existing My Radio global and category scan switches remain authoritative. Automatic source imports wait for the account's queued/running file transfers; photo folder imports also wait for current photo/iCloud work. The music destination is enrolled using its exact existing folder spelling without moving, renaming or restarting its transfer. Metadata from local tags and embedded covers is read on import. Internet providers remain unchanged and opt-in; this update does not claim automatic online enrichment.
+
+The source coordinator runs in the console and uses the existing broker's per-account authorization and import jobs, so no broker restart is needed. It retains receipts, stops on failed/unknown jobs or ambiguous submission and does not blindly resubmit after a restart. Originals stay in place; importing into the private catalog consumes additional storage. Radio trees containing only subdirectories at their root are split into child-folder jobs. The existing native importer retains its 10,000-file per-job limit; unusually large mixed or single-child trees need narrower sources.
+
+Validation: 576 Python tests passed (16 optional/environment skips), 82 JavaScript tests passed, and package/showcase checks passed. Tests cover source permissions, shared-library denial, path bounds, existing lowercase folders, transfer waiting, positive receipts, retained failures, unknown submissions, source splitting and photo-busy waiting. End-to-end music catalog acceptance remains pending completion of the ongoing USB transfer and the first source scan. Raw evidence is private. No public push, NAS reboot, broker restart, RAID changes or notification changes.
+
+# Destination-only drive imports and larger file windows — 4 November 2026
+
+Whole-drive Import to… now asks only for the destination, then prepares the full accessible root contents in existing reviewed copy jobs. The shared destination picker can create/select a new folder in a writable parent. Folder controls, incoming notices and transfer details are compacted; windows are taller and detail expansion survives polling. No backend, permission or disk-layout change is required.
+
+All 80 JavaScript checks passed, including 451 root items split into 200/200/51 plans, destination cancellation without reads/writes, exact plan bindings, ambiguous submission rejection, folder creation and read-only/path boundaries, deferred family-library paths and retained transfer-detail expansion. Package and showcase checks passed. Tests use fixtures; no real whole-drive copy or new user folder was submitted for validation. Console-only deployment preserves running copy and iCloud processes. No public push.
+
+# File browsing, map navigation and visible iCloud progress — 4 November 2026
+
+Implemented per-window page sizes, All Files with bounded enumeration, separate row highlighting/checking and Import to… with source/destination folder pickers. The Files heading is separate from its toolbar. Added private revalidated artwork caching and a four-request thumbnail queue. Places now uses clustered canvas rendering, fine continuous navigation and offline land behind delayed street tiles. Both photo entry points show the same download progress, with unknown totals labeled honestly.
+
+Local regression: 565 Python tests passed (16 optional/environment skips), and 72 JavaScript tests passed. Conditional HTTP tests exercise authorization before 304 and denial after revoked access. Map tests exercise anchored zoom, drag/pinch and no tile requests before a stable 2.1-second view. These are automated checks, not physical hardware acceptance.
+
+Console-only deployment preserves the existing broker, live USB copy and iCloud session. Connector inventory-counter improvements are staged for the next safe broker update; the currently running downloader does not expose a complete expected total. No invented percentage or completion claim is made. Private evidence and screenshots stay ignored; no public push is performed.
+
+# USB layout and visible transfer destinations — 4 November 2026
+
+USB Storage uses one compact aligned row per physical device, with volume controls
+and usage together. The File Manager selector/sidebar no longer repeat a personal
+library under both its share name and shortcut name, or a mounted drive as a second
+disabled attachment. Distinct shared folders and volume roots remain distinct.
+
+Transfer cards open their logical destination. The matching folder window shows
+an Incoming copy notice until whole-folder verification/publication completes.
+This does not expose private staging as a normal file location or change the copy's
+atomic publication rule. At inspection the copy was still running, had checked
+about 5.98 GB of 105.81 GB, and had published no selected folders. No copy restart,
+mount/unmount, source changes or storage layout changes are part of this UI update.
+
+# Independent USB mounts and retained-copy continuation — 4 November 2026
+
+Deployed per-volume copy protection and dashboard typed confirmations using only
+CONFIRM. Exact plan/disk binding remains enforced internally. Busy/wait/error
+feedback now appears inside the confirmation dialog rather than only behind it.
+
+The owner-approved worker cutover retained all 8,143 staged files (about 8.8 GB)
+and their identities. Three sample hashes matched both original and staged files.
+The same stage is continuing under a fresh identity-matched plan, with no source
+or published destination overwrite. At verification it had rechecked/reused over
+2.1 GB. Counters recount retained files during verification; completion of the
+105.8 GB copy remains pending. No NAS reboot or disk formatting occurred.
+
+The unrelated 500 GB music drive mounted read-only with the same previously
+approved identity/options in 2.45 seconds while the continuation ran. It is
+browsable as usb-storage2. Both busy source/destination lease checks refused,
+while the unrelated music volume's lease was available. This was not a forced
+unmount or physical disconnect test of an in-use volume. Source data, interrupted
+attempt evidence and private state backups are retained. Changes are committed
+locally and have not been publicly published.
+
+# Family system Overview and USB access — 4 November 2026
+
+Family Overview now displays allowlisted read-only system health: CPU, memory,
+temperature, network history, RAID state, each attached disk's temperature/SMART,
+and mounted capacity. Missing/stale telemetry remains explicit. Private library
+paths, credentials, device serials and other account configuration are omitted.
+Administrator settings and storage mutation rights are unchanged.
+
+USB Storage routing now uses the same permission-aware route list as its menu,
+fixing the redirect to Overview. Existing mounting/unlocking permission checks
+and private encrypted-volume ownership remain in force. The additional 500 GB
+Samsung USB drive was detected with an ext4 filesystem; it has not been formatted
+or automatically mounted. The previous verified USB copy remains running.
+
+# Transfer paths and readable history — 4 November 2026
+
+Deployed source and final destination paths on file-transfer cards. The read-only
+inventory collector observes paired source/output descriptors without restarting
+the copy worker. Full nested paths include an observation timestamp; ambiguous or
+stale observations fall back to selected folders and the reported filename.
+Only broker-authorized transfer rows receive path context. Previous transfers
+retains expansion and scroll position during live progress refreshes.
+
+The active copy continued through deployment, with more than 4,300 files verified
+at inspection. The entire selected folder remains staged until verification ends.
+Completion is not claimed. No storage layout, user grants, Apple authentication,
+notification preferences or RAID settings changed. Changes are committed locally;
+no public push was performed.
+
+# USB copy progress and refresh — 4 November 2026
+
+Fixed ordinary-folder creation under existing hardening and the personal worker's
+separate checkpoint ID. Deployed private live copy/verification counters, speed,
+ETA, reviewed retries, coalesced folder refresh and accessible library shortcuts.
+The original failed copy was revalidated and submitted once with unchanged source
+and destination identities and no overwrite. It is actively copying 45,608 files
+(about 105.8 GB). At the recorded check, 1,101 files/1.45 GB were verified; ETA was
+about 9.8 hours and remains an estimate. Destination listing stayed responsive.
+The selected folder appears after complete verification. iCloud also remains
+connected/downloading. Whole-copy and archive completion are not claimed.
+See [dated validation](FILE-TRANSFERS-VALIDATION-2026-11-04.md) and
+[user/API guide](FILE-TRANSFERS.md). Updates are local, not publicly published.
+
+# Photo viewer responsiveness — 4 November 2026
+
+Preview reads no longer wait behind network ingestion. The viewer shows a thumbnail
+while generating the large image, with loading feedback, bounded retries, manual
+Retry image and cancellation when closed. All 83 photo tests and 45 JavaScript
+tests passed; targeted concurrency/identity tests passed on ARM. Three live large
+previews loaded during active iCloud ingestion. New previews took about six seconds;
+a cached preview took about 0.1 seconds. The archive continued with 502 files and
+no reported download errors at inspection. The owner confirmed images now load; subsequent proportional-fit sizing was
+deployed and checked with synthetic desktop/mobile layouts. No reboot or storage-layout change was performed. Changes are local.
+See [dated validation](PHOTOS-USB-UX-VALIDATION-2026-11-04.md).
+
+# Full-image previews and location maps — 4 November 2026
+
+Complete primary-image HEIC decoding and versioned previews are deployed. Real
+read-only native comparisons passed both decoder isolation paths, and the broker
+served a corrected thumbnail. GPS details now include an online city-scale map or
+an offline fallback, with a per-profile privacy setting in Library locations and
+Import & iCloud. The requested online setting is enabled for existing profiles.
+The Settings interface was checked live; the owner confirmed corrected images
+and the location map both look correct.
+The archive download resumed after the controlled update, with 236 files and no
+reported download errors at inspection. Data RAID remains healthy/idle; no reboot
+or storage-layout change occurred. Source and evidence remain local.
+See [dated validation](PHOTOS-USB-UX-VALIDATION-2026-11-04.md).
+
+# iCloud archive downloading — 4 November 2026
+
+Following owner review of Apple account prompts, real photo access is connected
+and downloading. Consecutive checks showed growth from 17 to 27 archived originals,
+with zero reported errors. Three bounded original-file identity/checksum reads
+passed. Initial live ingestion is accepted; the first full library pass and later
+scheduled/session-renewal checks remain pending. Downloads were left running.
+See [dated evidence](PHOTOS-USB-UX-VALIDATION-2026-11-04.md).
+
+# Apple account review required — 4 November 2026
+
+The latest real login reports an Apple terms-review requirement before web photo
+access. The dashboard now identifies this account action explicitly; the owner
+must review Apple prompts personally at iCloud.com. The account-action release
+passed 71 photo tests locally and on ARM and is deployed. Actual photo access
+and archive download are still unaccepted. RAID remained healthy/idle, with
+full cooling and watchdog unchanged. See the
+[dated follow-up](PHOTOS-USB-UX-VALIDATION-2026-11-04.md).
+
+# Photos, USB access and visual browsing — 4 November 2026
+
+Deployed clearer Apple sign-in/download states, family USB mount/unlock access,
+shared plaintext versus private encrypted USB content, expandable folder trees,
+and station logos with generated artwork alternatives. Actual folder browsing and
+radio artwork were verified in the running dashboard. Local regression passed
+492 Python tests (four expected skips) and 38 JavaScript tests; native ARM checks
+also passed. Data RAID is non-degraded/idle, OS mirror healthy, full cooling and
+watchdog active. Fresh owner Apple sign-in and actual archive download acceptance
+remain pending; no download success is claimed. No reboot or disk operation occurred.
+See [dated results](PHOTOS-USB-UX-VALIDATION-2026-11-04.md) and
+[behavior guide](PHOTOS-USB-AND-BROWSING.md). Updates are committed locally only.
+
+# Private volumes and user Activity — 4 November 2026
+
+Deployed owner-bound encrypted storage, account/session summaries, bounded per-user
+storage reports and private Activity. The administrator sees all application activity;
+family users see only their own actions plus sanitized shared system notices.
+Local regression: 477 Python tests (four expected skips), JavaScript checks and 17
+native privacy tests passed. Live reports and the administrator interface were verified.
+RAID is non-degraded/idle; current health has no active incidents. Cooling remains
+full speed and watchdog active. No NAS reboot or disk-layout change was performed.
+See [dated acceptance](USER-PRIVACY-VALIDATION-2026-11-04.md) and
+[behavior and API guide](USER-PRIVACY-AND-ACTIVITY.md). Physical two-user encrypted
+media and phone/family acceptance remain pending; protocol/root audit limits are explicit.
+
+# Cloud identity, offline access and landing pages — 4 November 2026
+
+Deployed and validated the optional provider connection. The owner manually linked
+the existing administrator and a separate family profile through the dashboard.
+Actual administrator Authentik round trips succeeded, retaining the original
+profile/password; new administrator sign-ins land on Overview. Family users can
+choose permitted landing pages in My account, with personal Overview as default.
+Optional Create Local Account/reset keeps one profile with separate NAS credentials.
+Photo sharing is nested in Photos; music/book sharing is nested in My Radio.
+Local suite: 460 Python tests (four expected skips), 31 JavaScript tests and
+25 native account tests passed. Family-member and phone/PWA acceptance remain
+pending. See [dated results](OIDC-AND-OFFLINE-VALIDATION-2026-11-04.md) and
+[manual setup and account guide](LOCAL-USERS-AND-AUTHENTIK.md).
+
 # Viewer metadata and sharing — 4 November 2026
 
 Metadata/GPS editing now uses non-destructive XMP sidecars and updates the Photos

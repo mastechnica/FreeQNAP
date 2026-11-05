@@ -33,3 +33,30 @@ class ManagedDecoderTests(unittest.TestCase):
  def test_service_path_uses_manager_without_an_in_service_setuid(self):
   with patch('freeqnap.nas.personal_metadata.managed_decoder',return_value=True),patch('freeqnap.nas.personal_metadata.shutil.which',return_value='/usr/bin/ffmpeg'),patch('freeqnap.nas.personal_metadata.managed_decode',return_value=b'jpeg') as call:
    self.assertEqual(decode(123,'ffmpeg',['-i','fd:'],memory_limit=384*1024**2),b'jpeg');self.assertEqual(call.call_args.args[0:2],(123,'/usr/bin/ffmpeg'))
+
+class CompleteHeifTests(unittest.TestCase):
+ def test_detects_heif_brands_without_misclassifying_video(self):
+  from freeqnap.nas.personal_metadata import is_heif
+  for brand,expected in [(b'heic',True),(b'mif1',True),(b'avif',True),(b'isom',False)]:
+   with tempfile.TemporaryFile() as f:
+    f.write((24).to_bytes(4,'big')+b'ftyp'+brand+b'\0'*4+b'zzzz'*2);f.flush();self.assertEqual(is_heif(f.fileno()),expected)
+ def test_full_primary_decoder_precedes_jpeg_encoding_and_keeps_original(self):
+  from freeqnap.nas.personal_metadata import jpeg
+  calls=[]
+  def fake(fd,tool,args,**kwargs):
+   calls.append((tool,args));return b'P6\n1 1\n255\nabc' if tool=='python3' else b'\xff\xd8result'
+  with tempfile.TemporaryFile() as f:
+   f.write(b'original');f.flush()
+   with patch('freeqnap.nas.personal_metadata.is_heif',return_value=True),patch('freeqnap.nas.personal_metadata.decode',side_effect=fake):self.assertEqual(jpeg(f.fileno()),b'\xff\xd8result')
+   self.assertEqual(os.pread(f.fileno(),8,0),b'original')
+  self.assertEqual([x[0] for x in calls],['python3','ffmpeg']);self.assertIn('--edge',calls[0][1]);self.assertIn('384',calls[0][1])
+ def test_invalid_primary_decode_never_falls_back_to_partial_tile(self):
+  from freeqnap.nas.personal_metadata import jpeg
+  with patch('freeqnap.nas.personal_metadata.is_heif',return_value=True),patch('freeqnap.nas.personal_metadata.decode',return_value=b'bad') as decode_call:
+   with self.assertRaises(ValueError):jpeg(123)
+   self.assertEqual(decode_call.call_count,1)
+ def test_heif_output_dimensions_preserve_orientation_and_bound_memory(self):
+  from freeqnap.heif_preview import dimensions
+  self.assertEqual(dimensions(5712,4284,384),(384,288));self.assertEqual(dimensions(3211,5708,384),(216,384))
+  for dims in [(0,1),(20001,1),(20000,20000)]:
+   with self.assertRaises(ValueError):dimensions(*dims,384)

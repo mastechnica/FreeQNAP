@@ -102,6 +102,19 @@ def inspect(fd,fallback=None):
         rows=json.loads(data);return metadata(rows[0] if rows else {},fallback)
     except (ValueError,OSError,KeyError,json.JSONDecodeError):return {**metadata({},fallback),'metadata_unavailable':True}
 
+def is_heif(fd):
+    header=os.pread(fd,128,0)
+    if len(header)<16 or header[4:8]!=b'ftyp':return False
+    brands=[header[8:12]]+[header[i:i+4] for i in range(16,min(len(header),int.from_bytes(header[:4],'big')),4)]
+    return any(b in (b'heic',b'heix',b'hevc',b'hevx',b'mif1',b'avif',b'avis') for b in brands)
+
 def jpeg(fd,large=False,memory_limit=768*1024**2):
     width=1600 if large else 384
+    if is_heif(fd):
+        helper=Path(__file__).resolve().parents[1]/'heif_preview.py'
+        ppm=decode(fd,'python3',['-I',str(helper),'--input','/proc/self/fd/'+str(fd),'--edge',str(width)],memory_limit=memory_limit)
+        if not ppm.startswith(b'P6\n'):raise ValueError('Complete HEIF image preview unavailable')
+        with tempfile.TemporaryFile() as image:
+            image.write(ppm);image.flush()
+            return decode(image.fileno(),'ffmpeg',['-nostdin','-v','error','-threads','1','-protocol_whitelist','fd,pipe','-fd',str(image.fileno()),'-i','fd:','-frames:v','1','-f','image2pipe','-c:v','mjpeg','-q:v','4','pipe:1'],memory_limit=memory_limit)
     return decode(fd,'ffmpeg',['-nostdin','-v','error','-threads','1','-protocol_whitelist','fd,pipe','-fd',str(fd),'-i','fd:','-frames:v','1','-vf',fr'scale=min({width}\,iw):-2','-f','image2pipe','-c:v','mjpeg','-q:v','4','pipe:1'],memory_limit=memory_limit)

@@ -1,0 +1,22 @@
+[Unit]
+Description=FreeQNAP add-only iCloud album membership import
+After=network-online.target freeqnap-broker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/freeqnap/current
+ExecStart=/opt/freeqnap/photos-venv/bin/python3 -B -m freeqnap.nas.icloud_album_worker
+UMask=0077
+Nice=15
+TimeoutStartSec=1800
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/freeqnap-system /var/lib/freeqnap /run/freeqnap
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6

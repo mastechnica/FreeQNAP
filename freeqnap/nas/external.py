@@ -195,6 +195,8 @@ class External:
         from .storage import Storage
         with self.ctx.lock():
             path,plan=self.ctx.reviewed(request,'usb-create');body=plan['body'];row=self.select(body['external']['id']);self.idle(row)
+            from ..access_scope import current
+            if body['encrypted'] and not current():raise ValueError('Sign in before creating a private encrypted volume')
             if len({filesystem_label(v['name']) for v in body['layout']['volumes']})!=len(body['layout']['volumes']):raise ValueError('Filesystem labels collide; review another name')
             for volume in body['layout']['volumes']:
                 require_ext4_size(volume['bytes'])
@@ -243,7 +245,8 @@ class External:
                     pool['filesystem_uuid']=self.ctx.run('blkid','-s','UUID','-o','value',block).strip();pool['block_device']=block
                     if not pool['filesystem_uuid']:raise ValueError('New filesystem UUID unavailable')
                     cfg=self.ctx.config();cfg['pools'][pool['name']]=pool;self.ctx.save(cfg);created.append(pool);step(v['name']+':volume-registered')
-                for pool in created:Storage(self.ctx).mount(pool)
+                from ..access_scope import claim
+                for pool in created:claim(self.ctx,pool);Storage(self.ctx).mount(pool)
                 result={'created':body['name'],'volumes':[p['name'] for p in created],'encrypted':body['encrypted'],'enclosure_raid_configuration_changed':False}
                 self.ctx.state.finish(job,result=result);return result
             except Exception:
@@ -290,7 +293,10 @@ class External:
             path,plan=self.ctx.reviewed(request,'usb-eject');body=plan['body']
             fresh=[r for r in self.discover()['devices'] if r['usb']['enclosure_id']==body['enclosure']]
             if fresh!=body['devices']:raise ValueError('Enclosure/LUN state changed; review a fresh eject plan')
-            if any(j['status'] in ('queued','running') for j in self.ctx.state.jobs()):raise ValueError('Wait for active operations before ejecting storage')
+            if any(j['status'] in ('queued','running') and j['kind']!='files.transfer' for j in self.ctx.state.jobs()):raise ValueError('Wait for active operations before ejecting storage')
+            from .volume_leases import idle
+            cfg=self.ctx.config()
+            idle(self.ctx,[cfg['pools'][key]['filesystem_uuid'] for key in body['pools'] if cfg['pools'][key].get('filesystem_uuid')])
             registered=self.ctx.config()['pools'];allowed_mounts={p['mountpoint'] for p in registered.values() if p.get('kind')=='usb' and p['external']['enclosure_id']==body['enclosure']}
             for row in fresh:
                 for item in walk(row['disk']):

@@ -15,8 +15,8 @@ from pathlib import PurePosixPath
 from xml.etree import ElementTree as ET
 from .personal_metadata import decode,managed_decoder,managed_decode
 
-AUDIO = {'.mp3','.m4a','.m4b','.aac','.flac','.ogg','.opus','.wav','.aiff','.aif','.wma'}
-BOOKS = {'.epub','.pdf','.txt','.docx','.azw','.azw3','.mobi','.kpf'}
+AUDIO = {'.mp3','.m4a','.m4b','.aac','.flac','.ogg','.opus','.wav','.aiff','.aif','.wma','.ape'}
+BOOKS = {'.epub','.pdf','.txt','.docx','.azw','.azw3','.mobi','.kpf','.aax'}
 MAX_TEXT = 8 * 1024**2
 
 class PlainText(html.parser.HTMLParser):

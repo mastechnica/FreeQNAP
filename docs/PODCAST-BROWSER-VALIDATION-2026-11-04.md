@@ -1,0 +1,10 @@
+# Show-first podcast browser — 4 November 2026
+
+Podcasts now opens as a compact show-cover grid. A show opens its own episode view, with Back to shows and an explicit saved-episode play button. Search spans show names, publishers, episode titles and notes. Genre/publisher filters, rolling publish-date filters, downloaded/not-downloaded filters and chronological/title/duration sorting are available. Both views offer 25, 50, 100, 500 or All, with First/Previous/page numbers/Next/Last. Browsing, expanding a show and loading artwork never start audio. Subscription management stays collapsed.
+
+Publisher covers are fetched through a public-address-pinned, bounded local proxy and privately cached. RSS header reads stop before episode bodies; remote SVG/HTML is rejected. Account and library-share authorization is repeated before serving artwork or 304. Client artwork loading is limited to two concurrent images; missing images retain deterministic colorful fallback covers. Original feed URLs are not returned by the browser API.
+
+The console browser works with the already-running broker by gathering its authorized per-show windows; it labels those legacy windows explicitly. Native retained-history pagination is also implemented and byte-budgeted for the existing two-MiB broker frame, but requires a safe broker reload after active copies/imports finish. All means all episodes available in the current view, not every historical episode ever published. No active worker is restarted for this UI update.
+
+Local verification: 594 Python tests with 16 optional/environment skips, 85 JavaScript checks and package/showcase checks passed. Coverage includes real date ordering, genre/search/download filters, every page size, modern cursor following, legacy-window labeling, cache reauthorization, revoked artwork access and Unicode response budgets. Native ARM checks passed. The live family account showed all 13 publisher covers and 3,044 indexed episodes. Expanding a show and advancing from page 1 to page 2 of 9 worked; the editor opened with its publisher metadata and no audio was played. No public push.
+

@@ -1,0 +1,11 @@
+[Unit]
+Description=Check queued iCloud album imports and attach newly archived photos
+
+[Timer]
+OnBootSec=3min
+OnUnitInactiveSec=2min
+AccuracySec=15s
+Unit=freeqnap-icloud-albums.service
+
+[Install]
+WantedBy=timers.target

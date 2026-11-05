@@ -65,8 +65,10 @@ class Foreign:
         with self.ctx.lock():
             plan_path,plan=self.ctx.reviewed(request,'foreign-unlock');b=plan['body'];row,item=self.source(b)
             if row!=b['disk_identity'] or item!=b['item']:raise ValueError('USB identity/attachment changed since review')
+            from ..access_scope import current
+            if b['format'] not in ('ntfs','exfat','vfat') and not current():raise ValueError('Sign in to unlock a private encrypted volume')
             plain=b['format'] in ('ntfs','exfat','vfat');password=b'' if plain else unlock_secret(request.get('secret'));ident=secrets.token_hex(16);mapping='freeqnap-foreign-'+ident;target=Path('/srv/freeqnap/foreign')/ident;unit='freeqnap-foreign-'+ident+'.service';opened=False
-            self.ctx.consume(plan_path,plan);self.prepare_target(target);record={'id':ident,'source':b['source'],'external_id':b['id'],'disk_identity':row,'item':item,'format':b['format'],'mountpoint':str(target),'created_at':time.time(),'read_only':True,'unit':unit,'mapping':mapping if b['format'] not in ('apfs','ntfs','exfat','vfat') else None,'status':'opening'}
+            self.ctx.consume(plan_path,plan);self.prepare_target(target);record={'id':ident,'source':b['source'],'external_id':b['id'],'disk_identity':row,'item':item,'format':b['format'],'mountpoint':str(target),'created_at':time.time(),'read_only':True,'unit':unit,'mapping':mapping if b['format'] not in ('apfs','ntfs','exfat','vfat') else None,'status':'opening','owner':current() if not plain else None}
             atomic(self.ctx.directory/'foreign'/ (ident+'.json'),record)
             try:
                 if plain:
@@ -141,11 +143,16 @@ class Foreign:
                     try:self.validate(record)
                     except (OSError,ValueError,KeyError):active=False
             except (OSError,ValueError,KeyError):continue
-            rows.append({k:record[k] for k in ('id','source','format','mountpoint','created_at')}|{'active':active,'read_only':True,'mapping_open':bool(record.get('mapping') and Path('/dev/mapper/'+record['mapping']).exists())})
+            from ..access_scope import current
+            private=record['format'] not in ('ntfs','exfat','vfat')
+            access=not private or bool(record.get('owner') and record['owner']==current())
+            rows.append({k:record[k] for k in ('id','source','format','mountpoint','created_at')}|{'active':active,'private':private,'content_access':access,'read_only':True,'mapping_open':bool(record.get('mapping') and Path('/dev/mapper/'+record['mapping']).exists())})
         return rows[-64:]
     def lock(self,request):
         with self.ctx.lock():
-            record=self.record(request.get('session'))
+            record=self.record(request.get('session'));self.assert_owner(record)
+            from .volume_leases import idle
+            idle(self.ctx,['foreign:'+record['id']])
             if os.path.ismount(record['mountpoint']):
                 self.validate(record);self.ctx.run('systemd-mount','--umount',record['mountpoint'],timeout=90)
             if record['mapping'] and Path('/dev/mapper/'+record['mapping']).exists():self.ctx.run('cryptsetup','close',record['mapping'])
@@ -153,12 +160,16 @@ class Foreign:
                 units=self.ctx.run('systemctl','list-units','--all','--no-legend','--plain',record['unit'])
                 if any(line.split() and line.split()[0]==record['unit'] for line in units.splitlines()):self.ctx.run('systemctl','stop',record['unit'],timeout=90)
             return {'locked':True}
+    def assert_owner(self,record):
+        from ..access_scope import current
+        if record['format'] not in ('ntfs','exfat','vfat') and (not record.get('owner') or record['owner']!=current()):raise ValueError('This encrypted USB session belongs to another account; unlock it with your own credentials')
+
     def file_view(self,session):
-        record=self.validate(self.record(session));owner=self
+        record=self.record(session);self.assert_owner(record);record=self.validate(record);owner=self
         class View(Files):
             @contextlib.contextmanager
             def directory(self,share_id,path=''):
-                owner.validate(record);mount=Path(record['mountpoint'])/('root' if record['format']=='apfs' else '');fd=os.open(mount,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
+                owner.assert_owner(record);owner.validate(record);mount=Path(record['mountpoint'])/('root' if record['format']=='apfs' else '');fd=os.open(mount,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
                 try:
                     device=os.fstat(fd).st_dev
                     if device!=mount.stat().st_dev:raise ValueError('USB session mount changed')

@@ -1,7 +1,7 @@
 // Compose the existing public logo and approved dashboard capture; no private inputs.
 import AppKit
 let root = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-let output = root.appendingPathComponent("docs/assets/freeqnap-share-v1.png")
+let output = root.appendingPathComponent("docs/assets/freeqnap-share-v2.png")
 let bitmap = NSBitmapImageRep(bitmapDataPlanes:nil,pixelsWide:1200,pixelsHigh:630,bitsPerSample:8,samplesPerPixel:4,hasAlpha:true,isPlanar:false,colorSpaceName:.deviceRGB,bytesPerRow:0,bitsPerPixel:0)!
 NSGraphicsContext.saveGraphicsState()
 NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep:bitmap)
@@ -15,8 +15,8 @@ func text(_ value:String,_ x:CGFloat,_ y:CGFloat,_ size:CGFloat,_ color:NSColor,
  (value as NSString).draw(at:NSPoint(x:x,y:y),withAttributes:[.font:NSFont.systemFont(ofSize:size,weight:weight),.foregroundColor:color])
 }
 text("FreeQNAP",154,548,44,.white,.bold)
-text("Your hardware. Your NAS. Your memories.",156,516,20,NSColor(calibratedWhite:0.77,alpha:1))
-text("STORAGE  ·  BACKUPS  ·  PRIVATE ICLOUD PHOTO ARCHIVE",44,473,15,NSColor(calibratedRed:0.98,green:0.47,blue:0.61,alpha:1),.semibold)
+text("Your family. Your media. Your NAS.",156,516,20,NSColor(calibratedWhite:0.77,alpha:1))
+text("ICLOUD ARCHIVE  ·  FAMILY LIBRARIES  ·  MUSIC, BOOKS & MORE",44,473,15,NSColor(calibratedRed:0.98,green:0.47,blue:0.61,alpha:1),.semibold)
 let frame = NSBezierPath(roundedRect:NSRect(x:40,y:28,width:1120,height:425),xRadius:12,yRadius:12)
 NSColor(calibratedRed:0.4,green:0.22,blue:0.3,alpha:1).setFill();frame.fill()
 let screenshot = NSImage(contentsOf:root.appendingPathComponent("docs/assets/screenshots/overview.png"))!

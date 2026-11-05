@@ -6,7 +6,7 @@ set -eu
 photo_revision=99a6e7cde77819e739ed293ef411e5468b34873f
 photo_sha=faec3c59d490d4317b358e7996f06a3c1de8d87ae52d8a56d64b2cdde12c085a
 photo_archive=${2:-/var/tmp/freeqnap-icloud-source.tar.gz}
-DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3-venv libimage-exiftool-perl ffmpeg
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3-venv libimage-exiftool-perl ffmpeg libheif1 libheif-plugin-libde265 libheif-plugin-dav1d
 if [ ! -f "$photo_archive" ]; then
  python3 - "$photo_archive" "$photo_revision" <<'PY'
 import sys,urllib.request
@@ -33,4 +33,8 @@ PY
 chown -R root:root "$photo_venv"
 chmod 755 "$photo_venv"
 printf '%s\n' "$photo_revision" > "$photo_venv/freeqnap-upstream-revision"
+photo_deploy=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+install -m 644 "$photo_deploy/freeqnap-icloud-albums.service" "$photo_deploy/freeqnap-icloud-albums.timer" /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now freeqnap-icloud-albums.timer
 echo 'Dependencies prepared. Broker interpreter adoption is a separate deployment step.'

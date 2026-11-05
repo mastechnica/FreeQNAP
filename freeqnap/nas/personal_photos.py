@@ -1,9 +1,10 @@
+from contextvars import copy_context
 """Private, append-only photo archive. No remote/local deletion or public exports."""
 import base64,contextlib,hashlib,json,math,os,re,secrets,sqlite3,stat,threading,time
 from pathlib import Path
 from .common import name
 from .library_lock import serialized
-from .library_storage_source import source_directory
+from .library_storage_source import source_directory,source_allowed
 from .files import Files,relative
 from .personal_metadata import inspect,jpeg
 
@@ -109,7 +110,13 @@ class PersonalPhotos:
                     if not stat.S_ISREG(st.st_mode) or st.st_dev!=os.fstat(root).st_dev or (st.st_ino,st.st_size,st.st_mtime_ns)!=(item['inode'],item['bytes'],item['mtime_ns']):raise ValueError('Original file identity changed; re-verification is required')
                     yield fd
                 finally:os.close(fd)
-    def progress(self,**v):self.ctx.state.set('personal-photo-progress',{'at':time.time(),**v})
+    def progress(self,**v):
+        previous=self.ctx.state.setting('personal-photo-progress',{})
+        # File-byte observations must not erase the running inventory counters.
+        if v.get('state')=='downloading' and previous.get('state')=='downloading':
+            retained={k:previous[k] for k in ('seen','completed','failed','expected_items') if k in previous}
+            v={**retained,**v}
+        self.ctx.state.set('personal-photo-progress',{'at':time.time(),**v})
     @serialized
     def ingest(self,source_id,revision,filename,opener,total,group=None,taken=None,metadata_override=None):
         """opener(offset) yields bytes from a validated range; partials survive failure."""
@@ -318,32 +325,39 @@ class PersonalPhotos:
             if not db.execute('SELECT 1 FROM personal_albums WHERE id=?',(album,)).fetchone():raise ValueError('Choose an existing album')
             db.execute('INSERT OR IGNORE INTO personal_album_items VALUES(?,?)',(album,item['id']))
         return {'saved':True}
-    @serialized
     def read(self,r):
+        # Originals are immutable and retained across placement changes. Validate/open
+        # exact file identities instead of waiting behind a network ingestion lock.
         item=self.asset(r.get('id'));variant=r.get('variant','original');offset=r.get('offset',0);count=r.get('count',512*1024)
         if variant not in ('original','thumbnail','preview') or type(offset)!=int or not 0<=offset<=max(item['bytes'],8*1024**2) or type(count)!=int or not 1<=count<=512*1024:raise ValueError('Invalid photo read')
         if variant=='original':
             with self.opened(item) as fd:data=os.pread(fd,count,offset)
             return {'filename':item['name'],'total_bytes':item['bytes'],'etag':item['id'],'data_base64':base64.b64encode(data).decode()}
-        cache=item['id']+'-'+variant+'.jpg'
+        cache=item['id']+'-'+variant+'-v2.jpg'
         with self.root() as root:
             with directory(root,('previews',),True) as folder:
                 try:fd=os.open(cache,os.O_RDONLY|os.O_NOFOLLOW,dir_fd=folder)
                 except FileNotFoundError:
-                    if not self.preview_slot.acquire(timeout=1):raise ValueError('Photo preview is busy; try again shortly')
+                    if not self.preview_slot.acquire(timeout=10):raise ValueError('Photo preview is busy; try again shortly')
                     try:
-                        with self.opened(item) as original:data=self.preview(original,variant=='preview')
+                        # Another reader may have published this cache while we waited.
+                        try:fd=os.open(cache,os.O_RDONLY|os.O_NOFOLLOW,dir_fd=folder)
+                        except FileNotFoundError:
+                            with self.opened(item) as original:data=self.preview(original,variant=='preview')
+                            if not data.startswith(b'\xff\xd8') or len(data)>8*1024**2:raise ValueError('JPEG preview unavailable')
+                            tmp=cache+'-'+secrets.token_hex(4)+'.next';out=os.open(tmp,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600,dir_fd=folder)
+                            try:
+                                view=memoryview(data)
+                                while view:view=view[os.write(out,view):]
+                                os.fsync(out)
+                            finally:os.close(out)
+                            os.rename(tmp,cache,src_dir_fd=folder,dst_dir_fd=folder);fd=os.open(cache,os.O_RDONLY|os.O_NOFOLLOW,dir_fd=folder)
                     finally:self.preview_slot.release()
-                    if not data.startswith(b'\xff\xd8') or len(data)>8*1024**2:raise ValueError('JPEG preview unavailable')
-                    tmp=cache+'-'+secrets.token_hex(4)+'.next';out=os.open(tmp,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600,dir_fd=folder)
-                    try:os.write(out,data);os.fsync(out)
-                    finally:os.close(out)
-                    os.rename(tmp,cache,src_dir_fd=folder,dst_dir_fd=folder);fd=os.open(cache,os.O_RDONLY|os.O_NOFOLLOW,dir_fd=folder)
                 try:
                     info=os.fstat(fd)
                     if not stat.S_ISREG(info.st_mode) or info.st_size>8*1024**2:raise ValueError('Preview cache invalid')
                     data=os.pread(fd,count,offset)
-                    return {'filename':item['id']+'.jpg','total_bytes':info.st_size,'etag':item['id']+'-'+variant,'data_base64':base64.b64encode(data).decode()}
+                    return {'filename':item['id']+'.jpg','total_bytes':info.st_size,'etag':item['id']+'-'+variant+'-v2','data_base64':base64.b64encode(data).decode()}
                 finally:os.close(fd)
     def import_folder(self,r):
         if not self.busy.acquire(False):raise ValueError('A photo operation is already running')
@@ -354,7 +368,7 @@ class PersonalPhotos:
             with source_directory(self.ctx,share,folder):pass
             if pool==self.config().get('pool') and (folder==self.config()['folder'] or folder.startswith(self.config()['folder']+'/')):raise ValueError('Do not import the archive into itself')
             self.stop.clear();self.progress(state='scanning',source='local folder')
-            t=threading.Thread(target=self._import,args=(pool,folder,share),daemon=True);t.start();return {'started':True}
+            t=threading.Thread(target=copy_context().run,args=(self._import,pool,folder,share),daemon=True);t.start();return {'started':True}
         except Exception:self.busy.release();raise
     @serialized
     def _import(self,pool,folder,share=None):
@@ -368,6 +382,7 @@ class PersonalPhotos:
                         try:
                             for n in os.listdir(fd):
                                 if n.startswith('.') or self.stop.is_set():continue
+                                if not source_allowed(self.ctx,share or 'pool:'+str(pool),str(Path(folder)/prefix/n)):continue
                                 info=os.stat(n,dir_fd=fd,follow_symlinks=False)
                                 if info.st_dev!=os.fstat(root).st_dev:continue
                                 if stat.S_ISDIR(info.st_mode) and pool==self.config().get('pool') and str(Path(folder)/prefix/n)==self.config()['folder']:continue

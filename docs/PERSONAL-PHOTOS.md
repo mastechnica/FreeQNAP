@@ -129,3 +129,77 @@ files. See [local users, optional Authentik and scoped sharing](LOCAL-USERS-AND-
 Whole libraries, albums or selected photos/videos can be shared read-only with
 other local users, separately from their own collections. Sharing includes selected
 content metadata and locations, never Apple credentials or session cookies.
+
+## Responsive places and download feedback
+
+Places uses a local canvas with clustered points, continuous drag/pinch navigation, cursor-anchored wheel zoom and quarter-step zoom buttons. The bundled Natural Earth background remains visible while street tiles load. With online maps enabled, a view must remain unchanged for 2.1 seconds before missing visible OpenStreetMap tiles are requested. Panning or zooming restarts the delay; already cached tiles can still display. No tile prefetch or offline tile pack is downloaded. Photo-details maps follow the same delay. Online maps remain a per-user choice. See the [tile service policy](https://operations.osmfoundation.org/policies/tiles/).
+
+Both the gallery header and Import & iCloud show archive download activity, checked items, processed files and errors. A moving bar explicitly means activity when the inventory total is unknown. When available, current-file bytes and the inventoried-item total are displayed separately; an inventory total may grow as additional collections are inspected and is not a promised full-account total. The connector preserves inventory counters during file-byte updates. Already-running connector versions may not supply totals until their next safe service update; do not restart a live download just to populate a bar.
+
+Private thumbnails and previews can be reused from the browser cache after authorization and validation on every request. Originals retain no-store handling. Loading is limited to four concurrent thumbnail requests, with a bounded timeout so a stalled image does not block the queue.
+
+## Scan folders and File Manager imports
+
+The primary library location holds the private catalog; it is separate from a list of watched source folders. Open **Library storage, scanner & metadata settings** in My Radio, **Import & iCloud** in Personal Photos, or **Settings → Library locations**. Add one or more folders using the browser or the saved-library shortcuts, select each collection/category, enable automatic imports if wanted and save. Local audio tags and embedded artwork are read on import. Online title/cover lookups remain a separate opt-in action.
+
+My Radio prepares Music, Books and Podcasts folders; Personal Photos prepares Imports. Existing case variants are reused. A primary location's reviewed save creates the visible base folder; ordinary Personal Files creates its selected folder too. File Manager can copy into those folders. Only saved/enabled scan sources are imported; creating an arbitrary folder alone does not enroll it.
+
+The source scanner waits for your active file transfers to finish, then copies supported originals into the private catalog while retaining the source. This uses additional space. Photo sources wait for existing iCloud/photo imports. Per-folder and global scan switches can disable work. Status distinguishes scheduled, waiting, active, complete and needs-attention states, and Activity retains the native import jobs. Large radio trees are split where possible; a single native import still has a 10,000-file limit. No source deletion propagates to the catalog.
+
+### iCloud album import
+
+Import & iCloud has a separate, opt-in **iCloud albums** panel. Enable it and
+choose **Import albums now**, or check every 1–24 hours (default six). Each NAS
+account uses only its own saved Apple sign-in and selected archive. Photo and
+iCloud management permissions are required. This is optional, including when
+photo downloads are already enabled.
+
+Personal iCloud album names and membership are imported using stable Apple album
+identifiers. Identically named albums remain separate. Downloaded originals join
+the matching album; membership awaiting a download is retained and attached on
+later passes. Renames update the imported title. Existing local albums, archived
+originals and previously imported membership are never removed by remote deletion.
+This deliberately preserves an archive rather than an exact live mirror. Smart
+Albums, nested folder layout, legacy Shared Albums and Shared Photo Library album
+membership are outside this implementation.
+
+The optional `freeqnap-icloud-albums.timer` runs a bounded album-only companion.
+It copies saved session files into a private temporary directory, without writing
+the active downloader's cookie directory. Passwords and verification codes are
+not requested by this worker. If Apple requires renewed authentication, use the
+existing private sign-in controls and then retry album import. Progress reports
+album counts, linked archived memberships and memberships waiting for originals.
+A failed album does not discard successful albums or delete existing membership.
+
+The isolated worker retains `PrivateDevices=yes`. After first selecting or changing
+archive volumes, run `python3 tools/configure-icloud-albums.py` as root from the
+installed source directory. It verifies mounted filesystem and block-device
+identities and exposes only those device node paths read-only for identity checks.
+It does not allow raw device I/O, mount or unlock storage. Missing/offline/changed
+volume identities fail closed. This preparation is needed before the first album
+import on a new archive volume; the dashboard reports an unavailable archive
+rather than bypassing its identity check.
+
+### Physical acceptance — 5 November 2026
+
+The owner's existing saved session successfully listed eighteen personal albums.
+The final pass processed 946 distinct Apple asset references into 874 unique
+album/master memberships, with zero failed albums. At that snapshot 260 memberships
+linked to archived originals and 614 awaited downloads. Counts are memberships,
+not a claim about unique photos across the entire account. The two-minute local
+companion pass attaches subsequently archived photos without needing another
+remote inventory. The remote album inventory is configured for six-hour checks
+on the requested account only; other accounts remain opt-in.
+
+A live variant case exposed multiple distinct Apple asset records sharing one
+original master. The importer now deduplicates masters for membership while
+validating asset-reference uniqueness and both initial/final remote counts.
+Repeated asset records still fail completeness checks. Both cases have regression
+coverage. Existing downloader sessions and the long-running native worker stayed
+intact. PrivateDevices remains enabled and raw block-device I/O remains denied.
+
+The physical run proves the current personal album interface and available
+memberships, not every future Apple API change. Pending originals still require
+successful archive downloads; a membership entry cannot recover a photo deleted
+before it downloads. Nested iCloud folder layout, Smart Albums and shared-library
+album replication remain outside this acceptance.

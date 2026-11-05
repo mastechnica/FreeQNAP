@@ -11,6 +11,8 @@ class MediaHTTPTests(unittest.TestCase):
   self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup);self.root=Path(self.tmp.name);self.state=State(self.root/'state');self.state.set('administrator',auth.password_hash('private fixture password'));self.token,self.csrf=auth.login(self.state,'private fixture password');self.data=b'0123456789';test=self
   class Broker:
    def request(self,action,payload):
+    if action=='access.invoke':return self.request(payload['action'],payload['payload'])
+    if action=='myradio.podcasts':return {'feeds':[] if getattr(test,'podcast_revoked',False) else [{'id':'a'*32,'title':'Podcast','metadata':{}}],'episodes':[]}
     if action in ('files.read','files.pool-read','external.session-read'):return {'data_base64':base64.b64encode(test.data[payload['offset']:payload['offset']+payload['count']]).decode(),'etag':'stable','total_bytes':len(test.data),'modified_at':1700000000}
     if action in ('photos.read','myradio.read','raid.backup-read'):return {'filename':'fixture.mp4','data_base64':base64.b64encode(test.data[payload['offset']:payload['offset']+payload['count']]).decode(),'etag':'photo-fixture','total_bytes':len(test.data)}
     if action=='files.bundle-info':return {'ticket':payload['ticket'],'filename':'files.zip','roots':[{'path':'test','name':'test'}]}
@@ -22,6 +24,22 @@ class MediaHTTPTests(unittest.TestCase):
   c=http.client.HTTPConnection('127.0.0.1',self.server.server_port);h={'Host':'127.0.0.1:'+str(self.server.server_port)}
   if authorized:h['Cookie']='freeqnap_session='+self.token
   h.update(headers);c.request(method,path,headers=h);r=c.getresponse();result=r.status,dict(r.getheaders()),r.read();c.close();return result
+ def test_card_cover_upload_supports_documented_size_with_csrf(self):
+  payload={'kind':'podcast','id':'a'*32,'metadata':{'title':'My show'},'artwork':base64.b64encode(b'\xff\xd8\xff'+b'x'*100000).decode()}
+  def post(csrf):
+   c=http.client.HTTPConnection('127.0.0.1',self.server.server_port);host='127.0.0.1:'+str(self.server.server_port)
+   c.request('POST','/api/nas/myradio.card-save',json.dumps(payload),{'Host':host,'Origin':'http://'+host,'Content-Type':'application/json','Cookie':'freeqnap_session='+self.token,'X-CSRF-Token':csrf});r=c.getresponse();status=r.status;body=r.read();c.close();return status,body
+  self.assertEqual(post('bad')[0],403);code,body=post(self.csrf);self.assertEqual(code,200,body)
+  payload['artwork']=base64.b64encode(b'\xff\xd8\xff'+b'x'*1048576).decode();self.assertEqual(post(self.csrf)[0],400)
+ def test_custom_card_cover_reauthenticates_before_conditional_response(self):
+  user=auth.session(self.state,self.token)['user']
+  # Legacy primary administrator fixture uses its actual session-derived ID.
+  owner=user['id'];self.state.set('library-card:'+owner+':podcast:'+('a'*32),{'artwork':base64.b64encode(b'\xff\xd8\xfffixture').decode()})
+  path='/api/library-card-art?kind=podcast&id='+('a'*32)
+  self.assertEqual(self.request(path,authorized=False)[0],401)
+  code,h,b=self.request(path);self.assertEqual((code,b),(200,b'\xff\xd8\xfffixture'));self.assertIn('private',h['Cache-Control'])
+  self.assertEqual(self.request(path,**{'If-None-Match':h['ETag']})[0],304)
+  self.podcast_revoked=True;self.assertEqual(self.request(path,**{'If-None-Match':h['ETag']})[0],404)
  def test_media_ranges_suffix_head_and_if_range(self):
   path='/api/file?share=a&path=movie.mp4&inline=1';code,h,b=self.request(path,Range='bytes=2-5');self.assertEqual((code,b),(206,b'2345'));self.assertEqual(h['Content-Range'],'bytes 2-5/10');self.assertTrue(h['Content-Disposition'].startswith('inline'))
   self.assertEqual(self.request(path,Range='bytes=-3')[2],b'789');self.assertEqual(self.request(path,'HEAD')[2],b'');self.assertEqual(self.request(path,Range='bytes=99-')[0],416);self.assertEqual(self.request(path,Range='bytes=2-5',**{'If-Range':'"other"'})[2],self.data)
@@ -58,3 +76,24 @@ class MediaHTTPTests(unittest.TestCase):
   self.assertEqual(self.request('/api/radio-stream?id='+'a'*32,authorized=False)[0],401)
   for path in ['/navigation.js','/myradio.js','/array-recovery.js']:
    code,headers,body=self.request(path,authorized=False);self.assertEqual(code,200);self.assertIn('javascript',headers['Content-Type'])
+
+ def test_private_thumbnail_and_cover_caches_revalidate_after_authorization(self):
+  for path in ['/api/photo-file?id='+('a'*64)+'&variant=thumbnail&inline=1','/api/radio-file?id='+('a'*64)+'&variant=cover&inline=1','/api/file?share=a&path=poster.jpg&inline=1']:
+   code,headers,body=self.request(path);self.assertEqual(code,200);self.assertEqual(body,self.data);self.assertIn('private',headers['Cache-Control']);self.assertIn('must-revalidate',headers['Cache-Control']);self.assertEqual(headers['Vary'],'Cookie')
+   code,conditional,body=self.request(path,**{'If-None-Match':headers['ETag']});self.assertEqual(code,304);self.assertEqual(body,b'');self.assertEqual(conditional['ETag'],headers['ETag'])
+   self.assertEqual(self.request(path,authorized=False,**{'If-None-Match':headers['ETag']})[0],401)
+ def test_revoked_preview_access_cannot_receive_304(self):
+  path='/api/photo-file?id='+('a'*64)+'&variant=thumbnail&inline=1';_,headers,_=self.request(path)
+  from unittest.mock import patch
+  with patch('freeqnap.personal_access.Gateway.request',side_effect=PermissionError('Access revoked')):
+   self.assertEqual(self.request(path,**{'If-None-Match':headers['ETag']})[0],403)
+
+ def test_podcast_artwork_revalidates_access_before_a_cached_304(self):
+  from unittest.mock import patch
+  user=auth.session(self.state,self.token)['user'];self.state.set('podcast-profile:'+user['id']+':'+'a'*32,{'checked':9999999999,'artwork':'https://public.example/art.jpg'})
+  path='/api/podcast-art?id='+'a'*32
+  self.assertEqual(self.request(path,authorized=False)[0],401)
+  with patch('freeqnap.podcast_browser.public_http.fetch',return_value=b'\xff\xd8\xfffixture'):
+   code,headers,body=self.request(path);self.assertEqual(code,200);self.assertIn('private',headers['Cache-Control']);self.assertEqual(headers['Content-Type'],'image/jpeg')
+   self.assertEqual(self.request(path,**{'If-None-Match':headers['ETag']})[0],304)
+   self.podcast_revoked=True;self.assertNotEqual(self.request(path,**{'If-None-Match':headers['ETag']})[0],304)

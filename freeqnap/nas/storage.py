@@ -113,6 +113,8 @@ class Storage:
         with self.ctx.lock():
             path, plan = self.ctx.reviewed(request, 'pool-create')
             body = plan['body']
+            from ..access_scope import current
+            if body['encrypted'] and not current():raise ValueError('Sign in before creating a private encrypted volume')
             if body.get('volume_count',1)==2:
                 for volume in body['layout']['volumes']:
                     require_ext4_size(volume['bytes'],pointer_bytes=4,page_bytes=4096)
@@ -174,6 +176,8 @@ class Storage:
                 pool['block_device'] = device
                 config['pools'][pool['name']] = pool;self.ctx.save(config)
                 done('filesystem-created')
+                from ..access_scope import claim
+                claim(self.ctx,pool)
                 self.mount(pool)
                 done('mounted')
                 self.ctx.state.finish(operation, result={'pool': pool['name'], 'initial_sync_must_be_checked': True})
@@ -226,7 +230,8 @@ class Storage:
             pool['filesystem_uuid']=self.ctx.run('blkid','-s','UUID','-o','value',device).strip();pool['block_device']=device
             if not pool['filesystem_uuid']:raise ValueError('New filesystem UUID unavailable')
             cfg=self.ctx.config();cfg['pools'][pool['name']]=pool;self.ctx.save(cfg);created.append(pool);done(volume['name']+':filesystem-registered')
-        for pool in created:self.mount(pool);done(pool['name']+':mounted')
+        from ..access_scope import claim
+        for pool in created:claim(self.ctx,pool);self.mount(pool);done(pool['name']+':mounted')
         self.ctx.state.set('array_creation:'+operation,{'md_uuid':detail['MD_UUID'],'volumes':[p['name'] for p in created],'incomplete':False})
         result={'operation':operation,'volumes':[p['name'] for p in created],'md_uuid':detail['MD_UUID'],'initial_sync_must_be_checked':True}
         self.ctx.state.finish(operation,result=result);return result
@@ -249,6 +254,10 @@ class Storage:
         return candidate
 
     def mount(self, pool):
+        from ..access_scope import claim,current,check
+        if pool.get('encrypted'):
+            lease=self.ctx.state.setting('volume-owner:'+pool['name'],{})
+            check(self.ctx,pool,content=True)
         target = Path(pool['mountpoint'])
         target.mkdir(mode=0o000, parents=True, exist_ok=True)
         existing = self.ctx.run('findmnt', '-J', '-o', 'TARGET,UUID')
@@ -263,9 +272,11 @@ class Storage:
         options='nodev,nosuid,noexec'+(',ro,noload' if pool.get('read_only') else '')
         self.ctx.run('systemd-mount', '--collect', '--type=ext4', '--options='+options, device, str(target),timeout=90)
         self.ctx.volume(pool['name'])
-        if not pool.get('read_only'):target.chmod(0o755)
+        if not pool.get('read_only'):target.chmod(0o700 if pool.get('encrypted') else 0o755)
 
     def unlock(self, request):
+        from ..access_scope import current
+        if not current():raise ValueError('Sign in to unlock a private encrypted volume')
         with self.ctx.lock():
             pool = self.ctx.config()['pools'].get(name(request.get('pool')))
             if not pool or not pool['encrypted'] or (not pool.get('filesystem_uuid') and not pool.get('imported')):
@@ -286,6 +297,8 @@ class Storage:
                 if pool.get('kind')=='usb':
                     pool['ejected']=False
                     config=self.ctx.config();config['pools'][pool['name']]=pool;self.ctx.save(config)
+                from ..access_scope import claim
+                claim(self.ctx,pool)
                 self.mount(pool)
             except Exception:
                 self.ctx.run('cryptsetup', 'close', 'freeqnap-' + pool['name']);raise
@@ -296,6 +309,8 @@ class Storage:
             pool, target = self.ctx.volume(name(request.get('pool')))
             if not pool['encrypted']:
                 raise ValueError('The selected pool is not encrypted')
+            from .volume_leases import idle
+            idle(self.ctx,[pool['filesystem_uuid']])
             stop_services()
             self.ctx.run('systemd-mount', '--umount', str(target),timeout=90)  # Never force/lazy-unmount active writers.
             target.chmod(0o000)

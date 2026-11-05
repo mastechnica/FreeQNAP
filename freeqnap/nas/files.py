@@ -37,6 +37,9 @@ class Files:
         self.ctx = context
 
     def mapping(self, share_id):
+        from ..access_scope import check
+        cfg=self.ctx.config();key=share_id[5:] if isinstance(share_id,str) and share_id.startswith('pool:') else cfg['shares'].get(share_id,{}).get('pool')
+        if key in cfg['pools']:check(getattr(self.ctx,'base',self.ctx),cfg['pools'][key],content=True)
         if isinstance(share_id,str) and share_id.startswith('pool:'):
             pool,mount=self.ctx.volume(name(share_id[5:]))
             return {'name':share_id,'pool':pool['name'],'path':str(mount),'gid':os.getegid(),'volume_root':True,'read_only':bool(pool.get('read_only'))}
@@ -69,6 +72,7 @@ class Files:
         if not share:
             raise ValueError('Unknown shared folder')
         pool, mount = self.ctx.volume(share['pool'])
+        if share.get('volume_root') and hasattr(self.ctx,'shared_usb_path') and not self.ctx.shared_usb_path(share['pool'],path):raise ValueError('This is private personal storage')
         if not share.get('personal_root') and (Path(share['path']) if share.get('volume_root') else Path(share['path']).parent) != mount:
             raise ValueError('Share root mapping changed')
         if share.get('personal_root'):
@@ -102,6 +106,7 @@ class Files:
             names=sorted(n for n in os.listdir(directory) if not n.startswith('.freeqnap') and query.casefold() in n.casefold())
             for filename in names[offset:offset+limit]:
                 if filename.startswith('.freeqnap'):continue
+                if request['share'].startswith('pool:') and hasattr(self.ctx,'shared_usb_path') and not self.ctx.shared_usb_path(request['share'][5:],str(Path(request.get('path',''))/filename)):continue
                 info = os.stat(filename, dir_fd=directory, follow_symlinks=False)
                 entries.append({'name': filename, 'directory': stat.S_ISDIR(info.st_mode),
                                 'symlink': stat.S_ISLNK(info.st_mode), 'bytes': info.st_size,
@@ -129,8 +134,10 @@ class Files:
         if len(relative(folder)) != 1:
             raise ValueError('Choose one new folder name')
         with self.directory(request['share'], request.get('path', '')) as (directory, share, _):
-            os.mkdir(folder, mode=0o770 if share.get("volume_root") else 0o2770, dir_fd=directory)
-            os.chown(folder, 0, share['gid'], dir_fd=directory, follow_symlinks=False)
+            os.mkdir(folder, mode=0o770, dir_fd=directory)
+            created=os.open(folder,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=directory)
+            try:os.fchown(created,0,share['gid']);os.fchmod(created,0o770);os.fsync(created)
+            finally:os.close(created)
             os.fsync(directory)
         return {'created': folder}
 

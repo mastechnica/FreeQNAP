@@ -6,6 +6,8 @@ from freeqnap.nas.foreign import Foreign,unlock_secret
 
 class ForeignTests(unittest.TestCase):
  def setUp(self):
+  from freeqnap.access_scope import using
+  scope=using('user:'+'a'*32);scope.__enter__();self.addCleanup(scope.__exit__,None,None,None)
   test_external.USBTests.setUp(self);self.foreign=Foreign(self.ctx,self.service)
   self.disk['children']=[{'path':'/dev/sdz1','type':'part','size':2*1024**3,'fstype':'crypto_LUKS','uuid':'test-crypto','partuuid':'test-part','mountpoints':[]}]
  def probe(self,*a):return test_external.USBTests.probe(self,*a)
@@ -65,7 +67,7 @@ class ForeignTests(unittest.TestCase):
  def test_apfs_browser_uses_volume_root_and_skips_collected_service_on_lock(self):
   import base64
   target=self.root/'apfs';(target/'root').mkdir(parents=True);(target/'private-dir').mkdir();(target/'root/proof.txt').write_bytes(b'proof')
-  record={'id':'b'*32,'mapping':None,'format':'apfs','mountpoint':str(target),'unit':'freeqnap-foreign-'+('b'*32)+'.service'}
+  record={'owner':'user:'+'a'*32,'id':'b'*32,'mapping':None,'format':'apfs','mountpoint':str(target),'unit':'freeqnap-foreign-'+('b'*32)+'.service'}
   with patch.object(self.foreign,'record',return_value=record),patch.object(self.foreign,'validate',return_value=record):
    listing=self.foreign.files({'session':'b'*32});self.assertEqual([e['name'] for e in listing['entries']],['proof.txt']);self.assertEqual(base64.b64decode(self.foreign.files({'session':'b'*32,'path':'proof.txt'},True)['data_base64']),b'proof')
    calls=[]

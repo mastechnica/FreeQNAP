@@ -159,6 +159,10 @@ class Media:
         return result
 
     def catalog(self, request):
+        from ..access_scope import check
+        lib=self.ctx.config()['libraries'].get(request.get('library'),{})
+        pool=self.ctx.config()['pools'].get(lib.get('pool'),{})
+        if pool:check(self.ctx,pool,content=True)
         ident = name(request.get('library'))
         offset = max(0, int(request.get('offset', 0)))
         with self.ctx.state.connect() as db:
@@ -320,7 +324,7 @@ class Media:
     def dlna_config(self):
         libraries = []
         for library in self.ctx.config()['libraries'].values():
-            if not library['dlna']:continue
+            if not library['dlna'] or self.ctx.config()['pools'].get(library['pool'],{}).get('encrypted'):continue
             try:
                 pool, _ = self.ctx.volume(library['pool'])
                 if pool['filesystem_uuid'] == library['filesystem_uuid']:libraries.append(library)

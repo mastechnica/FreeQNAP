@@ -38,7 +38,7 @@ class SystemRecovery:
                 src=sqlite3.connect(path.as_uri()+'?mode=ro',uri=True);dst=sqlite3.connect(output)
                 try:
                     src.backup(dst);tables={r[0] for r in dst.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-                    for table in ('sessions','account_sessions','oidc_transactions'):
+                    for table in ('sessions','account_sessions','recent_cloud_auth','oidc_transactions'):
                         if table in tables:dst.execute('DELETE FROM '+table)
                     if 'settings' in tables:dst.execute("DELETE FROM settings WHERE key IN ('enrollment','oidc_states')")
                     dst.commit()

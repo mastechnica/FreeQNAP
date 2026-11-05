@@ -38,6 +38,8 @@ class Fixture(Context):
 
 class NAS(unittest.TestCase):
     def setUp(self):
+        from freeqnap.access_scope import using
+        scope=using('user:'+'a'*32);scope.__enter__();self.addCleanup(scope.__exit__,None,None,None)
         self.temp = tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name);self.ctx = Fixture(self.root)
     def inventory(self):

@@ -19,7 +19,7 @@ class PoolBrowser(unittest.TestCase):
   from freeqnap.nas.files import Files
   fs=Files(self.context)
   from unittest.mock import patch
-  with patch('os.chown'):
+  with patch('os.fchown'):
    self.assertEqual(fs.mkdir({'share':'pool:data','name':'created'})['created'],'created')
   self.assertTrue((self.root/'created').is_dir())
   self.pool['read_only']=True

@@ -1,100 +1,282 @@
 {
   "overview": {
-    "original_sha256": "054854a4164d8e2f601a97cf4a0c70bd61828db464f3dc35d6aab50b46c76ebe",
-    "output_sha256": "373c209b4e064e343dc4f652af7c710fd1b789f97cef4646e2edf7b583db2329",
+    "original_sha256": "c64b2f22dae3693354d2e87a0d98321b969e2d436fb96f088d4985ab6a099a94",
+    "output_sha256": "c877287904913c6052e0115f74248db31ad4dcc555d799d2d4378b5e38e089f5",
     "original_dimensions": [
       2678,
       1788
     ],
     "output_dimensions": [
       2678,
-      1372
+      1556
     ],
     "crop_original_coordinates": [
       0,
       164,
       2678,
-      1536
+      1720
     ],
     "opaque_masks_original_coordinates": [],
-    "outside_masks": "Original cropped pixels unchanged",
-    "capture_date": "2026-10-31",
+    "outside_masks": "Original cropped pixels unchanged outside masks and any listed illustrative thumbnail regions",
+    "illustrative_thumbnail_regions": [],
+    "capture_date": "2026-11-05",
     "source": "Running FreeQNAP dashboard; no synthetic state or metrics"
   },
   "files": {
-    "original_sha256": "27094f1154b2225392a99743d9f230b66d2888cffd52c846fb58be386d93c633",
-    "output_sha256": "a610bdc9db616fbab842d75c24e5498aabb3e49fd84e7d79fa7a9542bf1d6f7f",
+    "original_sha256": "53be9c6872e12c17d62ea4ae093e04ce79b716ad0408da382213d40afc1b9a67",
+    "output_sha256": "2f93140d71d7435ff37afbcb717bf1de9b1a622db7aed2404996c7b25974ffaf",
     "original_dimensions": [
       2678,
       1788
     ],
     "output_dimensions": [
-      2678,
-      1624
+      1726,
+      1394
     ],
     "crop_original_coordinates": [
-      0,
-      164,
-      2678,
-      1788
+      40,
+      336,
+      1766,
+      1730
     ],
-    "opaque_masks_original_coordinates": [
-      [
-        100,
-        1124,
-        256,
-        1156
-      ],
-      [
-        211,
-        1281,
-        330,
-        1314
-      ],
-      [
-        1373,
-        1124,
-        1530,
-        1156
-      ],
-      [
-        1483,
-        1281,
-        1609,
-        1314
-      ]
-    ],
-    "outside_masks": "Original cropped pixels unchanged",
-    "capture_date": "2026-10-31",
+    "opaque_masks_original_coordinates": [],
+    "outside_masks": "Original cropped pixels unchanged outside masks and any listed illustrative thumbnail regions",
+    "illustrative_thumbnail_regions": [],
+    "capture_date": "2026-11-05",
     "source": "Running FreeQNAP dashboard; no synthetic state or metrics"
   },
   "network": {
-    "original_sha256": "a687069eba8102a5e685fe7e26d663a3d59e3433ec54e08a4d1ffedf7abfdad4",
-    "output_sha256": "aa96874e07bb528f6d39703a5302af870727e5df0d7a2e704a7a2bc912ded351",
+    "original_sha256": "a40bfe93e49d7bc1b5f942be19d4a3c338c1265199ef990bc3a3429b1e796c9f",
+    "output_sha256": "beb23054fe33c78b8c90a5ec92643d8ab2fbd04ef78abb18eacf11d1192c54e0",
     "original_dimensions": [
       2678,
       1788
     ],
     "output_dimensions": [
       2678,
-      1596
+      1436
     ],
     "crop_original_coordinates": [
       0,
       164,
       2678,
-      1760
+      1600
     ],
     "opaque_masks_original_coordinates": [
       [
-        1036,
-        911,
-        1620,
-        950
+        1850,
+        845,
+        2238,
+        878
       ]
     ],
-    "outside_masks": "Original cropped pixels unchanged",
-    "capture_date": "2026-10-31",
+    "outside_masks": "Original cropped pixels unchanged outside masks and any listed illustrative thumbnail regions",
+    "illustrative_thumbnail_regions": [],
+    "capture_date": "2026-11-05",
     "source": "Running FreeQNAP dashboard; no synthetic state or metrics"
+  },
+  "icloud": {
+    "original_sha256": "3117d990339738f3b1576defe48516ba8492f3d183f51ef70a8caba40abdcb74",
+    "output_sha256": "1200f4300f8e67d12ae2a61c7bd8fa19d0cba299fc478345c2c3ec739f57970c",
+    "original_dimensions": [
+      2978,
+      1632
+    ],
+    "output_dimensions": [
+      2578,
+      1220
+    ],
+    "crop_original_coordinates": [
+      200,
+      380,
+      2778,
+      1600
+    ],
+    "opaque_masks_original_coordinates": [],
+    "outside_masks": "Original cropped pixels unchanged outside masks and any listed illustrative thumbnail regions",
+    "illustrative_thumbnail_regions": [],
+    "capture_date": "2026-11-05",
+    "source": "Running FreeQNAP dashboard; no synthetic state or metrics"
+  },
+  "icloud-albums": {
+    "original_sha256": "b7c103cc110806f0047d23f68b877195af8c1b026ca29cb9f38faf7569c89e36",
+    "output_sha256": "f762e8a8f61c5dfc643aa558d03e1d6ef856257c5c9dfb14fbecba0490e787d4",
+    "original_dimensions": [
+      2978,
+      1632
+    ],
+    "output_dimensions": [
+      2322,
+      522
+    ],
+    "crop_original_coordinates": [
+      328,
+      956,
+      2650,
+      1478
+    ],
+    "opaque_masks_original_coordinates": [],
+    "outside_masks": "Original cropped pixels unchanged outside masks and any listed illustrative thumbnail regions",
+    "illustrative_thumbnail_regions": [],
+    "capture_date": "2026-11-05",
+    "source": "Running FreeQNAP dashboard; no synthetic state or metrics"
+  },
+  "music": {
+    "original_sha256": "47af40357f25db1100a041cfe9304b13e8b5643d6d4a70680beec07edf0077f4",
+    "output_sha256": "14c5ae98968dbdd30bbc817fe19528f68ced1fe7a50cb9c14000e8170b8ffdec",
+    "original_dimensions": [
+      2978,
+      1632
+    ],
+    "output_dimensions": [
+      2578,
+      1070
+    ],
+    "crop_original_coordinates": [
+      200,
+      380,
+      2778,
+      1450
+    ],
+    "opaque_masks_original_coordinates": [],
+    "outside_masks": "Original cropped pixels unchanged outside masks and any listed illustrative thumbnail regions",
+    "illustrative_thumbnail_regions": [],
+    "capture_date": "2026-11-05",
+    "source": "Running FreeQNAP dashboard; no synthetic state or metrics"
+  },
+  "books": {
+    "original_sha256": "33fdf8045f59be977af79bd789eb53a28c8026b4cdf3fa9be2d336447d7c2e08",
+    "output_sha256": "a58f20cf94887faa8e27c37611f9a8e24347731784d848ba0b37a3029d08fe6e",
+    "original_dimensions": [
+      2978,
+      1632
+    ],
+    "output_dimensions": [
+      2578,
+      1220
+    ],
+    "crop_original_coordinates": [
+      200,
+      380,
+      2778,
+      1600
+    ],
+    "opaque_masks_original_coordinates": [],
+    "outside_masks": "Original cropped pixels unchanged outside masks and any listed illustrative thumbnail regions",
+    "illustrative_thumbnail_regions": [],
+    "capture_date": "2026-11-05",
+    "source": "Running FreeQNAP dashboard; no synthetic state or metrics"
+  },
+  "podcasts": {
+    "original_sha256": "a0387a50a49167cf33caa5abc17d922cb8d175772c73e87f32dac098fc267405",
+    "output_sha256": "02ebae65cae45b2a1f339257be9d1c0b856d026ae7496f473acc5b4150199693",
+    "original_dimensions": [
+      2978,
+      1632
+    ],
+    "output_dimensions": [
+      2578,
+      1138
+    ],
+    "crop_original_coordinates": [
+      200,
+      380,
+      2778,
+      1518
+    ],
+    "opaque_masks_original_coordinates": [],
+    "outside_masks": "Original cropped pixels unchanged outside masks and any listed illustrative thumbnail regions",
+    "illustrative_thumbnail_regions": [],
+    "capture_date": "2026-11-05",
+    "source": "Running FreeQNAP dashboard; no synthetic state or metrics"
+  },
+  "radio": {
+    "original_sha256": "20ec47de28b645aabdb0a3413ef958f25ac70158805560184f7e1eb7e2df4d24",
+    "output_sha256": "63b2c6bb1958d50fb40be4ce5fe49bae254723498759a60616607a67c0e36cfc",
+    "original_dimensions": [
+      2978,
+      1632
+    ],
+    "output_dimensions": [
+      2578,
+      1106
+    ],
+    "crop_original_coordinates": [
+      200,
+      380,
+      2778,
+      1486
+    ],
+    "opaque_masks_original_coordinates": [],
+    "outside_masks": "Original cropped pixels unchanged outside masks and any listed illustrative thumbnail regions",
+    "illustrative_thumbnail_regions": [],
+    "capture_date": "2026-11-05",
+    "source": "Running FreeQNAP dashboard; no synthetic state or metrics"
+  },
+  "photos": {
+    "original_sha256": "94b22593254df210254b1991c44b504b6643821d04c8533b01b3706b202fdf66",
+    "output_sha256": "f3fb3c8869b82749916ae5668a8dd71728c12c28299493b3e260619ec27ad79d",
+    "original_dimensions": [
+      2978,
+      1632
+    ],
+    "output_dimensions": [
+      2578,
+      1125
+    ],
+    "crop_original_coordinates": [
+      200,
+      380,
+      2778,
+      1505
+    ],
+    "opaque_masks_original_coordinates": [],
+    "outside_masks": "Original cropped pixels unchanged outside masks and any listed illustrative thumbnail regions",
+    "illustrative_thumbnail_regions": [
+      [
+        303,
+        1260,
+        537,
+        1495
+      ],
+      [
+        540,
+        1260,
+        775,
+        1495
+      ],
+      [
+        778,
+        1260,
+        1013,
+        1495
+      ],
+      [
+        1016,
+        1260,
+        1250,
+        1495
+      ],
+      [
+        1253,
+        1260,
+        1488,
+        1495
+      ],
+      [
+        1491,
+        1260,
+        1726,
+        1495
+      ],
+      [
+        1729,
+        1260,
+        1963,
+        1495
+      ]
+    ],
+    "capture_date": "2026-11-05",
+    "source": "Running FreeQNAP dashboard; scenic thumbnails substituted for privacy"
   }
 }

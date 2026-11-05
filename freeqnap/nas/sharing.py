@@ -177,7 +177,7 @@ class Sharing:
     def active(self):
         active = []
         for share in self.ctx.config()['shares'].values():
-            if not share['enabled']:continue
+            if not share['enabled'] or self.ctx.config()['pools'].get(share['pool'],{}).get('encrypted'):continue
             try:
                 pool, mount = self.ctx.volume(share['pool'])
                 if Path(share['path']).parent != mount or Path(share['path']).is_symlink():

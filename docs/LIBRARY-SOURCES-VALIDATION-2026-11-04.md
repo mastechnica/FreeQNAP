@@ -1,0 +1,23 @@
+# Watched library folders and music-copy enrollment — 4 November 2026
+
+Added persistent account-scoped source folders for My Radio and Personal Photos, separate from the primary private catalog location. Each collection can watch multiple accessible folders, with per-folder enable/category controls, a schedule and manual scan. Saved library locations populate source shortcuts. Successful library-location saves prepare required visible source folders through the existing authorized file service; existing spelling/case is reused. Personal Files already creates its selected folder during its reviewed save.
+
+The existing My Radio global and category scan switches remain authoritative. Automatic source imports wait for the account's queued/running file transfers; photo folder imports also wait for current photo/iCloud work. The music destination is enrolled using its exact existing folder spelling without moving, renaming or restarting its transfer. Metadata from local tags and embedded covers is read on import. Internet providers remain unchanged and opt-in; this update does not claim automatic online enrichment.
+
+The source coordinator runs in the console and uses the existing broker's per-account authorization and import jobs, so no broker restart is needed. It retains receipts, stops on failed/unknown jobs or ambiguous submission and does not blindly resubmit after a restart. Originals stay in place; importing into the private catalog consumes additional storage. Radio trees containing only subdirectories at their root are split into child-folder jobs. The existing native importer retains its 10,000-file per-job limit; unusually large mixed or single-child trees need narrower sources.
+
+Validation: 576 Python tests passed (16 optional/environment skips), 82 JavaScript tests passed, and package/showcase checks passed. Tests cover source permissions, shared-library denial, path bounds, existing lowercase folders, transfer waiting, positive receipts, retained failures, unknown submissions, source splitting and photo-busy waiting. End-to-end music catalog acceptance remains pending completion of the ongoing USB transfer and the first source scan. Raw evidence is private. No public push, NAS reboot, broker restart, RAID changes or notification changes.
+
+## Live configuration and UI check
+
+The two current music-copy batches both target the same existing lowercase music folder under the account's My Radio location. That exact path was enrolled as an enabled Music source with a 15-minute automatic schedule; no rename, duplicate uppercase Music folder, copy cancellation or new copy was performed. Required category folders and the photo Imports folder were checked/prepared through the existing account-scoped file API. The observed state is waiting-transfers, with no source import dispatched.
+
+The signed-in family dashboard displays the saved Music source, category, enable switch, Add another folder, library-location shortcuts and waiting explanation. Existing internet-metadata preference stayed disabled. Eleven focused source tests also passed on the NAS-compatible code path; the initial native deployment ran nine before two additional regression cases. Full catalog and artwork acceptance is still pending copy completion and source import.
+
+## Final regression and podcast subscription check
+
+The final combined source tree passed 582 Python tests with 16 expected optional/environment skips and 82 JavaScript tests. Native ARM validation passed all eleven source-coordinator checks and four initial podcast-reader checks; subsequent local cases also cover blocked-request non-retry and malformed XML boundaries. Package and showcase checks passed.
+
+Thirteen explicitly requested public US podcast subscriptions were populated for one authorized family account: ten technology/startup shows and three security shows. All selected IDs were returned through the normal account-scoped listing, with real episode metadata; no audio download was requested and existing automatic-refresh settings were preserved. A consistent private metadata backup was taken before import. The isolated updated reader avoided restarting active copy/iCloud workers. The running legacy broker's oversized-feed refresh limit remains until a safe idle reload; this is not claimed live-accepted through that older refresh handler. See the public [curated list](TECHNOLOGY-PODCASTS.md).
+
+The music scan remains waiting-transfers. Its first completed import, local artwork coverage and any unusually large branch limits remain pending actual transfer completion. Neither queued copies nor source data were restarted, moved or deleted for this work. No public push.

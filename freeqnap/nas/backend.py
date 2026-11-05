@@ -47,6 +47,8 @@ from .foreign import Foreign
 class Backend:
     def __init__(self, context=None):
         self.ctx = context or Context()
+        from .user_usage import Usage
+        self.user_usage=Usage(self)
         self.metrics = Metrics(self.ctx)
         self.status_light = StatusLight(self.ctx)
         self.disk_reports = DiskReports(self.ctx)
@@ -91,6 +93,10 @@ class Backend:
         self.alerts.optional_checks={'personal-photos':self.personal_cloud.health,'cooling':self.cooling.health,'watchdog':self.cooling.watchdog_health,'notifications':self.notifications.health,'ddns':self.ddns.health,'workers':self.worker_alerts,'https':self.https_alerts}
 
     def status(self):
+        from ..access_scope import metadata
+        with metadata():return self.status_metadata()
+
+    def status_metadata(self):
         config = self.ctx.config()
         pools = [];arrays={}
         for pool in config['pools'].values():
@@ -98,7 +104,10 @@ class Backend:
             try:
                 _, mount = self.ctx.volume(pool['name'])
                 space = os.statvfs(mount)
-                value.update(mounted=True, locked=False, available_bytes=space.f_bavail * space.f_frsize,
+                from ..access_scope import check
+                try:check(self.ctx,pool,content=True);private_access=True
+                except ValueError:private_access=False
+                value.update(private=bool(pool.get('encrypted')),content_access=private_access,mounted=True, locked=False, available_bytes=space.f_bavail * space.f_frsize,
                              total_bytes=space.f_blocks * space.f_frsize)
             except (ValueError, OSError):pass
             if pool.get('md_uuid') and pool.get('kind')!='usb':
@@ -122,6 +131,20 @@ class Backend:
                 'cooling':self.optional_status(self.cooling), 'notifications':self.optional_status(self.notifications), 'ddns':self.optional_status(self.ddns), 'health':self.alert_status(), 'management_tls':self.management_tls.status(), 'physical_recovery_acceptance': False, 'shutdown_metadata_followup_open': True}
 
     def dispatch(self, action, request):
+        if action=='access.invoke':
+            from ..access_scope import using
+            if set(request)!={'actor','action','payload'} or request['action'].startswith('access.'):raise ValueError('Invalid access envelope')
+            with using(request['actor']):
+                result=self.dispatch(request['action'],request['payload'])
+                return result
+        if action.startswith(('myradio.','photos.')):
+            from ..access_scope import check
+            cfg=self.ctx.state.setting('myradio' if action.startswith('myradio.') else 'personal-photos',{})
+            pool=self.ctx.config()['pools'].get(cfg.get('pool'),{})
+            if pool:check(self.ctx,pool,content=True)
+        if action=='users.usage':return self.user_usage.status(request)
+        if action=='activity.system':return self.system_activity()
+        if action=='activity.jobs':return self.job_activity(request)
         if action=='personal.social-prepare':return self.social.prepare(request)
         if action=='personal.social-read':return self.social.read(request)
         if action=='personal.social-discard':return self.social.discard(request)
@@ -131,7 +154,7 @@ class Backend:
         if action=='personal.invoke':return self.personal.invoke(request)
         direct = {
             'nas.status': lambda _: self.status(),
-            'library.files-status':self.personal_files.status,'library.files-plan':self.personal_files.plan,'library.files-apply':self.personal_files.apply,
+            'library.folders':lambda r:self.files.list({'share':'pool:'+r['pool'],'path':r.get('path',''),'offset':r.get('offset',0),'limit':r.get('limit',200)}), 'library.files-status':self.personal_files.status,'library.files-plan':self.personal_files.plan,'library.files-apply':self.personal_files.apply,
             'library.storage-plan':self.library_storage.plan,
             'myradio.status':self.my_radio.status,
             'myradio.configure':self.my_radio.configure,
@@ -147,7 +170,7 @@ class Backend:
             'myradio.artwork-url':self.my_radio.artwork_url,
             'myradio.progress':self.my_radio.progress,
             'myradio.lookup':self.my_radio.lookup,
-            'myradio.stations':self.my_radio.stations,
+            'myradio.station-artwork':self.my_radio.station_artwork, 'myradio.stations':self.my_radio.stations,
             'myradio.station-save':self.my_radio.station_save,
             'myradio.station-check':self.my_radio.station_check,
             'myradio.station-source':self.my_radio.station_source,
@@ -206,7 +229,7 @@ class Backend:
             'files.upload-begin': self.files.upload_begin, 'files.upload-chunk': self.files.upload_chunk,
             'files.upload-finish': self.files.upload_finish, 'files.move-plan': self.files.move_plan,
             'files.move': self.files.move, 'files.transfer-plan': self.files.transfer_plan,
-            'files.stages':self.files.stages,'files.stage-plan':self.files.stage_plan,'files.stage-remove':self.files.stage_remove,
+            'files.transfer-resume-plan':self.files.transfer_resume_plan, 'files.transfer-retry-plan':self.files.transfer_retry_plan, 'files.transfers':self.files.transfers, 'files.stages':self.files.stages,'files.stage-plan':self.files.stage_plan,'files.stage-remove':self.files.stage_remove,
             'files.delete-plan': self.files.delete_plan, 'files.trash': self.files.trash_items, 'files.recycle-policy': self.files.policy_apply, 'files.recycle-policy-plan':self.files.policy_plan, 'files.recycle-plan':self.files.recycle_plan,
             'files.purge-plan': self.files.purge_plan, 'files.purge': self.files.purge,
             'recovery.list': self.recovery.list, 'recovery.plan': self.recovery.plan, 'recovery.apply': self.recovery.apply,
@@ -216,7 +239,7 @@ class Backend:
             'photos.read':self.personal_photos.read, 'photos.annotate':self.personal_photos.annotate,
             'photos.album-create':self.personal_photos.album, 'photos.album-add':self.personal_photos.album_add,
             'photos.import-folder':self.personal_photos.import_folder, 'photos.pause':self.personal_cloud.pause,
-            'photos.icloud-status':self.personal_cloud.status, 'photos.icloud-save':self.personal_cloud.save,
+            'photos.icloud-check':self.personal_cloud.check, 'photos.icloud-status':self.personal_cloud.status, 'photos.icloud-save':self.personal_cloud.save,
             'photos.icloud-login':self.personal_cloud.login, 'photos.icloud-code':self.personal_cloud.code,
             'photos.icloud-run':self.personal_cloud.run,
             'media.save': lambda r: self.save_library(r), 'media.catalog': self.media.catalog,
@@ -233,6 +256,41 @@ class Backend:
             return {'job_id': self.ctx.state.enqueue(action, request)}
         raise ValueError('Unknown or unsupported NAS operation')
 
+    def job_activity(self,r):
+        from .. import activity
+        from ..state import State
+        from ..access_scope import current
+        actor=current();admin=r.get('administrator') is True;events=[]
+        scopes=[self.ctx.state]
+        personal=self.ctx.directory/'personal'
+        if personal.exists():
+            for path in personal.iterdir():
+                if path.is_dir() and len(path.name)==32 and (admin or actor=='user:'+path.name):scopes.append(State(path))
+        for state in scopes:
+            activity.ensure(state)
+            with state.connect() as db:
+                query="SELECT at,actor,operation,outcome,severity FROM activity_events WHERE scope='private'";args=[]
+                if not admin:query+=' AND actor=?';args=[actor]
+                events.extend(dict(v) for v in db.execute(query+' ORDER BY id DESC LIMIT 100',args))
+        return sorted(events,key=lambda v:v['at'],reverse=True)[:100]
+
+    def system_activity(self):
+        from .. import activity
+        activity.ensure(self.ctx.state)
+        try:
+            boot=Path('/proc/sys/kernel/random/boot_id').read_text().strip()
+            with self.ctx.state.connect() as db:
+                db.execute('BEGIN IMMEDIATE');row=db.execute("SELECT value FROM settings WHERE key='activity-boot'").fetchone()
+                if not row or json.loads(row[0])!=boot:
+                    db.execute("INSERT INTO activity_events(at,actor,operation,outcome,scope,severity,bytes) VALUES(?,'system','system.boot-observed','changed','system','info',0)",(time.time(),))
+                    db.execute("INSERT OR REPLACE INTO settings VALUES('activity-boot',?)",(json.dumps(boot),))
+        except OSError:pass
+        with self.ctx.state.connect() as db:
+            labels={'inventory':'Hardware monitoring','raid':'RAID protection and maintenance','smart':'Disk health','space':'Storage capacity','temperature':'System temperature','jobs':'Background operations','schedules':'Scheduled backups','services':'NAS services','personal-photos':'Photo archive service','cooling':'Cooling','watchdog':'Hardware watchdog','notifications':'Notification service','ddns':'Dynamic DNS','workers':'Background services','https':'Local HTTPS'}
+            health=[{'id':'health:'+str(v['id']),'at':v['created'],'operation':'system.health.'+v['kind'],'severity':v['severity'],'outcome':'changed','summary':labels.get(v['scope'].removeprefix('monitor-'),'System health')+' · '+v['severity']+' · '+v['kind']} for v in db.execute('SELECT e.id,e.created,e.kind,e.severity,a.scope FROM health_events e JOIN health_alerts a ON a.id=e.alert_id ORDER BY e.id DESC LIMIT 100')]
+            events=[dict(v) for v in db.execute("SELECT id,at,operation,outcome,severity FROM activity_events WHERE scope='system' ORDER BY id DESC LIMIT 100")]
+        return sorted(health+events,key=lambda v:v['at'],reverse=True)[:100]
+
     def system_plan(self, request):
         if self.personal_photos.busy.locked() or self.personal_cloud.auth_lock.locked():raise ValueError('Pause and wait for personal photo activity before changing system power')
         operation=request.get('operation')
@@ -247,6 +305,8 @@ class Backend:
             path,plan=self.ctx.reviewed(request,'system-power')
             if any(job['status'] in ('queued','running') for job in self.ctx.state.jobs()):raise ValueError('An operation started after the power plan; wait and review again')
             self.ctx.consume(path,plan)
+            from .. import activity
+            activity.record(self.ctx.state,'system','system.'+plan['body']['operation'],'accepted',scope='system')
             action='reboot' if plan['body']['operation']=='restart' else 'poweroff'
             timer=threading.Timer(2,lambda:self.ctx.run('systemctl',action));timer.daemon=True;timer.start()
             return {'scheduled':plan['body']['operation'],'delay_seconds':2}
@@ -296,6 +356,11 @@ class Backend:
         return {'dlna_libraries': [row['name'] for row in libraries], 'default_deny':True}
 
     def execute(self, job):
+        from ..access_scope import using
+        with self.ctx.state.connect() as db:row=db.execute('SELECT actor FROM job_principals WHERE id=?',(job['id'],)).fetchone()
+        with using(row['actor'] if row else None):return self.execute_scoped(job)
+
+    def execute_scoped(self, job):
         request = json.loads(job['payload'])
         actions = {
             'library.storage-apply':self.library_storage.apply, 'myradio.scan':self.my_radio.scan, 'myradio.import-folder':self.my_radio.import_folder,'myradio.station-refresh':self.my_radio.station_refresh,'myradio.download':self.my_radio.download,

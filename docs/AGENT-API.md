@@ -14,7 +14,13 @@ credentials under **Settings → AI agent access** in the dashboard.
 4. Revoke it from the agent list when access is no longer needed. To change its
    rights, issue a replacement with the new selection and revoke the old token.
 
-**Rights are NAS-wide function permissions, not folder permissions.** A file
+**Rights are NAS-wide function permissions, not folder permissions.** Private
+encrypted unlock ownership is an additional boundary: each credential owns its own
+unlock and cannot inherit another account’s or credential’s decrypted files.
+Private encrypted sources are excluded from DLNA/anonymous network exports. See
+[private-volume and activity rules](USER-PRIVACY-AND-ACTIVITY.md).
+
+ A file
 editor can modify shared folders across the NAS. A media editor can update all
 indexed libraries. Do not grant file editing to an agent intended only to edit
 metadata. File deletion, exports, network configuration, power controls and
@@ -244,3 +250,91 @@ existing tokens. Browser-family metadata editing additionally requires
 `metadata.edit` and the corresponding file/photo write right. External native-app
 sharing is session-only and never automatically sends content. See
 [privacy and sharing](METADATA-AND-SOCIAL-SHARING.md).
+
+## Station artwork and folder browsing
+
+`myradio.station-artwork` and `library.folders` are separately selectable operations.
+They do not expand existing credentials. The interactive `photos.icloud-check` action
+is not available to agent tokens. See [interface fields and owner rules](PHOTOS-USB-AND-BROWSING.md).
+
+File copy telemetry and freshly reviewed retries are documented in
+[File transfers](FILE-TRANSFERS.md). `files.transfers` is read-only and filters by
+the authenticated principal; `files.transfer-retry-plan` prepares a new review,
+not an automatic retry. Existing tokens require explicit grants for new operations.
+
+### Photo progress and media cache response additions
+
+`photos.status.operation` may include `expected_items` alongside `seen`, `completed`, `failed`, and per-file `bytes`/`total_bytes`. The expected count covers the inventory discovered so far and may grow across collections; absence means unknown, not zero. File-byte updates preserve inventory counters; terminal/new-operation states clear obsolete per-file fields. These additive connector fields take effect after a safe broker update. Existing running downloads are not restarted for UI changes.
+
+Authorized thumbnail/preview and recognized artwork HTTP reads support private conditional caching with account/grant-scoped ETags and `If-None-Match`/304. Authorization is checked before conditional responses. Originals keep no-store and range behavior. This does not grant agents new permissions or expand media access.
+
+### Account scan-folder endpoints
+
+The authenticated dashboard exposes POST `/api/nas/library.sources-status`, `library.sources-save` and `library.sources-scan`. These are session-scoped endpoints, not bearer-agent operations in the current token catalog; existing token grants/presets are unchanged. Shared libraries cannot configure sources. Read requires `myradio.read` or `photos.read`; saving/scanning requires the corresponding `.write`, with normal file-read/write and source authorization independently enforced by existing handlers. Administrators can use the existing managed-account selector. Owner IDs cannot be supplied in the body.
+
+All three take `kind: "radio" | "photos"`. Save also accepts `enabled` (boolean), `interval_minutes` (integer 5–1440) and `sources` (up to 32 entries). An entry has `share`, relative `path`, `enabled`, optional display `label`, and radio `category` (`music`, `books`, `podcasts`); photo category is fixed. Returned source IDs are bookkeeping only. Paths must stay inside accessible sources; no permission is granted by saving a path.
+
+Status returns `config`, `run`, `suggestions`, `library_location`, `folder_setup`, `catalog_counts`, `current_scanner`, `copy_into_private_catalog` and an `online_metadata` explanation. Internal expanded task inventories are not returned. Run states include scheduled, waiting-transfers, waiting-photos, waiting-job, waiting-photo, complete, disabled, failed and uncertain. Scan requests schedule saved sources rather than synchronously importing. Failed/unknown receipts and ambiguous submissions block automatic retries; inspect Activity before operator reconciliation. Automatic imports never enable online metadata lookups.
+
+### Session podcast browser and artwork
+
+POST `/api/nas/myradio.podcast-browser` is a session-scoped read interface that reuses authorized `myradio.podcasts` reads. It is not added to bearer-agent presets or grants. Shared access must be an authorized podcast-library share; managed-account access remains administrator-only. The request accepts `view` (`shows` or `episodes`), `feed`, `query` (up to 255 characters), `genre`, `publisher`, `age` (empty, 7/30/90/365, older or undated), `saved` (empty/yes/no), `sort` (newest/oldest/title/publisher/episodes/duration), `offset`, `limit` (25/50/100/500 or all) and optional boolean `refresh`. Search/filtering happens before paging.
+
+Responses include `items`, `total`, `offset`, `limit`, optional selected `show`, genre/publisher `options`, authorized `show_count`, `indexed_episodes`, and `recent_window`. Show items include title, publisher, description, genres, safe website, artwork availability, episode/matching/saved counts and latest timestamp. Episode items contain opaque ID, title, plain notes, publication date/timestamp, duration and any saved asset reference. No feed/enclosure URL or owner-selecting payload field is exposed. Unknown/cross-account feed references are denied.
+
+GET `/api/podcast-art?id=…` requires the same session/account/share authorization before image cache reads or conditional 304. It returns only bounded JPEG/PNG/WebP, private revalidation headers and a scoped ETag. Remote XML/SVG/HTML is not served as artwork. Cached derived artwork is bounded and evicted independently of originals.
+
+Native `myradio.podcasts` additionally supports offset and numeric limits up to 1000 or all, returning total/next_offset/pagination. Responses obey the broker byte budget, so clients must follow actual next_offset even when all is requested. The running legacy broker may not expose this capability until its next safe reload; the console compatibility layer reports recent_window rather than claiming older retained records are available. Existing bearer-token rights remain unchanged.
+
+#### Personal card edits (browser session)
+
+`POST /api/nas/myradio.card-save` accepts `kind` (`podcast` or `station`), `id`, optional `metadata` (`title`, `author`, `genre`, `description`, `website`), optional base64 `artwork` and boolean `reset_artwork`. Text limits are respectively 500, 500, 200, 10000 and 2000 characters. Genres use comma-separated text. A supplied title cannot be blank. Website URLs must resolve to public HTTP(S) destinations. Artwork is raster JPEG/PNG/WebP, at most 1 MiB; active SVG/HTML is rejected. Returns `{saved:true,revision}`. The current session must have `myradio.write`; shared libraries cannot be edited, and managed-account edits require an administrator. The target must already be in that account’s authorized library. Source URLs, region, approval and playback destinations cannot be edited here.
+
+`GET /api/library-card-art?kind=podcast|station&id=…` returns a private custom raster cover, with session/account authorization before 200 or conditional 304. Missing/inaccessible artwork returns 404; no session returns 401. These console endpoints do not add bearer-agent capabilities. Existing book/music metadata and artwork operations keep their current authorization. Native `myradio.metadata` additionally accepts `book_type` (`audiobook`, `ebook`, `other`) after the safe worker reload.
+
+#### Prepared local music metadata
+
+Music item metadata can include `identification_status` (`complete` or `needs-review`) and `metadata_sources`, mapping tag fields to `embedded`, `folder-consensus`, `existing-album-nfo` or `filename-needs-review`. These report local evidence, not an online fingerprint match. They add no permissions or external metadata transmission. Unknown identification leaves the original filename unchanged. Internal prepared-file identity checks are omitted from newly loaded native public DTOs. Browser-compatible M4B editions use normal audiobook playback; legacy AAX/APE/WMA originals retain compatible-player guidance. No automatic transcoding is introduced.
+
+`myradio.status` includes `prepared_scanning:true` when the native worker has loaded identity-verified fast rescans. The console may report `optimized_scan_pending:true` for a prepared large library while an older worker remains active for an existing transfer. In that state `myradio.scan` is rejected before enqueueing; current browsing/playback and unrelated transfers remain available. Planned per-account music maintenance temporarily rejects new media writes/scans, with an explanatory response, and holds automatic folder imports. These holds add no new permissions and do not silently replay uncertain jobs.
+
+
+### Session album browser, listening overview and metadata matching
+
+The following POST `/api/nas/` operations are authenticated, CSRF-protected dashboard-session adapters. They do not add bearer-agent grants or presets. Native account, collection and managed-user authorization is reapplied; shared collections remain read-only. Owner IDs cannot be supplied in payloads.
+
+| Operation | Request | Response / rights |
+| --- | --- | --- |
+| `myradio.music-browser` | Optional `album` ID, `query`, `artist`, `genre`, `sort` (title/artist/newest/year), `offset`, `limit` (25/50/100/500/all), boolean `refresh` | Authorized album summaries, facets, totals, paging; selected album includes tracks in disc/track order. Requires native My Radio reads. |
+| `myradio.books-browser` | `query`, `artist`, `genre`, `series`, `collection`, `format` (empty/audiobook/ebook), `sort`, `offset`, `limit`, boolean `favorite`/`archived` | Authorized items, facets and paging. Title, author, newest, year and numeric series ordering; normal book access. |
+| `myradio.album-save` | `album`, optional `metadata` containing album/album_artist/genre/year, optional base64 raster `artwork` at most 1 MiB | `updated` track count and `cover_saved`. Requires `myradio.write`, denied on shares. Explicit changed fields apply to all album tracks (maximum 1,000). A partial failure reports completed writes; inspect before retry. |
+| `myradio.overview` | Empty object | Own `sections`, `recent`, `stats`, `counts`, `measurement`. Managed-account impersonation is denied. |
+| `myradio.listen` | Start: `event:start`, `id`, `kind` (music/audiobooks/books/podcasts/radio). Tick/stop: `event`, opaque `session`, boolean `playing` | Start returns session/tracking_since; updates return saved/seconds/ended. Listener is always the signed-in account, never a payload owner. Current item/share access rechecked. |
+| `myradio.providers` | Empty object | Enabled flags and transmission disclosure. Native MusicBrainz/OpenLibrary flags plus per-account podcasts/radio flags. |
+| `myradio.providers-save` | Optional boolean `podcasts`, `radio` | Updated enabled flags. Requires write permission; shared collections denied. Native provider flags remain in normal My Radio configuration. |
+| `myradio.metadata-search` | `kind` (asset/album/podcast/station), exact `id`, `title`, optional `artist`, `country` (US/CA) | Explicit enabled-provider search results with opaque ticket, public metadata, optional has_cover; disabled providers return an explanation without searching. Requires write/current target access. |
+| `myradio.metadata-apply` | `ticket`, boolean `cover` | Applies the selected metadata and optionally artwork; returns saved/warning. Ticket is owner/requester/target-bound for ten minutes, provider enablement and authorization rechecked. Feed and stream destinations are unchanged. |
+
+Album summaries include opaque ID, title, artist, year, genres, track_count, duration, needs_review, optional cover_item/custom_artwork/revision and source folder label for unidentified albums. Internal filesystem paths/identities are not exposed. Source evidence prevents unrelated unidentified/compilation folders from merging. Private inventory caching repeats native authorization before each cache read.
+
+`myradio.metadata` supports book `series` (200 characters), `series_number` (40 characters) and `collections` (up to twenty names, 160 characters each). Organization is account-scoped local configuration; the original file is unchanged. Native core metadata/sidecar writes keep existing authorization. Catalog/item responses overlay these book fields. Personal album artwork is a console display override rather than replacement of every track's embedded art.
+
+Listening stats contain total_seconds, sessions, tracking_since, by_kind, genres (name/seconds/percent), top_tracks and top_stations. Only actual browser playback starts sessions; updates account previous playing state by server wall time, cap each interval at sixty seconds, reject concurrent stale writes and exclude pauses. Missing/offline reports may undercount. No history is reconstructed. Recent and top item details are reauthorized before display. High-frequency successful ticks do not flood Activity; start/stop and failed requests remain auditable.
+
+GET `/api/album-art?id=…` and `/api/metadata-match-art?ticket=…` require current session/account/share/provider authorization before either 200 or conditional 304. Only bounded JPEG/PNG/WebP is returned with private revalidation, ETag, Vary:Cookie and nosniff. Missing/inaccessible art returns 404; unauthenticated requests return 401. Search queries go only to enabled providers on explicit request; no originals or listening history are transmitted. Podcast results must match enrolled region-declared US/Canadian feeds, and radio results must match the selected country. Provider artwork requests are validated through the existing public-HTTP boundary. No new renderer-control rights are granted.
+
+The private album inventory may persist across console restarts. Native authorization and item count are checked before cache use; known metadata edits invalidate it. Unchanged snapshots older than ten minutes refresh in the background, with a one-day maximum. Explicit refresh rebuilds synchronously. Cached display metadata can lag out-of-band edits during that window; original reads always enforce current authorization. Catalog lookup indexes accelerate the exact title and facet expressions without changing media.
+
+### Reviewed album identity and retained alternatives
+
+Session `myradio.music-browser` accepts optional `attention` (empty, `identification`, `audio`). Album responses additionally expose `file_count`, `identical_copies`, `other_versions`, `retained_unavailable_copies` and `unavailable_tracks`. `track_count` counts the main intended-track rows; `file_count` counts retained originals. Main track rows may have nested `alternate_copies` (verified identical content), `other_versions` (metadata/duration grouping, not a byte-identity claim) and `unavailable_copies` (unavailable sources with a matching playable intended track). Each retained item keeps normal account authorization. `album-save` applies to all retained files, including nested alternatives; its 1,000-file limit counts them too. These fields grant no new file access or bearer scopes.
+
+Music metadata provenance can additionally identify `reviewed-folder`, `reviewed-online` or `reviewed-artwork`. Prepared metadata may report `audio_status:unavailable` and a short `audio_warning`; such items retain `playable:original-only` with a specific explanation that the source did not contain decodable audio. Identification and audio availability are separate facts. A successful header read is not complete-file integrity acceptance. Native `disc` metadata editing is supported in current source after the storage worker's safe reload; the running older worker's editor does not advertise that new field. Source music sidecars retain disc order but continue to exclude active URL fields.
+
+The session-only personal photo controls `photos.icloud-albums-status`,
+`photos.icloud-albums-configure` (`enabled`, `interval_hours` 1–24) and
+`photos.icloud-albums-sync` (empty request) operate only on the signed-in account,
+or an explicitly managed administrator target. They are not bearer-agent
+operations. Status requires photo access; changes require photo and iCloud write
+rights. Archive location and Apple account must be configured before enabling or
+requesting an import. Shared-library sessions cannot change these controls.

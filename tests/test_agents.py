@@ -51,7 +51,9 @@ class AgentTests(unittest.TestCase):
  def test_http_token_boundary_csrf_and_https(self):
   test=self
   class Broker:
-   def request(self,op,payload):test.assertEqual(op,'media.catalog');return {'entries':[]}
+   def request(self,op,payload):
+    if op=='access.invoke':return self.request(payload['action'],payload['payload'])
+    test.assertEqual(op,'media.catalog');return {'entries':[]}
   self.state.set('administrator',auth.password_hash('fixture private password'));cookie,csrf=auth.login(self.state,'fixture private password')
   server=ThreadingHTTPServer(('127.0.0.1',0),handler(self.state,Path(self.tmp.name)/'backups',broker=Broker()));threading.Thread(target=server.serve_forever,daemon=True).start();self.addCleanup(server.server_close);self.addCleanup(server.shutdown)
   def request(path,method='GET',body=None,**headers):

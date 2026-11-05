@@ -27,6 +27,7 @@ class State:
         self.directory.mkdir(mode=0o700, parents=True, exist_ok=True)
         self.database = self.directory / 'state.sqlite3'
         with self.connect() as db:
+            db.execute('CREATE TABLE IF NOT EXISTS job_principals(id TEXT PRIMARY KEY,actor TEXT NOT NULL)')
             db.executescript('CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY,value TEXT NOT NULL); CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,kind TEXT NOT NULL,payload TEXT NOT NULL,status TEXT NOT NULL,created REAL NOT NULL,updated REAL NOT NULL,attempts INTEGER NOT NULL DEFAULT 0,result TEXT,error TEXT); CREATE TABLE IF NOT EXISTS sessions(token_hash TEXT PRIMARY KEY,csrf TEXT NOT NULL,expires REAL NOT NULL);')
         self.database.chmod(0o600)
 
@@ -59,6 +60,8 @@ class State:
             if db.execute("SELECT count(*) FROM jobs WHERE status IN ('queued','running')").fetchone()[0] >= 128:
                 raise ValueError('Active job capacity reached; retained failed jobs are unchanged')
             db.execute('INSERT INTO jobs(id,kind,payload,status,created,updated) VALUES(?,?,?,?,?,?)', (ident, kind, json.dumps(payload), 'queued', now, now))
+            from .access_scope import current
+            if current():db.execute('INSERT INTO job_principals VALUES(?,?)',(ident,current()))
         return ident
 
     def jobs(self):
@@ -76,10 +79,18 @@ class State:
             return dict(r)
 
     def finish(self, ident, result=None, error=None):
+        from . import activity
+        activity.ensure(self)
+        with self.connect() as db:
+            row=db.execute('SELECT j.kind,p.actor FROM jobs j LEFT JOIN job_principals p ON p.id=j.id WHERE j.id=?',(ident,)).fetchone()
+        if row and row['actor']:activity.record(self,row['actor'],'job.'+row['kind'],'failed' if error else 'succeeded')
         with self.connect() as db:
             db.execute('UPDATE jobs SET status=?,result=?,error=?,updated=? WHERE id=?', ('retryable' if error else 'succeeded', json.dumps(result) if result is not None else None, str(error)[:1000] if error else None, time.time(), ident))
 
     def retry(self, ident):
+        from .access_scope import current
+        with self.connect() as db:owner=db.execute('SELECT actor FROM job_principals WHERE id=?',(ident,)).fetchone()
+        if owner and current()!=owner['actor']:raise ValueError('Only the account that requested this operation can retry it')
         with self.connect() as db:
             cur = db.execute("UPDATE jobs SET status='queued',updated=? WHERE id=? AND status='retryable'", (time.time(), ident))
             if cur.rowcount != 1:

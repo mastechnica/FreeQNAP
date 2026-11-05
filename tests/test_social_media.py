@@ -39,7 +39,9 @@ class SocialGatewayTests(unittest.TestCase):
   from freeqnap.personal_access import Gateway
   fixture=test_accounts.AccountsTests();fixture.setUp();self.addCleanup(fixture.doCleanups)
   user,token,_=fixture.user();seen=[]
-  def broker(action,payload=None):seen.append((action,payload));return {'data_base64':'eA=='} if action=='personal.invoke' else {'id':'safe-ticket'}
+  def broker(action,payload=None):
+   if action=='access.invoke':return broker(payload['action'],payload['payload'])
+   seen.append((action,payload));return {'data_base64':'eA=='} if action=='personal.invoke' else {'id':'safe-ticket'}
   fixture.device.request=broker;gateway=fixture.gateway(token);source={'type':'files','share':'my-files','path':'photo.jpg'}
   gateway.social('prepare',{'source':source,'owner':'b'*32,'recipient':'b'*32,'primary':True})
   action,payload=seen[-1];self.assertEqual(action,'personal.social-prepare');self.assertEqual(payload['owner'],user['id']);self.assertEqual(payload['recipient'],user['id']);self.assertFalse(payload['primary'])

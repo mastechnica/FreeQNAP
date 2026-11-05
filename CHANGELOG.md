@@ -1,3 +1,160 @@
+## Evidence-based album reconciliation — 5 November 2026
+
+- Showcase Photos gallery: privacy-safe illustrative sunsets and daytime beaches; exact surrounding interface preserved and replacement regions documented.
+
+- Consolidate known albums across source folders, keeping album artist separate from performers and disc order.
+- Bind reviewed album groups to their current metadata and prefer representative existing artwork.
+- Keep identical originals and alternate versions accessible below each intended track; include them in album edits.
+- Distinguish unresolved identification from unavailable source audio and add album-status filters.
+- Preserve encoded originals, private evidence, existing transfers and the running storage worker.
+
+## Albums, personal listening hub and reviewed music — 5 November 2026
+
+- Open Music as cover-art albums with ordered songs, album/track metadata, filters and paging.
+- Add My Radio Overview with recent listening, per-category hours, genre percentages and top tracks/stations; count only new reported playback.
+- Add book series, reading order and collections; explicit enabled-provider matching in each metadata editor.
+- Complete ten verified M4B replacements and the reviewed 7,958-track music import/scan; preserve uncertain names and existing NFOs.
+- Retain transfer continuity, account/share boundaries and private evidence; no automatic public publication.
+
+## Show-first podcast library — 4 November 2026
+
+## Personal audio cards and audiobook originals — 4 November 2026
+
+- Consistent three-dot metadata/cover editing across music, books, shows and live radio; account-scoped show/station overrides preserve source addresses and read-only shares.
+- Verified a ten-original private audiobook import with covers and editable metadata.
+- AAX audiobook-original retention, embedded tags/covers and honest compatible-player labels; no DRM removal or automatic playback. Native worker changes are staged while transfers remain active.
+
+- Replace the long landing episode list with cover-art show cards and explicit per-show episode views.
+- Add search, genre/publisher/date/download filters, meaningful sorting and 25/50/100/500/All pages.
+- Proxy/cache publisher artwork with renewed account/share authorization and bounded loading.
+- Add protocol-safe retained-history pagination in native source, with compatibility windows while the current worker remains active.
+
+## Technology and security podcast feed compatibility — 4 November 2026
+
+- Document a curated starter list of ten technology/startup and three cybersecurity podcasts with verified public feeds.
+- Add a bounded streaming fallback for oversized RSS/Atom metadata, preserving public-network restrictions and XML safety.
+- Distinguish subscription metadata from episode downloads and document safe activation limits while legacy copy workers run.
+
+## Multiple watched library folders — 4 November 2026
+
+- Separate primary catalog storage from multiple scan/import source folders for My Radio and Personal Photos.
+- Offer saved library-folder shortcuts, per-folder categories/enabling, schedules, manual scans and live source status.
+- Prepare visible category folders after location setup; reuse existing folder capitalization.
+- Wait for active transfers and photo imports; preserve native permissions, job receipts and ambiguous/failed outcomes without blind replay.
+- Keep internet metadata lookups opt-in and preserve originals when importing into the private catalog.
+
+## Destination-only drive imports and usable file-list space — 4 November 2026
+
+- Copy a drive's accessible contents by choosing only its destination, with one confirmation for bounded reviewed jobs.
+- Create and select new folders from writable destination pickers.
+- Enlarge initial folder windows, compact rows/controls and fold transfer paths without losing expansion state.
+- Preserve no-overwrite, account/volume boundaries and ambiguous-submission handling; no worker restart.
+
+## File selection, smoother Places and visible photo downloads — 4 November 2026
+
+- Add 100/500/1000/All Files views, separate highlights/checks, bulk selection and browsable Import to….
+- Cache private artwork with authorization revalidation and bound thumbnail concurrency.
+- Render Places locally with smooth pinch/drag/zoom; defer missing street tiles until the view stays still for 2.1 seconds.
+- Show iCloud activity and honest known/unknown totals in both gallery and connection panel; preserve inventory counters in future connector byte updates.
+- Move the Files heading above its toolbar.
+
+## Aligned USB drives and clear copy destinations — 4 November 2026
+
+- Align USB Storage into compact physical-drive rows and keep each volume's controls together; avoid duplicate import actions for already registered partitions.
+- Remove repeated library shortcuts and represented USB attachment stubs; preserve distinct access boundaries and unavailable private media.
+- Add transfer destination buttons and matching Incoming copy notices, explaining why an unfinished selected folder is not yet listed.
+- Keep drive selectors stable during unchanged periodic updates. Copying and folder publication behavior are unchanged.
+
+## Simpler confirmations and independent USB mounts — 4 November 2026
+
+- Use CONFIRM for typed dashboard prompts while preserving exact reviewed plan/target binding in the API.
+- Show busy/error/wait feedback inside confirmation dialogs, with elapsed waiting time and no automatic resubmission.
+- Replace long NAS-wide copy locking with source/destination volume leases; block unmount/eject of busy volumes while allowing unrelated storage changes.
+- Add reviewed continuation of retained, unpublished single-selection copies with prefix comparison, full hash readback, preserved source data and retained failed-attempt history.
+
+## Family NAS status and USB navigation — 4 November 2026
+
+- Show real read-only NAS hardware health, performance history, disks, RAID and capacity on family Overview.
+- Keep private paths, account configuration and administrator controls out of the family telemetry response; bound/cache broker reads and report unavailable data honestly.
+- Use one permission-aware route list for menu visibility and page rendering so permitted family users can open USB Storage.
+- Preserve mounted-drive sharing rules and private encrypted-drive ownership; do not restart ongoing file copies.
+
+## Clear transfer locations and stable history — 4 November 2026
+
+- Show source and final destination paths, with timestamped active-file observations from the existing read-only inventory collector.
+- Preserve Previous transfers expansion and scroll position during progress refreshes.
+- Keep path enrichment restricted to broker-authorized transfer rows; do not expose staging tokens or unrelated file descriptors. No copy-worker restart is required.
+
+## Visible file transfers and reliable folder refresh — 4 November 2026
+
+- Verified native copies with service hardening enabled, then revalidated and restarted the original authorized no-overwrite copy. Live telemetry and responsive destination browsing were confirmed while iCloud continued. Full-copy completion remains pending.
+
+- Fix recursive folder copying/creation under the existing service hardening by using ordinary directory permissions, without disabling protections.
+- Tie personal transfer checkpoints to the real queued job; add private durable copy/verification counters, throughput, ETA, phases and reviewed retry plans.
+- Add live transfer cards above the file desktop, explicit Refresh buttons/F5, coalesced listing requests, independent device discovery and accessible private-library shortcuts.
+- Preserve originals, hash verification, no-overwrite publication, partial stages and prior failure evidence. Selected folders become visible only after verification.
+
+## Fit photo viewer to available space — 4 November 2026
+
+- Scale images and videos proportionally to fill their dedicated popup viewing area, including enlarging thumbnail-sized previews, without cropping the image or overlapping the toolbar and details.
+- Bound the viewer grid and toolbar overflow so controls remain separate from media and the details panel remains scrollable.
+
+## Responsive full-image viewer — 4 November 2026
+
+- Keep immutable photo/preview reads independent of the ingestion lock so active iCloud transfers cannot hold completed originals or cached previews behind a network wait.
+- Show a thumbnail immediately while the large preview loads; provide explicit loading/timeout feedback, bounded busy retries and Retry image. Cancel requests and release derived browser resources when closing or switching to motion playback.
+- Recheck preview caches after bounded decoder admission so simultaneous requests decode one image once. Preserve exact original-file identity checks and atomic derived-cache publication.
+
+## Complete iPhone previews and photo location maps — 4 November 2026
+
+- Owner confirmed the corrected images and GPS location map look correct after refreshing the gallery.
+
+- Decode complete primary HEIF/HEIC images with an isolated libheif helper, preserving orientation and originals. Version derived caches so older incorrect previews are not reused.
+- Add a GPS pin map below photo/video details, city-scale OpenStreetMap views, and a per-user online/offline preference in Library locations and Import & iCloud.
+- Keep external maps off by default, disclose coordinate transmission, retain offline fallback, and restrict embedded content to OpenStreetMap.
+
+## Live Apple photo archive started — 4 November 2026
+
+- Verified connected real photo access and growing local archive after owner account review, with zero reported download errors at inspection.
+- Independently checked three downloaded originals by exact file identity and SHA-256. The first full library pass remains running and is not claimed complete.
+
+## Explicit Apple account action — 4 November 2026
+
+- Detect Apple terms-review and account-repair flags before requesting photo access; show an actionable iCloud.com link instead of generic photo-access errors. Legal acceptance stays with the owner.
+- The observed real account requires terms review; actual photo download acceptance remains pending. All 71 photo tests and JavaScript syntax checks passed.
+
+## Apple photo-access diagnosis — 4 November 2026
+
+- Added safe fixed-category connector failure and connection-step diagnostics. The latest real attempt passed sign-in but failed photo access; no archive download is claimed successful.
+- Verified 70 photo regression tests, including rejection of upstream exception contents in diagnostics.
+
+## iCloud feedback, USB access and visual browsing — 4 November 2026
+
+- Separated Apple code verification from ADP web approval and verified photo access; removed a redundant session-trust call, added saved-session checks, persistent safe errors, busy controls and immediate download feedback.
+- Made mounted plaintext USB storage available to family file readers while retaining encrypted owner-only content and private NAS folder restrictions. Kept formatting and enclosure-wide eject administrator-only.
+- Added expandable directory trees for file-window navigation, Copy/Move to, personal storage selection and photo/music imports, including visible unavailable drive states.
+- Added same-origin radio logos and generated local fallback thumbnails, bounded safe fetching/decoding and cache behavior; no audio is played by artwork loading.
+- Added backend and UI regression checks; actual Apple account/iPhone approval acceptance is reported separately.
+- Deployed and verified real station artwork and attached-drive tree browsing. Passed 492 Python tests (four expected skips), 38 JavaScript tests and native ARM checks; fresh owner Apple sign-in/download acceptance remains pending.
+
+## Private volumes and family activity — 4 November 2026
+
+- Bound encrypted unlocks, reviewed plans and queued work to the requesting user or agent. Enforced ownership for file access, streams and cached personal-media metadata, including administrator requests.
+- Excluded private encrypted storage from protocol exports without dashboard identities; added an explicit family unlock permission and accessible-only File Manager locations.
+- Added administrator account presence/session summaries and bounded on-demand personal/shared media storage accounting with honest partial/offline states.
+- Added durable private user Activity, administrator all-user Activity, login events, attributed worker outcomes and sanitized shared health/power/boot notices. Added paging and logging-failure visibility.
+- Documented protocol/root trust boundaries and remaining physical/multi-user acceptance separately from fixture checks.
+- Deployed and verified live user reports and Activity; passed 477 local Python tests (four expected skips), JavaScript checks and 17 native privacy tests. RAID, full cooling and watchdog stayed healthy; physical two-user media acceptance remains pending.
+
+## Cloud-first profiles and offline family access — 4 November 2026
+
+- Added password-confirmed administrator mapping of immutable Authentik subjects to existing NAS profiles or new family profiles, without automatic email linking or role promotion.
+- Added optional Create Local Account after cloud login, separate NAS password confirmation/disclaimer, recent-cloud-login reset, administrator temporary-password reset and offline local sign-in.
+- Kept stable user ownership, local administrator fallback, session revocation and private recovery backups; excluded recent-authentication markers from backups.
+- Enforced Overview for administrator sign-in; added per-family-user landing preferences with a private Overview and permission-aware fallback.
+- Moved photo sharing into Personal Photos & Videos and music/book sharing into My Radio. Added NAS-origin PWA installation guidance.
+- Actual provider/phone acceptance remains distinct from fixture tests. Private provider details and user identities are excluded from source.
+
 ## Family-focused public showcase — 4 November 2026
 
 - Highlighted private family accounts, separate libraries, selective sharing, metadata/GPS editing and Share Social in the showcase and README.
@@ -359,3 +516,37 @@ cold-start/full-replacement recovery remain separate acceptance gates.
 - Passed owner-assisted enclosure-only power-off/on after verified safe eject; both exact filesystem/inode/direct hashes passed and both volumes are mounted read/write.
 - Removed temporary files, retained original timeout/interruption evidence, and confirmed no failed services while internal RAID recovery advanced.
 - Preserve unexpected-power-loss, NAS cold-boot-with-enclosure, full-surface and proprietary controller-health limits.
+
+### 5 November 2026 — personal iCloud album archive
+
+- Added opt-in, account-scoped iCloud album membership import with pending-photo
+  attachment, visible progress and stable album identities, including duplicate
+  titles. Remote deletions never delete archived photos, albums or membership.
+- Isolated album session copies from active photo download sessions. Failed album
+  reads preserve existing membership; no downloader or NAS restart is required.
+
+### 5 November 2026 — accepted music, album and book maintenance
+
+- Applied 5,487 reviewed music corrections; live browsing groups 7,958 retained
+  files into 706 albums. Expandable copies/versions preserve originals. Forty-eight
+  unusable audio sources and 154 identification flags remain explicit.
+- Imported three distinct public-domain books in TXT, EPUB3 and AZW3, focused on
+  philosophy, science fiction and dystopia. Verified original hashes, text readers,
+  real cover images and complete catalog details; kept existing audiobooks.
+- Accepted eighteen personal iCloud albums with no failed album reads and additive
+  membership for originals still downloading. Correctly handles separate Apple
+  asset variants sharing one original master.
+- Preserved active transfers, the running native worker and healthy internal arrays.
+  Local tests: 653 Python cases (16 optional/environment skips), 90 JavaScript
+  checks, package/showcase checks and native focused acceptance. No public push.
+
+### 5 November 2026 — family media showcase and publication package
+
+- Reframed the showcase around private family libraries, iCloud archiving and My
+  Radio, with eighteen major-feature cards and a dedicated optional Authentik card.
+- Added eight live dashboard gallery views plus personal iCloud album controls;
+  retained original pixels outside crops and the network identifier mask.
+- Updated current iCloud acceptance wording, family/USB access guidance, format
+  descriptions, hardware limits and the logo/dashboard social-sharing image.
+- Prepared source-only publication for the personal mastechnica/FreeQNAP repository;
+  private history, credentials, media originals and unredacted captures stay local.

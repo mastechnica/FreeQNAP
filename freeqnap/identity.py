@@ -97,10 +97,10 @@ class Identity:
     return {'linked':True}
    if not link:raise ValueError('No local account is linked to this identity. Sign in locally and choose Link my Authentik login.')
    account=db.execute('SELECT * FROM local_accounts WHERE id=? AND enabled=1',(link['user_id'],)).fetchone()
-   if not account or account['must_change']:raise ValueError('Complete local password setup before cloud login')
+   if not account:raise ValueError('Local account is unavailable')
    accounts.audit(db,account['id'],'cloud-login',account['id'])
   token,csrf=accounts.create_session(self.state,account,'oidc',cfg.get('session_minutes',60)*60)
-  return {'token':token,'csrf':csrf}
+  return {'token':token,'csrf':csrf,'landing_page':accounts.landing(self.state,accounts.public(account))['href']}
  def user_version(self,ident):
   with self.state.connect() as db:r=db.execute('SELECT version FROM local_accounts WHERE id=? AND enabled=1',(ident,)).fetchone()
   return r[0] if r else None
@@ -127,3 +127,31 @@ class Identity:
    if not row or not accounts.verify(row,r.get('current_password')):raise ValueError('Confirm your local password')
    db.execute('DELETE FROM external_identities WHERE user_id=? AND issuer=? AND subject=?',(user['id'],r.get('issuer'),r.get('subject')));db.execute("DELETE FROM sessions WHERE token_hash IN (SELECT token_hash FROM account_sessions WHERE user_id=? AND source='oidc')",(user['id'],));db.execute("DELETE FROM account_sessions WHERE user_id=? AND source='oidc'",(user['id'],));accounts.audit(db,user['id'],'unlink-cloud-identity',user['id'])
   return {'unlinked':True,'local_login_available':True}
+
+ def assign(self,user,r):
+  if user['role']!='administrator':raise PermissionError('Administrator access required')
+  if set(r)-{'current_password','subject','user_id','username','label','permissions'}:raise ValueError('Unknown identity assignment setting')
+  cfg=self.config()
+  if not cfg.get('enabled'):raise ValueError('Enable and verify your provider first')
+  d=self.discovery(cfg);subject=r.get('subject')
+  if not isinstance(subject,str) or not 1<=len(subject)<=1000 or any(ord(c)<32 for c in subject):raise ValueError('Enter the exact immutable Subject claim from the provider, not an email guess')
+  with self.state.connect() as db:
+   db.execute('BEGIN IMMEDIATE');actor=db.execute('SELECT * FROM local_accounts WHERE id=? AND enabled=1',(user['id'],)).fetchone()
+   if not actor or actor['role']!='administrator' or not accounts.verify(actor,r.get('current_password')):raise PermissionError('Confirm your local administrator password')
+   current=db.execute("SELECT value FROM settings WHERE key='oidc-provider'").fetchone()
+   if not current or json.loads(current[0])!=cfg:raise ValueError('Provider configuration changed; reopen the form')
+   if db.execute('SELECT 1 FROM external_identities WHERE issuer=? AND subject=?',(d['issuer'],subject)).fetchone():raise ValueError('This provider identity is already linked; existing links are never reassigned automatically')
+   target=r.get('user_id')
+   if target:
+    row=db.execute('SELECT * FROM local_accounts WHERE id=? AND enabled=1',(target,)).fetchone()
+    if not row:raise ValueError('Select an enabled local account')
+   else:
+    username=accounts.text(r.get('username'),40).lower();label=accounts.text(r.get('label'));permissions=r.get('permissions',accounts.DEFAULT)
+    if not accounts.USERNAME.fullmatch(username):raise ValueError('Choose a NAS username with 2–40 letters, numbers, dots, dashes or underscores')
+    if not isinstance(permissions,list) or any(p not in accounts.PERMISSIONS for p in permissions):raise ValueError('Choose personal feature permissions')
+    if db.execute('SELECT 1 FROM local_accounts WHERE username=?',(username,)).fetchone():raise ValueError('That NAS username already exists; select its existing account instead')
+    target=secrets.token_hex(16)
+    db.execute('INSERT INTO local_accounts VALUES(?,?,?,?,?,?,1,0,1,0,?)',(target,username,label,'member',json.dumps(sorted(set(permissions))),'null',time.time()));accounts.audit(db,user['id'],'create-cloud-family-profile',target)
+   db.execute('INSERT INTO external_identities VALUES(?,?,?)',(d['issuer'],subject,target));accounts.audit(db,user['id'],'assign-cloud-identity',target)
+   row=db.execute('SELECT * FROM local_accounts WHERE id=?',(target,)).fetchone()
+  return {'linked':True,'user':accounts.public(row),'same_profile':True,'local_password_optional':row['password']=='null'}

@@ -20,7 +20,7 @@ from pathlib import Path
 from xml.etree import ElementTree as ET
 from .common import name
 from .library_lock import serialized
-from .library_storage_source import source_directory
+from .library_storage_source import source_directory,source_allowed
 from .files import Files, relative, rename_exclusive
 from .personal_photos import directory
 from .personal_metadata import jpeg
@@ -29,7 +29,7 @@ from . import public_http
 
 CATEGORIES = {'music':'Music','books':'Books','podcasts':'Podcasts'}
 IDENT = re.compile('[a-f0-9]{32}\\Z')
-FIELDS = {'title':500,'artist':500,'album':500,'album_artist':500,'genre':200,'year':20,'track':40,'composer':500,'author':500,'narrator':500,'publisher':500,'description':10000,'isbn':30,'source_url':2000}
+FIELDS = {'title':500,'artist':500,'album':500,'album_artist':500,'genre':200,'year':20,'track':40,'disc':40,'composer':500,'author':500,'narrator':500,'publisher':500,'description':10000,'isbn':30,'source_url':2000,'book_type':40}
 
 REGIONS={'US':'United States','CA':'Canada'}
 def region(value):
@@ -55,6 +55,11 @@ def filename(value):
     if len(value.encode('utf-8'))>220 or not value or value.startswith('.') or '/' in value or '\\' in value:raise ValueError('Choose a plain filename')
     return value
 
+def catalog_indexes(db):
+    db.execute("CREATE INDEX IF NOT EXISTS radio_title_page ON radio_assets(category,hidden,lower(coalesce(json_extract(metadata,'$.title'),name)))")
+    for field in ('artist','author','album','genre'):
+        db.execute("CREATE INDEX IF NOT EXISTS radio_facet_"+field+" ON radio_assets(category,hidden,json_extract(metadata,'$."+field+"'))")
+
 class MyRadio:
     def __init__(self,ctx):
         self.storage_lock=threading.RLock();self.ctx=ctx;self.decode_slot=threading.BoundedSemaphore(1);self.scan_lock=threading.Lock();self.provider_lock=threading.Lock();self.last_provider=0
@@ -66,6 +71,10 @@ class MyRadio:
             CREATE TABLE IF NOT EXISTS radio_episodes(id TEXT PRIMARY KEY,feed TEXT NOT NULL,title TEXT NOT NULL,url TEXT NOT NULL,metadata TEXT NOT NULL,asset TEXT);
             CREATE TABLE IF NOT EXISTS radio_sources(id TEXT PRIMARY KEY,kind TEXT NOT NULL,url TEXT,name TEXT NOT NULL,category TEXT NOT NULL,status TEXT NOT NULL,bytes INTEGER NOT NULL DEFAULT 0,total INTEGER,etag TEXT,sha256 TEXT,asset TEXT,error TEXT,updated REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS radio_uploads(id TEXT PRIMARY KEY,name TEXT NOT NULL,category TEXT NOT NULL,total INTEGER NOT NULL,offset INTEGER NOT NULL DEFAULT 0,created REAL NOT NULL,status TEXT NOT NULL);''')
+        # Index the actual expressions used by paging and tag facets. Otherwise each
+        # album-browser page repeatedly parses every track's metadata on small CPUs.
+        with ctx.state.connect() as db:
+            catalog_indexes(db)
         self.seed_stations()
 
     def config(self):return self.ctx.state.setting('myradio',{})
@@ -122,7 +131,7 @@ class MyRadio:
             stations=sum(origin(json.loads(v[0])) is not None for v in db.execute('SELECT metadata FROM radio_stations'))
             pending=[dict(v) for v in db.execute("SELECT id,name,category,status,bytes,total,error FROM radio_sources WHERE status!='complete' ORDER BY updated DESC LIMIT 50")]
             uploads=[dict(v) for v in db.execute("SELECT id,name,category,total,offset,status FROM radio_uploads WHERE status!='complete' ORDER BY created LIMIT 16")]
-        return {'uploads':uploads,'config':cfg,'online':online,'counts':counts,'stations':stations,'pending':pending,'scanner':self.ctx.state.setting('myradio-scanner',{'state':'idle'}),'private_storage':True,
+        return {'prepared_scanning':True,'uploads':uploads,'config':cfg,'online':online,'counts':counts,'stations':stations,'pending':pending,'scanner':self.ctx.state.setting('myradio-scanner',{'state':'idle'}),'private_storage':True,
                 'formats':{'audio':sorted(AUDIO),'book_text':['.epub','.txt','.docx']+(['.pdf'] if shutil.which('pdftotext') else []),'kindle_originals':['.azw','.azw3','.mobi','.kpf'],'kindle_reading':'DRM-free MOBI/AZW/AZW3 up to 64 MB use libmobi-tools; KPF requires a readable companion','pdf_ocr':'Scanned PDFs need OCR','read_aloud':'Device speech voices; availability and background playback depend on your browser'},
                 'privacy':'My Radio and Personal Photos use separate private folders, not general shares or DLNA exports'}
 
@@ -147,7 +156,7 @@ class MyRadio:
                 finally:os.close(fd)
 
     def public(self,row):
-        return {k:row[k] for k in ('id','category','name','bytes','metadata','created','favorite','hidden')}
+        return {**{k:row[k] for k in ('id','category','name','bytes','created','favorite','hidden')},'metadata':{k:v for k,v in row['metadata'].items() if not k.startswith('_')}}
 
     @serialized
     def catalog(self,r):
@@ -215,16 +224,25 @@ class MyRadio:
             try:
                 st=os.fstat(fd);ext=Path(leaf).suffix.lower()
                 if not stat.S_ISREG(st.st_mode) or st.st_dev!=os.fstat(root).st_dev:raise ValueError('Original identity changed')
+                if not metadata and previous.get('_prepared')=={'inode':st.st_ino,'bytes':st.st_size,'mtime_ns':st.st_mtime_ns}:return self.public(self.asset(ident))
                 with self.decode_slot:
                     if ext in AUDIO:
                         metadata={**audio_metadata(fd),**metadata};metadata['playable']='audio'
+                        if kind=='books':metadata.update(book_type='audiobook',author=metadata.get('author') or metadata.get('artist',''))
+                        try:
+                            if not previous.get('custom_cover'):self.write_file(folder,'cover.jpg',jpeg(fd,memory_limit=384*1024**2))
+                            metadata['has_cover']=True
+                        except (ValueError,OSError):pass
+                    elif ext=='.aax':
+                        metadata={**audio_metadata(fd),**metadata,'book_type':'audiobook','playable':'original-only','reading_note':'Audible AAX original retained. Browser playback requires a compatible authorized player or a DRM-free companion edition.'}
+                        metadata['author']=metadata.get('author') or metadata.get('artist','')
                         try:
                             if not previous.get('custom_cover'):self.write_file(folder,'cover.jpg',jpeg(fd,memory_limit=384*1024**2))
                             metadata['has_cover']=True
                         except (ValueError,OSError):pass
                     elif ext in BOOKS:
                         try:
-                            book=extract_book(fd,ext);self.write_file(folder,'book.json',json.dumps(book,ensure_ascii=False).encode());metadata['playable']='text';metadata['chapters']=len(book.get('chapters',[]))
+                            book=extract_book(fd,ext);self.write_file(folder,'book.json',json.dumps(book,ensure_ascii=False).encode());metadata['playable']='text';metadata['book_type']='ebook';metadata['chapters']=len(book.get('chapters',[]))
                         except (ValueError,OSError,KeyError,ET.ParseError,UnicodeError) as error:metadata.update(playable='original-only',reading_note=str(error)[:400])
                     else:raise ValueError('This file format is not supported in My Radio')
                 metadata['title']=metadata.get('title') or Path(leaf).stem
@@ -310,6 +328,7 @@ class MyRadio:
                 value[k]=v or None
             else:
                 value[k]=clean(v,FIELDS[k])
+                if k=='book_type' and value[k] not in ('audiobook','ebook','other'):raise ValueError('Choose Audiobook, eBook or Other')
                 if k=='source_url' and value[k]:
                     u=urllib.parse.urlsplit(value[k])
                     if u.scheme not in ('http','https') or not u.hostname or u.username is not None or u.password is not None:raise ValueError('Use an HTTP(S) source link without credentials')
@@ -362,9 +381,20 @@ class MyRadio:
                             for entry in entries:
                                 if count>=100000:raise ValueError('Scanner limit reached; earlier results are retained')
                                 if not IDENT.fullmatch(entry.name) or not entry.is_dir(follow_symlinks=False):continue
+                                prepared=False
                                 with directory(folder,(entry.name,)) as item_fd:
                                     candidates=[e.name for e in os.scandir(item_fd) if e.is_file(follow_symlinks=False) and Path(e.name).suffix.lower() in AUDIO|BOOKS]
+                                    if len(candidates)==1:
+                                        try:
+                                            saved=self.asset(entry.name);st=os.stat(candidates[0],dir_fd=item_fd,follow_symlinks=False)
+                                            expected={'inode':st.st_ino,'bytes':st.st_size,'mtime_ns':st.st_mtime_ns}
+                                            prepared=stat.S_ISREG(st.st_mode) and st.st_dev==os.fstat(root).st_dev and saved['path']==kind+'/'+entry.name+'/'+candidates[0] and saved['metadata'].get('_prepared')==expected and all(saved[k]==v for k,v in expected.items())
+                                        except ValueError:pass
                                 if len(candidates)!=1:continue
+                                if prepared:
+                                    count+=1
+                                    if count%50==0:progress('running',folder=CATEGORIES[kind],filename=candidates[0],phase='Verifying prepared local metadata')
+                                    continue
                                 progress('running',folder=CATEGORIES[kind],filename=candidates[0],phase='Reading local metadata')
                                 try:self.register(kind,entry.name,candidates[0]);count+=1
                                 except (ValueError,OSError) as error:errors.append({'name':candidates[0],'error':str(error)[:200]})
@@ -385,7 +415,8 @@ class MyRadio:
                 if len(parts)>30:raise ValueError('Source folder nesting exceeds limits')
                 with os.scandir(fd) as entries:
                     for entry in entries:
-                        if entry.name.startswith('.freeqnap') or entry.is_symlink():continue
+                        if entry.name.startswith('.freeqnap') or entry.name=='@eaDir' or entry.is_symlink():continue
+                        if not source_allowed(self.ctx,share,str(Path(source_path).joinpath(*parts,entry.name))):continue
                         if imported+skipped>=10000:raise ValueError('Import limit reached; earlier imports are retained')
                         if entry.is_dir(follow_symlinks=False):
                             with directory(fd,(entry.name,)) as child:
@@ -400,6 +431,8 @@ class MyRadio:
                                 try:self.asset(ident);skipped+=1;continue
                                 except ValueError:pass
                                 leaf=filename(entry.name)
+                                from .music_sidecars import read as read_sidecar
+                                sidecar=read_sidecar(fd,entry.name,st) if kind=='music' else {}
                                 with self.root() as root,directory(root,(kind,ident),True) as folder:
                                     try:existing=os.open(leaf,os.O_RDONLY|os.O_NOFOLLOW,dir_fd=folder)
                                     except FileNotFoundError:existing=None
@@ -417,7 +450,7 @@ class MyRadio:
                                                 b.update(chunk)
                                             if a.digest()!=b.digest():raise ValueError('Retained import differs; inspect it before retry')
                                         finally:os.close(existing)
-                                        self.register(kind,ident,leaf);imported+=1;continue
+                                        self.register(kind,ident,leaf,sidecar);imported+=1;continue
                                     stage=leaf+'.'+secrets.token_hex(8)+'.partial'
                                     out=os.open(stage,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600,dir_fd=folder)
                                     try:
@@ -431,7 +464,7 @@ class MyRadio:
                                         if (st.st_ino,st.st_size,st.st_mtime_ns)!=(after.st_ino,after.st_size,after.st_mtime_ns):raise ValueError('Source changed during import; partial copy retained for inspection')
                                         rename_exclusive(folder,stage,folder,leaf);os.fsync(folder)
                                     except Exception:raise
-                                self.register(kind,ident,leaf);imported+=1
+                                self.register(kind,ident,leaf,sidecar);imported+=1
                                 self.ctx.state.set('myradio-scanner',{'state':'running','phase':'Importing files','filename':leaf,'indexed':imported,'at':time.time()})
                             finally:os.close(source)
             walk(start)
@@ -591,6 +624,10 @@ class MyRadio:
                 metadata={**row['metadata'],'directory_uuid':row['id'],'content_type':row['content_type'],'source':'Radio Browser'}
                 db.execute('INSERT OR IGNORE INTO radio_stations(id,name,url,metadata,checked,working) VALUES(?,?,?,?,?,1)',(ident,row['name'],row['url'],json.dumps(metadata),row['checked_at']))
 
+    def station_artwork(self,r):
+        from .station_art import artwork
+        return artwork(self.ctx,r)
+
     def stations(self,r):
         query=clean(r.get('query',''),200);tag=clean(r.get('group',''),100);country=clean(r.get('country',''),100)
         if country:country=region(country)
@@ -664,15 +701,40 @@ class MyRadio:
         return {'verified_working':added,'unavailable_skipped':failed,'old_stations_retained':True}
 
     def feeds(self,r):
+        from email.utils import parsedate_to_datetime
+        from datetime import datetime,timezone
+        def stamp(row):
+            value=row['metadata'].get('published')
+            try:
+                try:d=parsedate_to_datetime(value)
+                except (ValueError,TypeError):d=datetime.fromisoformat(str(value).replace('Z','+00:00'))
+                return (d if d.tzinfo else d.replace(tzinfo=timezone.utc)).timestamp()
+            except (ValueError,TypeError,OverflowError):return None
+        limit=r.get('limit',300);offset=r.get('offset',0)
+        if limit!='all' and (type(limit)is not int or not 1<=limit<=1000) or type(offset)is not int or offset<0:raise ValueError('Choose a valid podcast page')
         with self.ctx.state.connect() as db:
             feeds=[{'id':v['id'],'title':v['title'],'metadata':json.loads(v['metadata']),'checked_at':v['checked']} for v in db.execute('SELECT * FROM radio_feeds ORDER BY title')]
-            args=[];where=''
-            if r.get('feed'):where=' WHERE feed=?';args=[r['feed']]
-            episodes=[{'id':v['id'],'feed':v['feed'],'title':v['title'],'metadata':json.loads(v['metadata']),'asset':v['asset']} for v in db.execute('SELECT * FROM radio_episodes'+where+' ORDER BY json_extract(metadata,\'$.published\') DESC LIMIT 300',args)]
-        unclassified=[v for v in feeds if not origin(v['metadata'])];feeds=[v for v in feeds if origin(v['metadata'])];allowed={v['id'] for v in feeds};episodes=[v for v in episodes if v['feed'] in allowed]
+            unclassified=[v for v in feeds if not origin(v['metadata'])];feeds=[v for v in feeds if origin(v['metadata'])];allowed={v['id'] for v in feeds}
+            if r.get('feed'):allowed &= {r['feed']}
+            episodes=[]
+            if allowed:
+                records=db.execute('SELECT * FROM radio_episodes WHERE feed IN ('+','.join('?' for _ in allowed)+') LIMIT 20001',tuple(allowed)).fetchall()
+                if len(records)>20000:raise ValueError('This podcast catalog exceeds the 20,000 episode browser limit; choose one show')
+                episodes=[{'id':v['id'],'feed':v['feed'],'title':v['title'],'metadata':json.loads(v['metadata']),'asset':v['asset']} for v in records]
         query=clean(r.get('query',''),200).casefold()
         if query:episodes=[v for v in episodes if query in (v['title']+' '+str(v['metadata'].get('series',''))+' '+str(v['metadata'].get('description',''))).casefold()]
-        return {'unclassified_feeds':unclassified,'regions':REGIONS,'feeds':feeds,'episodes':episodes,'feed_urls_private':True,'auto_refresh':self.config().get('podcast_auto_refresh',False)}
+        episodes.sort(key=lambda v:(stamp(v) is None,-stamp(v) if stamp(v) is not None else 0,v['id']))
+        total=len(episodes);page=episodes[offset:offset+(1000 if limit=='all' else limit)]
+        # Leave headroom for the broker's two-MiB envelope, including non-ASCII text.
+        budget=1500*1024-len(json.dumps(feeds).encode())
+        admitted=[];used=0
+        for item in page:
+            amount=len(json.dumps(item).encode())+2
+            if used+amount>budget:break
+            admitted.append(item);used+=amount
+        if page and not admitted:raise ValueError('Podcast metadata exceeds the broker response budget')
+        page=admitted
+        return {'unclassified_feeds':unclassified,'regions':REGIONS,'feeds':feeds,'episodes':page,'total':total,'offset':offset,'limit':limit,'next_offset':None if offset+len(page)>=total else offset+len(page),'pagination':True,'feed_urls_private':True,'auto_refresh':self.config().get('podcast_auto_refresh',False)}
 
     def feed_add(self,r):
         code=region(r.get('country'))
@@ -695,7 +757,11 @@ class MyRadio:
         if not row:raise ValueError('Podcast subscription not found')
         savedmeta=json.loads(row['metadata']);code=origin(savedmeta)
         if not code:raise ValueError('Confirm this podcast service is in the United States or Canada first')
-        raw=public_http.fetch(row['url'],2*1024**2)
+        try:raw=public_http.fetch(row['url'],2*1024**2)
+        except ValueError as error:
+            if str(error)!='Internet response exceeded the size limit':raise
+            from .podcast_feed import fetch
+            raw=fetch(row['url'])
         normalized=raw.replace(b'\x00',b'').upper()
         if b'<!DOCTYPE' in normalized or b'<!ENTITY' in normalized:raise ValueError('Podcast feed contains an unsafe XML declaration')
         try:root=ET.fromstring(raw)

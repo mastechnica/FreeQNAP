@@ -21,6 +21,9 @@ class Device:
  def __init__(self,root):
   self.ctx=Fixture(root/'broker');volume=root/'data';volume.mkdir();cfg=self.ctx.config();cfg['pools']['data']={'name':'data','mountpoint':str(volume),'filesystem_uuid':'fixture-volume','read_only':False};self.ctx.save(cfg);self.my_radio=MyRadio(self.ctx);self.personal_photos=PersonalPhotos(self.ctx);self.personal=Personal(self);self.calls=[]
  def request(self,action,payload=None):
+  if action=='access.invoke':
+   from freeqnap.access_scope import using
+   with using(payload['actor']):return self.request(payload['action'],payload['payload'])
   self.calls.append(action);payload=payload or {}
   if action=='personal.invoke':return self.personal.invoke(payload)
   if action=='personal.control':return self.personal.control(payload)
@@ -60,7 +63,7 @@ class AccountsTests(unittest.TestCase):
   with self.assertRaises(PermissionError):self.gateway(at,managed=b['id']).request('myradio.status')
  def test_family_file_manager_can_upload_only_into_own_visible_container(self):
   a,at,_=self.user();scope=self.configure(a,at)
-  with patch('os.chown'):self.gateway(at).request('files.mkdir',{'share':'my-radio','path':'','name':'USB import'})
+  with patch('os.fchown'):self.gateway(at).request('files.mkdir',{'share':'my-radio','path':'','name':'USB import'})
   self.assertTrue((self.root/'data'/scope['radio'].config()['location_folder']/'USB import').is_dir())
   with self.assertRaises(ValueError):self.gateway(at).request('files.list',{'share':'my-radio','path':'.freeqnap-myradio'})
  def test_shared_content_is_separate_readonly_and_revocation_takes_effect(self):
@@ -87,10 +90,14 @@ class AccountsTests(unittest.TestCase):
   accounts.change(self.state,self.admin,{'action':'update','id':a['id'],'enabled':False})
   with self.assertRaises(PermissionError):g.request('myradio.status')
  def test_http_member_cannot_read_admin_data_or_forge_internal_owner(self):
-  user,token,csrf=self.user();server=ThreadingHTTPServer(('127.0.0.1',0),handler(self.state,self.root/'backups',broker=self.device));server.auth_lock=threading.Lock();server.login_attempts=[];threading.Thread(target=server.serve_forever,daemon=True).start();self.addCleanup(server.server_close);self.addCleanup(server.shutdown)
+  user,token,csrf=self.user();server=ThreadingHTTPServer(('127.0.0.1',0),handler(self.state,self.root/'backups',snapshot=self.root/'inventory.json',broker=self.device));server.auth_lock=threading.Lock();server.login_attempts=[];threading.Thread(target=server.serve_forever,daemon=True).start();self.addCleanup(server.server_close);self.addCleanup(server.shutdown)
   def request(path,body=None):
    c=http.client.HTTPConnection('127.0.0.1',server.server_port);headers={'Host':'127.0.0.1:'+str(server.server_port),'Origin':'http://127.0.0.1:'+str(server.server_port),'Content-Type':'application/json','Cookie':'freeqnap_session='+token,'X-CSRF-Token':csrf};c.request('POST' if body is not None else 'GET',path,json.dumps(body) if body is not None else None,headers);r=c.getresponse();v=r.status,json.loads(r.read());c.close();return v
   self.assertEqual(request('/api/users')[0],403);self.assertEqual(request('/api/identity')[0],403);self.assertEqual(request('/api/nas/personal.invoke',{'owner':self.admin['id']})[0],403);self.assertEqual(request('/api/nas/network.plan',{})[0],403);self.assertEqual(request('/api/account')[1]['user']['id'],user['id']);self.assertTrue(request('/api/nas/status')[1]['personal_only'])
+  with patch('freeqnap.system_summary.inventory.snapshot',return_value={'sampled_at':time.time(),'stale':False,'errors':[],'disks':[{'name':'sda','path':'/dev/sda','type':'disk','size':100,'model':'Test SATA','serial':'private-device-serial'}]}):
+   code,summary=request('/api/status');self.assertEqual(code,200);self.assertEqual(summary['inventory']['disks'][0]['model'],'Test SATA');self.assertNotIn('private-device-serial',json.dumps(summary));self.assertTrue(summary['inventory']['health']['monitor_stale'])
+  self.assertEqual(request('/api/nas/health.alerts',{})[0],403);self.assertEqual(request('/api/nas/system.frontpanel',{})[0],403)
+  accounts.save_preferences(self.state,user,{'landing_page':'photos-shared'});self.assertEqual(request('/api/login',{'username':'alice','password':PASSWORD+' updated'})[1]['landing_page'],'/#photos?view=shared');self.assertEqual(request('/api/login',{'username':'admin','password':PASSWORD})[1]['landing_page'],'/#overview')
 
  def test_dedicated_files_and_admin_shared_folder_rights_remain_separate(self):
   a,at,_=self.user();b,bt,_=self.user('bob');g=self.gateway(at);plan=g.request('library.files-plan',{'pool':'data','folder':'My files'});g.request('library.files-apply',{'plan_id':plan['id'],'digest':plan['digest'],'confirmation':plan['confirmation']});scope=self.device.personal.get(a['id']);self.assertTrue(scope['ctx'].state.setting('personal-files')['folder'].startswith('Users/'+a['id']+'/'))
@@ -98,10 +105,42 @@ class AccountsTests(unittest.TestCase):
   with self.assertRaises(ValueError):g.request('files.mkdir',{'share':'family','name':'blocked'})
   with self.assertRaises(ValueError):self.gateway(bt).request('files.list',{'share':'family'})
   accounts.set_storage(self.state,self.admin,a['id'],[{**pin,'access':'write'}])
-  with patch('os.chown'):g.request('files.mkdir',{'share':'family','name':'allowed'})
+  with patch('os.fchown'):g.request('files.mkdir',{'share':'family','name':'allowed'})
   accounts.set_storage(self.state,self.admin,a['id'],[])
   with self.assertRaises(ValueError):g.request('files.list',{'share':'family'})
   self.assertTrue((directory/'read.txt').exists())
+
+
+ def test_photo_map_preference_is_private_boolean_and_does_not_change_landing(self):
+  a,at,_=self.user(permissions=['photos.read']);b,bt,_=self.user('bob',permissions=['photos.read'])
+  self.assertFalse(accounts.photo_maps(self.state,a)['online']);accounts.save_preferences(self.state,a,{'photo_online_maps':True});self.assertTrue(accounts.photo_maps(self.state,a)['online']);self.assertFalse(accounts.photo_maps(self.state,b)['online']);self.assertEqual(accounts.landing(self.state,a)['href'],'/#overview')
+  accounts.save_preferences(self.state,a,{'photo_online_maps':False});self.assertFalse(accounts.photo_maps(self.state,a)['online'])
+  for payload in ({'photo_online_maps':'yes'},{'photo_online_maps':True,'user_id':b['id']}):
+   with self.assertRaises(ValueError):accounts.save_preferences(self.state,a,payload)
+
+ def test_administrator_landing_is_locked_to_overview(self):
+  value=accounts.landing(self.state,self.admin);self.assertTrue(value['locked']);self.assertEqual(value['href'],'/#overview')
+  with self.assertRaises(ValueError):accounts.save_preferences(self.state,self.admin,{'landing_page':'photos'})
+ def test_family_landing_is_private_persistent_and_permission_aware(self):
+  a,at,_=self.user(permissions=['photos.read']);b,bt,_=self.user('bob',permissions=['files.read']);self.assertEqual(accounts.landing(self.state,a)['href'],'/#overview');accounts.save_preferences(self.state,a,{'landing_page':'photos-shared'});self.assertEqual(accounts.landing(self.state,a)['href'],'/#photos?view=shared');self.assertEqual(accounts.landing(self.state,b)['href'],'/#overview')
+  with self.assertRaises(ValueError):accounts.save_preferences(self.state,b,{'landing_page':'photos'})
+  accounts.change(self.state,self.admin,{'action':'update','id':a['id'],'permissions':['files.read']});a=next(u for u in accounts.listing(self.state)['users'] if u['id']==a['id']);self.assertEqual(accounts.landing(self.state,a)['href'],'/#overview')
+ def test_landing_rejects_external_urls_other_users_and_admin_routes(self):
+  user,_,_=self.user()
+  for value in ['https://example.invalid','//example.invalid','settings/users','storage','vpn']:
+   with self.assertRaises(ValueError):accounts.save_preferences(self.state,user,{'landing_page':value})
+  with self.assertRaises(ValueError):accounts.save_preferences(self.state,user,{'landing_page':'photos','user_id':self.admin['id']})
+
+ def test_shared_plain_usb_is_browsable_but_private_user_roots_are_not(self):
+  a,token,_=self.user();cfg=self.device.ctx.config();cfg['pools']['data']['kind']='usb';cfg['pools']['data']['encrypted']=False;self.device.ctx.save(cfg);root=Path(cfg['pools']['data']['mountpoint']);(root/'public.txt').write_text('shared');(root/'Users/bob').mkdir(parents=True);(root/'Users/bob/private.txt').write_text('private');gateway=self.gateway(token)
+  listed=gateway.request('files.list',{'share':'pool:data'});self.assertIn('public.txt',[v['name'] for v in listed['entries']]);self.assertNotIn('Users',[v['name'] for v in listed['entries']])
+  self.assertEqual(base64.b64decode(gateway.request('files.read',{'share':'pool:data','path':'public.txt','offset':0,'count':100})['data_base64']),b'shared')
+  with self.assertRaises(ValueError):gateway.request('files.read',{'share':'pool:data','path':'Users/bob/private.txt','offset':0,'count':100})
+  with self.assertRaises(ValueError):gateway.request('photos.import-folder',{'share':'pool:data','folder':'Users/bob'})
+  with self.assertRaises(ValueError):gateway.request('myradio.import-folder',{'share':'pool:data','path':'Users/bob','category':'music'})
+ def test_library_folder_picker_is_scoped_to_the_family_user(self):
+  a,token,_=self.user();b,other,_=self.user('bob');self.configure(a,token);self.configure(b,other);data=self.gateway(token).request('library.folders',{'pool':'data','path':''});self.assertIn('My Radio',[v['name'] for v in data['entries']]);self.assertNotIn(b['id'],str(data))
+  with self.assertRaises(ValueError):self.gateway(token).request('library.folders',{'pool':'data','path':'../'+b['id']})
 
 @unittest.skipUnless(importlib.util.find_spec('jwt'),'Optional PyJWT dependency')
 class IdentityTests(unittest.TestCase):
@@ -125,7 +164,7 @@ class IdentityTests(unittest.TestCase):
   with patch('freeqnap.identity.fetch',side_effect=self.fetch):self.assertTrue(self.identity.finish(state,'code',binding)['linked'])
   state,binding=self.begin()
   with patch('freeqnap.identity.fetch',side_effect=self.fetch):result=self.identity.finish(state,'code',binding)
-  self.assertEqual(auth.session(self.state,result['token'])['user']['id'],self.admin['id'])
+  self.assertEqual(auth.session(self.state,result['token'])['user']['id'],self.admin['id']);self.assertEqual(result['landing_page'],'/#overview')
   with self.assertRaises(ValueError):self.identity.finish(state,'code',binding)
   self.identity.save(self.admin,{'enabled':False});self.assertIsNone(auth.session(self.state,result['token']));self.assertIsNotNone(auth.login(self.state,PASSWORD));self.assertNotIn('private-client-secret',json.dumps(self.identity.status()))
  def test_binding_nonce_audience_and_unlinked_identity_fail_closed(self):
@@ -144,3 +183,41 @@ class IdentityTests(unittest.TestCase):
   with patch('freeqnap.identity.fetch',side_effect=self.fetch):
    with self.assertRaises(ValueError):self.identity.discovery(self.config)
   with self.assertRaises(ValueError):self.identity.save(self.admin,{**self.config,'redirect_uri':'https://evil.example/auth/oidc/callback'})
+
+
+class CloudLocalPasswordTests(IdentityTests):
+ def assign(self,**extra):
+  with patch('freeqnap.identity.fetch',side_effect=self.fetch):return self.identity.assign(self.admin,{'current_password':PASSWORD,'subject':'cloud-subject','username':'matt','label':'Matt','permissions':['photos.read','files.read'],**extra})
+ def cloud_login(self):
+  state,binding=self.begin()
+  with patch('freeqnap.identity.fetch',side_effect=self.fetch):result=self.identity.finish(state,'code',binding)
+  return auth.session(self.state,result['token']),result['token']
+ def test_explicit_cloud_family_profile_enables_offline_password_without_new_identity(self):
+  assigned=self.assign();ident=assigned['user']['id'];self.assertFalse(assigned['user']['local_password_enabled']);self.assertEqual(assigned['user']['role'],'member');self.assertIsNone(auth.login(self.state,PASSWORD,'matt'))
+  session,token=self.cloud_login();self.assertTrue(session['recent_oidc']);self.assertEqual(session['user']['id'],ident)
+  request={'password':'separate local fixture password','confirm_password':'separate local fixture password','different_password_ack':True}
+  for bad in [{**request,'different_password_ack':False},{**request,'confirm_password':'wrong'}]:
+   with self.assertRaises(ValueError):accounts.configure_local_password(self.state,session,bad)
+  result,new_token=accounts.configure_local_password(self.state,session,request);self.assertEqual(result['user']['id'],ident);self.assertEqual(result['user']['permissions'],['files.read','photos.read']);self.assertIsNone(auth.session(self.state,token));self.assertIsNotNone(auth.session(self.state,new_token))
+  with patch('freeqnap.identity.fetch',side_effect=ValueError('Provider offline')):local,csrf=auth.login(self.state,request['password'],'matt')
+  self.assertEqual(auth.session(self.state,local)['user']['id'],ident)
+ def test_local_session_and_stale_cloud_session_cannot_reset_without_recent_cloud_proof(self):
+  self.assign();session,token=self.cloud_login();r={'password':'new separate local fixture','confirm_password':'new separate local fixture','different_password_ack':True}
+  with self.state.connect() as db:db.execute('UPDATE recent_cloud_auth SET authenticated_at=?',(time.time()-301,))
+  with self.assertRaises(PermissionError):accounts.configure_local_password(self.state,auth.session(self.state,token),r)
+  with self.assertRaises(PermissionError):accounts.configure_local_password(self.state,auth.session(self.state,self.token),r)
+  fresh,_=self.cloud_login();accounts.configure_local_password(self.state,fresh,r)
+ def test_existing_administrator_link_preserves_password_role_and_profile(self):
+  before=self.state.setting('administrator');assigned=self.assign(user_id=self.admin['id']);self.assertEqual(assigned['user']['id'],self.admin['id']);self.assertEqual(assigned['user']['role'],'administrator');self.assertEqual(self.state.setting('administrator'),before);session,_=self.cloud_login();self.assertEqual(session['user']['id'],self.admin['id']);self.assertIsNotNone(auth.login(self.state,PASSWORD))
+  with self.assertRaises(ValueError):self.assign(user_id=self.admin['id'])
+ def test_assignment_requires_admin_password_and_rolls_back_bad_subject_or_existing_username(self):
+  with self.assertRaises(PermissionError):self.assign(current_password='wrong')
+  with self.assertRaises(ValueError):self.assign(subject='bad\nsubject')
+  with self.assertRaises(ValueError):self.assign(username='admin')
+  with self.state.connect() as db:self.assertEqual(db.execute('SELECT count(*) FROM external_identities').fetchone()[0],0)
+ def test_admin_local_password_reset_does_not_break_verified_cloud_login(self):
+  assigned=self.assign();accounts.change(self.state,self.admin,{'action':'set-password','id':assigned['user']['id'],'password':'admin temporary fixture password'});cloud,_=self.cloud_login();self.assertFalse(cloud['user']['must_change']);self.assertTrue(cloud['user']['local_password_change_required']);request={'password':'user independent new password','confirm_password':'user independent new password','different_password_ack':True};result,_=accounts.configure_local_password(self.state,cloud,request);self.assertFalse(result['user']['must_change']);self.assertIsNotNone(auth.login(self.state,request['password'],'matt'))
+
+ def test_revocation_between_request_and_password_write_is_rechecked(self):
+  assigned=self.assign();session,_=self.cloud_login();accounts.change(self.state,self.admin,{'action':'revoke-sessions','id':assigned['user']['id']})
+  with self.assertRaises(PermissionError):accounts.configure_local_password(self.state,session,{'password':'separate new fixture password','confirm_password':'separate new fixture password','different_password_ack':True})

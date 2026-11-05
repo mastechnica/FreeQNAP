@@ -32,6 +32,39 @@ class FileManagerTests(unittest.TestCase):
  def review(self,plan):return {'plan_id':plan['id'],'digest':plan['digest'],'confirmation':plan['confirmation']}
  def trash(self,path='file.txt'):
   plan=self.fm.move_plan({'share':'a','path':path});self.fm.move(self.review(plan));return plan['id']
+ def test_folder_creation_never_requests_special_permission_bits(self):
+  (self.a/'folder').mkdir();(self.a/'folder/file').write_text('data');real=os.mkdir;modes=[]
+  def mkdir(path,mode=0o777,*args,**kwargs):
+   modes.append(mode)
+   if mode&0o6000:raise PermissionError('Special directory bits blocked')
+   return real(path,mode,*args,**kwargs)
+  with patch('os.mkdir',side_effect=mkdir):
+   self.fm.mkdir({'share':'b','name':'new'});p=self.fm.transfer_plan({'share':'a','paths':['folder'],'target_share':'b'});self.fm.transfer(self.review(p))
+  self.assertTrue(modes);self.assertTrue(all(not mode&0o6000 for mode in modes));self.assertEqual((self.b/'folder/file').read_text(),'data')
+ def test_transfer_progress_is_private_and_counts_copy_and_verification(self):
+  from freeqnap.access_scope import using
+  actor='user:'+'a'*32;other='user:'+'b'*32;(self.a/'data').write_bytes(b'x'*12345)
+  with using(actor):
+   p=self.fm.transfer_plan({'share':'a','paths':['data'],'target_share':'b'});job=self.ctx.state.enqueue('files.transfer',self.review(p));r=self.fm.transfer(self.review(p),job);self.ctx.state.finish(job,result=r);progress=self.fm.transfers()['transfers'][0]['progress']
+   self.assertEqual(progress['copied_bytes'],12345);self.assertEqual(progress['verified_bytes'],12345);self.assertEqual(progress['files_completed'],1);self.assertEqual(progress['percent'],100)
+  with using(other):self.assertFalse(self.fm.transfers()['transfers'])
+ def test_failed_copy_can_only_start_again_with_a_fresh_review(self):
+  from freeqnap.access_scope import using
+  (self.a/'data').write_text('safe source')
+  with using('user:'+'a'*32):
+   p=self.fm.transfer_plan({'share':'a','paths':['data'],'target_share':'b'});job=self.ctx.state.enqueue('files.transfer',self.review(p));self.ctx.state.finish(job,error='test failure')
+   new=self.fm.transfer_retry_plan({'id':job});self.assertNotEqual(new['id'],p['id']);self.assertFalse((self.b/'data').exists());self.assertEqual(new['body']['target_share'],'b')
+   active=self.ctx.state.enqueue('files.transfer',self.review(new))
+   with self.assertRaisesRegex(ValueError,'already queued'):self.fm.transfer_retry_plan({'id':job})
+   self.ctx.state.finish(active,error='Fixture cleanup')
+  with using('user:'+'b'*32):
+   with self.assertRaises(ValueError):self.fm.transfer_retry_plan({'id':job})
+ def test_transfer_eta_includes_readback_and_stale_state_has_no_eta(self):
+  from freeqnap.nas.transfer_progress import summarize
+  p={'total_bytes':2000,'copied_bytes':1000,'verified_bytes':500,'copy_seconds':1.,'verify_seconds':.2,'totals_ready':True,'updated_at':time.time()}
+  r=summarize(p,'running');self.assertAlmostEqual(r['percent'],37.5);self.assertAlmostEqual(r['eta_seconds'],1.6)
+  p['updated_at']=time.time()-60;self.assertTrue(summarize(p,'running')['stale']);self.assertIsNone(summarize(p,'running')['eta_seconds'])
+
  def test_recursive_copy_hash_readback_and_no_overwrite(self):
   source=self.a/'folder';source.mkdir();(source/'hello.txt').write_bytes(b'payload'*10000);(source/'nested').mkdir();(source/'nested'/'empty').touch()
   p=self.fm.transfer_plan({'share':'a','paths':['folder'],'target_share':'b','mode':'copy'});result=self.fm.transfer(self.review(p))
@@ -51,7 +84,7 @@ class FileManagerTests(unittest.TestCase):
   p=self.fm.transfer_plan({'share':'a','paths':['folder'],'target_share':'b'})
   with self.assertRaises(ValueError):self.fm.transfer(self.review(p))
   self.assertFalse((self.b/'folder').exists());self.assertEqual(secret.read_text(),'private')
-  self.assertTrue(list((self.ctx.mount/'.freeqnap/transfers').iterdir()))
+  self.assertFalse((self.ctx.mount/'.freeqnap/transfers').exists())
  def test_recycle_default_expiry_and_undated_or_locked_data_retained(self):
   (self.a/'file.txt').write_text('recoverable');ident=self.trash();record=self.ctx.state.setting('trash:'+ident)
   self.assertEqual(self.fm.trash_items()['policy']['retention_days'],30);self.assertTrue(record['deleted_at'])
@@ -78,9 +111,10 @@ class FileManagerTests(unittest.TestCase):
   self.assertEqual(self.fm.list({'share':'a','offset':6,'limit':3})['entries'][0]['name'],'example-6')
 
  def test_failed_unpublished_copy_stage_can_be_reviewed_and_removed(self):
-  (self.a/'folder').mkdir();(self.a/'folder/first').write_text('kept source');outside=self.root/'outside';outside.write_text('outside');(self.a/'folder/last').symlink_to(outside)
+  (self.a/'folder').mkdir();(self.a/'folder/first').write_text('kept source');outside=self.root/'outside';outside.write_text('outside');(self.a/'folder/last').write_text('second source')
   p=self.fm.transfer_plan({'share':'a','paths':['folder'],'target_share':'b'});job=self.ctx.operation('files.transfer',{'plan_id':p['id']})
-  with self.assertRaises(ValueError):self.fm.transfer(self.review(p),job)
+  with patch.object(self.fm,'validate_volume',side_effect=ValueError('Injected mid-copy failure')):
+   with self.assertRaises(ValueError):self.fm.transfer(self.review(p),job)
   self.ctx.state.finish(job,error='Injected copy failure retained')
   self.assertEqual(self.fm.stages()['items'][0]['id'],job);plan=self.fm.stage_plan({'id':job});self.fm.stage_remove(self.review(plan))
   self.assertFalse(self.fm.stages()['items']);self.assertEqual((self.a/'folder/first').read_text(),'kept source');self.assertEqual(outside.read_text(),'outside');self.assertFalse((self.b/'folder').exists())

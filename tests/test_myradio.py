@@ -33,6 +33,15 @@ class MyRadioTests(unittest.TestCase):
         value=self.radio.upload_begin({'category':kind,'name':name,'bytes':len(data)})
         self.radio.upload_chunk({'upload_id':value['upload_id'],'offset':0,'data_base64':base64.b64encode(data).decode()})
         return self.radio.upload_finish({'upload_id':value['upload_id']})['item']
+    def test_aax_retained_as_audiobook_without_false_playback_claim(self):
+        item=self.upload(b'protected original',name='book.aax')
+        self.assertEqual(item['metadata']['book_type'],'audiobook')
+        self.assertEqual(item['metadata']['playable'],'original-only')
+        self.assertEqual(item['metadata']['author'],'Test artist')
+        self.assertIn('authorized player',item['metadata']['reading_note'])
+        self.assertEqual(base64.b64decode(self.radio.read({'id':item['id']})['data_base64']),b'protected original')
+        self.radio.metadata({'id':item['id'],'metadata':{'title':'My book','book_type':'audiobook'}})
+        with self.assertRaises(ValueError):self.radio.metadata({'id':item['id'],'metadata':{'book_type':'bad'}})
     def test_upload_text_playback_and_identity_bounds(self):
         item=self.upload();self.assertEqual(self.radio.book_text({'id':item['id']})['text'],'Hello book')
         self.assertEqual(base64.b64decode(self.radio.read({'id':item['id']})['data_base64']),b'Hello book')
@@ -69,6 +78,29 @@ class MyRadioTests(unittest.TestCase):
     def test_private_marker_and_volume_identity_required(self):
         marker=self.volume/'.freeqnap-myradio'/'.library.json';marker.write_text('{}')
         with self.assertRaises(ValueError):self.upload()
+    def test_oversized_podcast_feed_uses_the_bounded_fallback_only_for_size_errors(self):
+        raw=b'<rss><channel><title>Large show</title><item><title>Episode</title><enclosure url="https://public.example/episode.mp3" type="audio/mpeg"/></item></channel></rss>'
+        with patch('freeqnap.nas.myradio.public_http.target'),patch('freeqnap.nas.myradio.public_http.fetch',side_effect=ValueError('Internet response exceeded the size limit')),patch('freeqnap.nas.podcast_feed.fetch',return_value=raw) as fallback:
+            result=self.radio.feed_add({'url':'https://public.example/large.rss','country':'US'});self.assertEqual(result['episodes'],1);fallback.assert_called_once_with('https://public.example/large.rss')
+        with patch('freeqnap.nas.myradio.public_http.target'),patch('freeqnap.nas.myradio.public_http.fetch',side_effect=ValueError('Private internet target blocked')),patch('freeqnap.nas.podcast_feed.fetch') as fallback:
+            with self.assertRaises(ValueError):self.radio.feed_add({'url':'https://public.example/blocked.rss','country':'US'})
+            fallback.assert_not_called()
+
+    def test_podcast_pagination_reaches_older_rows_and_filters_before_paging(self):
+        feed='a'*32
+        with self.ctx.state.connect() as db:
+            db.execute('INSERT INTO radio_feeds VALUES(?,?,?,?,NULL)',(feed,'https://public.example/rss','Show',json.dumps({'countrycode':'US'})))
+            for n in range(625):db.execute('INSERT INTO radio_episodes VALUES(?,?,?,?,?,NULL)',(f'{n:032x}',feed,'needle' if n==624 else 'Episode '+str(n),'https://public.example/'+str(n)+'.mp3',json.dumps({'published':'Sun, 01 Nov 2026 10:00:00 +0000'})))
+        first=self.radio.feeds({'feed':feed,'limit':500});self.assertEqual(len(first['episodes']),500);self.assertEqual(first['total'],625);self.assertEqual(first['next_offset'],500)
+        last=self.radio.feeds({'feed':feed,'offset':500,'limit':500});self.assertEqual(len(last['episodes']),125);self.assertIsNone(last['next_offset']);self.assertEqual(len(self.radio.feeds({'feed':feed,'limit':'all'})['episodes']),625)
+        self.assertEqual(self.radio.feeds({'feed':feed,'query':'needle','limit':25})['total'],1)
+    def test_podcast_pages_obey_the_broker_byte_budget_with_unicode_notes(self):
+        feed='a'*32
+        with self.ctx.state.connect() as db:
+            db.execute('INSERT INTO radio_feeds VALUES(?,?,?,?,NULL)',(feed,'https://public.example/rss','Show',json.dumps({'countrycode':'US'})))
+            for n in range(120):db.execute('INSERT INTO radio_episodes VALUES(?,?,?,?,?,NULL)',(f'{n:032x}',feed,'Episode','https://public.example/'+str(n)+'.mp3',json.dumps({'description':'🎧'*2000})))
+        page=self.radio.feeds({'feed':feed,'limit':500});self.assertLess(len(json.dumps(page).encode()),2*1024**2);self.assertGreater(len(page['episodes']),0);self.assertLess(len(page['episodes']),120);self.assertEqual(page['next_offset'],len(page['episodes']))
+
     def test_episode_feed_does_not_expose_private_feed_url(self):
         source=b'<rss><channel><title>My podcast</title><item><guid>x</guid><title>Episode</title><enclosure url="https://public.example/episode.mp3" type="audio/mpeg"/></item></channel></rss>'
         with patch('freeqnap.nas.myradio.public_http.target'),patch('freeqnap.nas.myradio.public_http.fetch',return_value=source):self.radio.feed_add({'url':'https://public.example/rss?private=TOKEN','country':'US'})

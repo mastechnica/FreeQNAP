@@ -16,14 +16,15 @@ from .common import Context
 MAX_FRAME = 2 * 1024**2
 
 class Client:
-    def __init__(self, path='/run/freeqnap/broker.sock'):
+    def __init__(self, path='/run/freeqnap/broker.sock', timeout=600):
         self.path = str(path)
+        self.timeout = timeout
 
     def request(self, action, payload=None):
         raw = json.dumps({'action': action, 'payload': payload or {}}).encode() + b'\n'
         if len(raw) > MAX_FRAME:raise ValueError('NAS request too large')
         with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
-            connection.settimeout(600);connection.connect(self.path);connection.sendall(raw)
+            connection.settimeout(self.timeout);connection.connect(self.path);connection.sendall(raw)
             stream = connection.makefile('rb')
             data = stream.readline(MAX_FRAME + 1)
             if len(data) > MAX_FRAME or not data.endswith(b'\n'):raise ValueError('Invalid broker response')
