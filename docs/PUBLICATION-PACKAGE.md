@@ -1,12 +1,11 @@
 # GitHub source-review package
 
-**Publication authorized on 31 October 2026.** The owner approved the reviewed
-source and showcase for the personal **mastechnica/FreeQNAP** repository, with
+The public source and showcase are maintained in **mastechnica/FreeQNAP**, with
 GitHub Pages served from `/docs`. Use only the personal account and a clean source
 snapshot. Do not import private development history or use an organization or a
 separate commercial project's documentation repository.
 
-## What the owner is reviewing
+## Publication contents
 
 - Root README: the GitHub repository's main page, feature matrix, real screenshots,
   local preview instructions and acceptance boundaries.
@@ -74,7 +73,7 @@ comprehensive secret or legal audit. The local history was not included in the
 review ZIP and is excluded from the initial public repository. Publication
 approval does not cover unrelated local history or private assets.
 
-The owner approved the exact personal destination and requested Pages. Publish
+I approved the exact personal destination and requested Pages. Publish
 only the clean reviewed snapshot and enable Pages from `/docs`. Future changes
 must retain the same private-data and source/license boundaries.
 Do not mark the installer turnkey or upload OS binaries until clean-source,

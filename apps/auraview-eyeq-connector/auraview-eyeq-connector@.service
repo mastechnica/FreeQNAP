@@ -1,0 +1,29 @@
+[Unit]
+Description=AuraView EyeQ AuraStore connector (%i)
+After=network-online.target freeqnap-broker.service
+Wants=network-online.target
+
+[Service]
+User=freeqnap
+Group=freeqnap
+WorkingDirectory=/opt/freeqnap/current
+Environment=PYTHONPATH=/opt/freeqnap/current
+ExecStart=/opt/auraview-eyeq-connector/venv/bin/python -B /opt/auraview-eyeq-connector/connector.py --config /var/lib/auraview-eyeq-connector/%i.json
+Restart=on-failure
+RestartSec=10
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+ReadWritePaths=/var/lib/freeqnap /etc/freeqnap /var/lib/auraview-eyeq-connector
+
+[Install]
+WantedBy=multi-user.target

@@ -28,7 +28,7 @@ Apple documents the trusted-device approval and web-access setting in its
 the setting is called Allow Data Access or Access iCloud Data on the Web. FreeQNAP
 does not disable Advanced Data Protection or change an Apple setting for you.
 Actual Apple acceptance remains account/device-specific; passing fixture tests does
-not prove that an owner has approved a real iPhone prompt.
+not prove that a user has approved a real iPhone prompt.
 
 The NAS retains downloaded originals if they disappear from iCloud. It does not
 request remote deletion. Passwords, codes, signed URLs and upstream exception text
@@ -122,9 +122,9 @@ that a new-device approval or verification code was requested.
 If Apple returns `termsUpdateNeeded` or `isRepairNeeded`, the connection shows
 `account-action-required` with `apple-terms-required` or
 `apple-account-action-required`. No web-approval or download request proceeds.
-The owner must open iCloud.com personally, review any terms or account prompts,
+You must open iCloud.com personally, review any terms or account prompts,
 and confirm Photos opens, then sign in again on the NAS. The application never
-accepts legal agreements for the owner. A valid password or trusted-device session
+accepts legal agreements for me. A valid password or trusted-device session
 does not by itself prove a usable iCloud Photos session.
 
 ## Full-image HEIC previews and location maps

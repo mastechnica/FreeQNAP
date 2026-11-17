@@ -1,0 +1,44 @@
+--- a/al_eth_main.c
++++ b/al_eth_main.c
+@@ -12,0 +13 @@
++#include <linux/of.h>
+@@ -79,0 +81 @@
++MODULE_INFO(freeqnap_stats, "software-queues-v1");
+@@ -4340,0 +4343,37 @@
++	/* TS-431XeU MAC statistics MMIO has caused an asynchronous external
++	 * abort from rtnetlink while the data path remained operational.
++	 * Use the already-maintained synchronized queue counters on this
++	 * board. Hardware-only error/pause counters are unavailable here.
++	 */
++	if (of_machine_is_compatible("qnap,ts-431xeu")) {
++		unsigned int start;
++		u64 packets, bytes, dropped;
++		int i;
++
++		memset(stats, 0, sizeof(*stats));
++		for (i = 0; i < adapter->num_rx_queues; i++) {
++			struct al_eth_ring *ring = &adapter->rx_ring[i];
++			do {
++				start = u64_stats_fetch_begin(&ring->syncp);
++				packets = ring->rx_stats.packets;
++				bytes = ring->rx_stats.bytes;
++				dropped = ring->rx_stats.skb_alloc_fail +
++					ring->rx_stats.dma_mapping_err;
++			} while (u64_stats_fetch_retry(&ring->syncp, start));
++			stats->rx_packets += packets;
++			stats->rx_bytes += bytes;
++			stats->rx_dropped += dropped;
++		}
++		for (i = 0; i < adapter->num_tx_queues; i++) {
++			struct al_eth_ring *ring = &adapter->tx_ring[i];
++			do {
++				start = u64_stats_fetch_begin(&ring->syncp);
++				packets = ring->tx_stats.packets;
++				bytes = ring->tx_stats.bytes;
++			} while (u64_stats_fetch_retry(&ring->syncp, start));
++			stats->tx_packets += packets;
++			stats->tx_bytes += bytes;
++		}
++		return;
++	}
++

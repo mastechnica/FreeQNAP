@@ -113,6 +113,10 @@ class Files:
                                 'modified_at': info.st_mtime, 'mode': oct(stat.S_IMODE(info.st_mode))})
             return {'entries':entries,'limit':limit,'offset':offset,'total_entries':len(names),'truncated':offset+limit<len(names),'next_offset':offset+limit if offset+limit<len(names) else None}
 
+    def properties(self,request):
+        from .file_properties import inspect
+        return inspect(self,request)
+
     def media_neighbors(self,request):
         from ..media_http import kind
         leaf=request.get('name');query=request.get('query','')

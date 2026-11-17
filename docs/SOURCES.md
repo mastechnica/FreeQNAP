@@ -30,7 +30,7 @@ The accepted boot format is a legacy uImage with an embedded uncompressed initra
 
 ## License boundaries
 
-The root MIT license is proposed for original FreeQNAP code/documentation, subject to owner review. The DTS and Linux-derived patch script retain GPL-2.0-only; the GPL text from the local upstream kernel source is preserved under `licenses/GPL-2.0.txt`. Existing per-file SPDX notices remain authoritative. Out-of-tree drivers, BusyBox, Linux and Debian packages retain their own terms; they are not relicensed by this repository.
+The root MIT license is proposed for original FreeQNAP code/documentation, subject to my review. The DTS and Linux-derived patch script retain GPL-2.0-only; the GPL text from the local upstream kernel source is preserved under `licenses/GPL-2.0.txt`. Existing per-file SPDX notices remain authoritative. Out-of-tree drivers, BusyBox, Linux and Debian packages retain their own terms; they are not relicensed by this repository.
 
 No binary release should be distributed until its complete corresponding source, notices, configurations, exact modifications and build instructions are reviewed and available as required. Vendor firmware availability does not authorize redistribution of every proprietary QTS utility or private hardware dump. Do not add those to “help” reproduce a build.
 

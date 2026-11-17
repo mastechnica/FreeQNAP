@@ -15,7 +15,7 @@ Public reports omit private staging names and device identities.
 1. Inventory every candidate and its ownership, inode, device, size and hash.
    Identify references from active services, current/rollback symlinks, installer
    sessions, pending validation and backup manifests before proposing removal.
-2. Archive historical source-review staging privately on the owner's host. Verify
+2. Archive historical source-review staging privately on my host. Verify
    both the transferred archive and every member against a pinned manifest, with
    enough host space. A copy command alone does not establish a good archive.
 3. Retain the active application generation, a tested immediate rollback, installed
@@ -29,16 +29,16 @@ Public reports omit private staging names and device identities.
    immutable hardlinks for identical source files. It must never remove the last
    accepted rollback or backup while an update/recovery campaign is incomplete.
 
-The initial review performed no cleanup. The owner subsequently authorized the
+The initial review performed no cleanup. I subsequently authorized the
 bounded archive-and-remove operation recorded below. Increasing data capacity does
 not increase the separate OS filesystem; moving private keys/configuration or
 logs to arbitrary data shares is not an appropriate shortcut.
 
 ## Completed bounded cleanup — 1 November 2026
 
-The owner authorized space cleanup. Only the historical source-review staging
+I authorized space cleanup. Only the historical source-review staging
 directory was removed, after checking for live references and privately archiving
-it on the owner's host. Active/recent rollback application releases, all kernel
+it on my host. Active/recent rollback application releases, all kernel
 module sets, original flash backups, validation records and accepted encrypted
 recovery archives were retained. No cache or broad release pruning was performed.
 

@@ -66,6 +66,7 @@
   "files.move-plan",
   "files.pool-list",
   "files.pool-read",
+  "files.properties",
   "files.purge",
   "files.purge-plan",
   "files.read",

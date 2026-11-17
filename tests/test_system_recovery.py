@@ -79,3 +79,44 @@ class SystemRecoveryTests(unittest.TestCase):
   target=stage/'system/etc/sysctl.d/90-freeqnap-hardening.conf'
   self.assertEqual(target.read_text(),'kernel.unprivileged_bpf_disabled = 2\n');self.assertEqual(target.stat().st_mode&511,384)
   self.assertFalse((stage/'system/etc/sysctl.d/unrelated.conf').exists());self.r.verify(stage)
+
+ def test_personal_database_above_ordinary_file_limit_is_streamed_and_kept(self):
+  owner='b'*32;database=State(self.ctx.directory/'personal'/owner)
+  database.set('large-fixture','x'*40000)
+  original=Path.read_bytes
+  def bounded_read(path):
+   if path.suffix=='.sqlite3':raise AssertionError('SQLite recovery hashes must stream')
+   return original(path)
+  with patch('freeqnap.nas.system_recovery.FILE_LIMIT',1024),patch('freeqnap.nas.system_recovery.DATABASE_LIMIT',1024*1024),patch.object(Path,'read_bytes',bounded_read):
+   stage=self.r.capture(self.ident);manifest=self.r.verify(stage)
+  relative='state/nas/personal/'+owner+'/state.sqlite3'
+  self.assertTrue(manifest['files'][relative]['sqlite_consistent'])
+  with sqlite3.connect(stage/relative) as db:
+   self.assertEqual(db.execute("SELECT value FROM settings WHERE key='large-fixture'").fetchone()[0],json.dumps('x'*40000))
+
+ def test_database_cap_failure_keeps_previous_stage_and_incomplete_evidence(self):
+  accepted=self.r.capture(self.ident)
+  with patch('freeqnap.nas.system_recovery.DATABASE_LIMIT',1):
+   with self.assertRaisesRegex(ValueError,'size limit'):self.r.capture('b'*32)
+  self.r.verify(accepted);self.assertTrue((self.ctx.directory/'system-recovery'/('b'*32)).is_dir())
+
+ def test_database_open_error_is_structured_and_preserves_incomplete_stage(self):
+  original=sqlite3.connect
+  def fail_snapshot(path,*args,**kwargs):
+   if str(path).startswith('file:'):raise sqlite3.OperationalError('fixture private diagnostic')
+   return original(path,*args,**kwargs)
+  with patch('freeqnap.nas.system_recovery.sqlite3.connect',side_effect=fail_snapshot):
+   with self.assertRaisesRegex(ValueError,'Consistent database snapshot unavailable') as caught:self.r.capture(self.ident)
+  self.assertNotIn('fixture private diagnostic',str(caught.exception))
+  self.assertTrue((self.ctx.directory/'system-recovery'/self.ident).is_dir())
+
+ def test_runtime_locks_are_excluded_but_network_and_vpn_configuration_are_kept(self):
+  for directory,lockfile in (('network','lock'),('vpn','operations.lock')):
+   root=self.ctx.directory/directory;root.mkdir()
+   (root/lockfile).write_text('runtime lock')
+   (root/'active.json').write_text('fixture configuration')
+  stage=self.r.capture(self.ident);manifest=self.r.verify(stage)
+  for directory,lockfile in (('network','lock'),('vpn','operations.lock')):
+   excluded='state/nas/'+directory+'/'+lockfile
+   self.assertNotIn(excluded,manifest['files']);self.assertIn(excluded,manifest['excluded_runtime_files'])
+   self.assertIn('state/nas/'+directory+'/active.json',manifest['files'])

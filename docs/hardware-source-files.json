@@ -4,7 +4,7 @@
   "hardware/ts431xeu/eyeq-buttons.py": "651d46fed35a1dbb9bed9ffdec605291f075fa0efc74a33c2b0a7b15ac99db86",
   "hardware/ts431xeu/eyeq-buttons.service": "dbced8fbe8ab26aeb610bad11e7b7713b8570e345301e4db170f353216388aa6",
   "hardware/ts431xeu/eyeq-cooling.service": "1fdfa1de5ba1395979f4de9ba2da5bf5dbf32f4b2e4b38a054de53cb75b10d53",
-  "hardware/ts431xeu/eyeq-disk-leds.py": "97dec3b6ffb5a6155fa5f00d3b44bdddfe145b196f45432efec41d6b1db0a13f",
+  "hardware/ts431xeu/eyeq-disk-leds.py": "9a2b35e1bcc7c9933c99c2dce117919d2f82cd96532b543bbd3eb81edbac58ae",
   "hardware/ts431xeu/eyeq-disk-leds.service": "a4a0f852841b2e9a0ab05ffc2856d013c889edd5769287cc5146baad40240f14",
   "hardware/ts431xeu/eyeq-drive-green.service": "af322817496fc1111fd724f30df226e37cad4b5c6f9e221fa2633de743bee2a9",
   "hardware/ts431xeu/eyeq-hwctl.py": "367a6fb2ddd5ca820b8842676a7ae00c981d89fe8524abe53868a06cf497fa92",

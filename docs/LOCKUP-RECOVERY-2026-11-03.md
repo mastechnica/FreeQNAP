@@ -4,10 +4,10 @@
 
 The HTTPS shell, session and saved base-inventory requests could respond while
 native NAS status remained pending. SSH connections completed TCP establishment
-but timed out before their greeting, including from a second LAN host. The owner
+but timed out before their greeting, including from a second LAN host. I
 reported the front power button did not respond, and performed a hard reset.
 Removing a newly attached USB drive had not reliably restored management.
-The owner later confirmed that this drive was not encrypted; its exact identity
+I later confirmed that this drive was not encrypted; its exact identity
 and filesystem remain unconfirmed.
 The original cause is unconfirmed. Do not label it a repaired USB fault.
 
@@ -41,7 +41,7 @@ Before the approved override, each member's first 8 MiB was copied and verified,
 with independent matching copies on NAS OS storage and the private local host.
 These preserve RAID metadata and bitmaps; **they are not backups of file contents**.
 
-The owner explicitly approved exact-member forced **read-only** assembly.
+I explicitly approved exact-member forced **read-only** assembly.
 The tool marked array metadata clean to permit assembly; this did not verify or
 repair parity. Kernel and block-device read-only state were verified, recovery
 remained idle, no filesystems were mounted, and the original fourth-member
@@ -58,7 +58,7 @@ is limited to those two files, not whole-volume integrity or all stored contents
 
 ## Recovery progression (historical)
 
-The owner separately approved the fresh writable-resume and existing-volume mount
+I separately approved the fresh writable-resume and existing-volume mount
 plan. Exact identities, post-override header hashes and the saved rebuilding
 checkpoint were checked before the single read-write activation. Kernel recovery
 resumed near 90.86% with the original member; it did not restart from zero.

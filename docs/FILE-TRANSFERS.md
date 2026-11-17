@@ -136,3 +136,13 @@ rebuilt during ordinary refreshes.
 Right-click a drive and choose Import to… to copy all accessible root contents, including subfolders, directly into a destination. The picker asks only for that destination; it does not ask for a source selection. A selected subfolder still imports that folder. FreeQNAP private system entries and symbolic links are excluded; unsupported/unreadable data stops its affected job without source deletion. Existing destination names are never overwritten or silently merged.
 
 Whole-drive imports prepare all immutable copy plans before confirmation, in groups of at most 200 top-level items. One CONFIRM queues the reviewed jobs; each appears in Files and Activity. All source/destination authorization and identity checks still run in the existing service. Above 10,000 root items, import folders separately. If a submission fails, confirmed receipts remain visible and the interface refuses blind retries because the last request might have reached the NAS. Cancel stops further submissions; already queued jobs continue. This is a grouped copy, not an all-or-nothing volume snapshot. Files added after inventory are not included.
+
+## Approval lifetime for queued copies
+
+A copy's review must be fresh when submitted (within ten minutes). Once accepted,
+its exact job, principal, request and acceptance time are recorded privately.
+Waiting behind an earlier copy no longer expires that already accepted approval.
+The worker still verifies the original plan digest, account, unused state, mounted
+filesystem identities, source fingerprints and destination before copying. An
+expired or changed plan cannot be newly submitted, and a consumed plan cannot run
+again. Failed historical jobs require a new review; no automatic replay is added.

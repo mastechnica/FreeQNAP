@@ -66,7 +66,7 @@ class Sources:
     def expand(self,rows):
         # An artist/album tree is split before invoking the existing bounded
         # importer. This avoids sending an entire large collection as one job.
-        from .nas.myradio import AUDIO,BOOKS
+        from .nas.myradio import collection_formats
         tasks=[]
         for row in rows:
             entries=[];offset=0
@@ -76,7 +76,7 @@ class Sources:
                 offset=page['next_offset']
                 if offset>10000:raise ValueError('Too many immediate source entries; use more specific scan folders')
             directories=[r for r in entries if r.get('directory') and not r.get('symlink')]
-            loose=any(not r.get('directory') and not r.get('symlink') and __import__('pathlib').Path(r['name']).suffix.lower() in AUDIO|BOOKS for r in entries)
+            loose=any(not r.get('directory') and not r.get('symlink') and __import__('pathlib').Path(r['name']).suffix.lower() in (collection_formats(row['category']) if self.kind=='radio' else set()) for r in entries)
             if self.kind=='radio' and directories and not loose:
                 tasks.extend({**row,'path':row['path'].rstrip('/')+'/'+r['name'] if row['path'] else r['name'],'label':row['label']+' / '+r['name']} for r in directories)
             else:tasks.append(row)
@@ -193,6 +193,8 @@ def tick_all(state,nas):
             source.ensure();state.set(key,{**run,'state':'complete','finished':time.time()})
         except (ValueError,PermissionError,OSError):state.set(key,{**run,'state':'needs-attention','message':'The main library is retained. Use Save scan folders to prepare its source folders.','updated':time.time()})
     for key in keys:
+        # Keep an explicit maintenance hold through unavailable startup volumes.
+        if state.setting(key+':run',{}).get('state')=='maintenance':continue
         _,owner,kind=key.split(':')
         with state.connect() as db:row=db.execute('SELECT * FROM local_accounts WHERE id=? AND enabled=1',(owner,)).fetchone()
         if not row:continue
@@ -200,4 +202,4 @@ def tick_all(state,nas):
         try:Sources(Gateway(nas,state,lambda:{'user':user}),kind).tick()
         except (ValueError,PermissionError,OSError,RuntimeError) as error:
             previous=state.setting(key+':run',{})
-            if previous.get('state')!='uncertain':state.set(key+':run',{**previous,'state':'failed','message':'Source unavailable or access changed; check the folder and scan settings.','updated':time.time()})
+            if previous.get('state') not in ('uncertain','maintenance'):state.set(key+':run',{**previous,'state':'failed','message':'Source unavailable or access changed; check the folder and scan settings.','updated':time.time()})

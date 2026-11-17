@@ -11,7 +11,7 @@ Synology cache deletion is restricted to the inventoried `@eaDir` subtrees, with
 
 ## Completed device results
 
-Ten M4B replacements (3,943,311,477 bytes) passed full checksums after transfer and after catalog registration. Existing book IDs, favorites and progress were retained; embedded cover images were normalized. All twenty approved old NAS AAX originals/temporary copies were removed only after replacement verification. Source files on the owner's computer were preserved. Local ten-second decode samples passed; this does not prove every browser supports every codec or every second of content.
+Ten M4B replacements (3,943,311,477 bytes) passed full checksums after transfer and after catalog registration. Existing book IDs, favorites and progress were retained; embedded cover images were normalized. All twenty approved old NAS AAX originals/temporary copies were removed only after replacement verification. Source files on my computer were preserved. Local ten-second decode samples passed; this does not prove every browser supports every codec or every second of content.
 
 The music audit found 7,958 audio files totaling 75,984,725,009 bytes. Complete or corroborated artist/album/title identification was available for 7,365; 593 are labeled Needs identification. Existing usable artwork was found for 5,722 tracks. All 43 release-note NFO files were preserved, and no source audio filenames were renamed. Identity-bound sidecars and verified same-volume hard links registered the collection without a second full-sized data copy.
 

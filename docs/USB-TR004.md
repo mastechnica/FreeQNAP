@@ -16,7 +16,7 @@ References: [TR-004 product and Linux support](https://www.qnap.com/en-us/produc
 
 Open **USB storage** and discover the connected devices. Enclosures with no usable logical disk can still appear. Missing/ambiguous serial identity, a protected OS ancestor, an active holder, swap or an unrelated mount blocks initialization. Device identity includes USB vendor/product/serial, interface, SCSI channel/target/LUN and capacity. Initialization uses a stable USB by-id link and rechecks the attachment before destructive phases. A changed kernel disk sequence makes an old mounted attachment unavailable until deliberately reconciled. Volume/partition UUIDs bind later use; changing `/dev/sdX` letters is not authority to use another disk.
 
-For existing ext4/LUKS2 data, select the exact filesystem UUID and review an import. Read-only is the default. Read-only ext4 uses `ro,noload` to avoid journal replay; it is inspection, not a clean-filesystem certification. LUKS2 needs an owner-supplied password or key before its inner ext4 filesystem can be used. The external-volume browser permits read-only traversal/downloads without changing existing file permissions or creating a share. Symlinks, private FreeQNAP directories and nested filesystems are not followed.
+For existing ext4/LUKS2 data, select the exact filesystem UUID and review an import. Read-only is the default. Read-only ext4 uses `ro,noload` to avoid journal replay; it is inspection, not a clean-filesystem certification. LUKS2 needs a user-supplied password or key before its inner ext4 filesystem can be used. The external-volume browser permits read-only traversal/downloads without changing existing file permissions or creating a share. Symlinks, private FreeQNAP directories and nested filesystems are not followed.
 
 For disposable storage, request a new volume plan. The review displays the exact enclosure/LUN, current geometry and signatures and requires **ERASE EXTERNAL name**. This creates one or more GPT data partitions and ext4 filesystems (4 KiB blocks, one inode per 256 KiB, zero root-reserved data-volume percentage and lazy table/journal initialization), optionally inside LUKS2; it destroys the previous data on that presented LUN. It does not reconfigure the TR-004's hardware RAID. Interrupted mutations retain their operation evidence and cannot be blindly retried.
 
@@ -41,7 +41,7 @@ The installed board kernel already includes xHCI, USB mass storage, UAS and ext4
 
 ## Initial physical TR-004 discovery
 
-The connected enclosure enumerated as a USB mass-storage device at 5 Gb/s, using the `usb-storage` driver. It presented one approximately 30 TB logical disk with a model string reporting hardware RAID5, an existing ext4 partition and an invalid backup GPT. This is observed identity/layout information, not independent confirmation of controller member health or sustained transfer performance. The format request did not run during discovery and preformat checks. A later controller failure logged a failed block WRITE despite no format job; its origin has not been established, so those checks are not claimed to prove zero host writes. No controller RAID mode change was requested. The owner selected unencrypted ext4 for the initial volume, with any later encryption change performed by backup/reformat/restore. A fresh identity-bound plan still precedes each initialization. Private serials, UUIDs and captures are deliberately excluded here.
+The connected enclosure enumerated as a USB mass-storage device at 5 Gb/s, using the `usb-storage` driver. It presented one approximately 30 TB logical disk with a model string reporting hardware RAID5, an existing ext4 partition and an invalid backup GPT. This is observed identity/layout information, not independent confirmation of controller member health or sustained transfer performance. The format request did not run during discovery and preformat checks. A later controller failure logged a failed block WRITE despite no format job; its origin has not been established, so those checks are not claimed to prove zero host writes. No controller RAID mode change was requested. I selected unencrypted ext4 for the initial volume, with any later encryption change performed by backup/reformat/restore. A fresh identity-bound plan still precedes each initialization. Private serials, UUIDs and captures are deliberately excluded here.
 
 ## Large disks on this ARM32 system
 
@@ -79,7 +79,7 @@ Upstream background: [EJ188 broken-streams patch](https://lkml.iu.edu/hypermail/
 
 ### Cold boot and second-device investigation
 
-The owner-requested orderly shutdown/cold boot resumed the physical data-array recovery near its saved 66% checkpoint rather than starting over. The TR-004 enumerated at SuperSpeed under its read-only quarantine. A newly attached Seagate Portable (USB 0bc2:2344) enumerated through usb-storage after UAS stream support was refused, reached SCSI inquiry, but had not exposed a block disk during the initial observation. No test write was issued to it; identity/size/holders must be established before a reviewed write plan. This is not yet proof it shares the TR-004 write fault.
+The requested orderly shutdown/cold boot resumed the physical data-array recovery near its saved 66% checkpoint rather than starting over. The TR-004 enumerated at SuperSpeed under its read-only quarantine. A newly attached Seagate Portable (USB 0bc2:2344) enumerated through usb-storage after UAS stream support was refused, reached SCSI inquiry, but had not exposed a block disk during the initial observation. No test write was issued to it; identity/size/holders must be established before a reviewed write plan. This is not yet proof it shares the TR-004 write fault.
 
 The exact EJ188 PCI function reports revision 00, a 5 GT/s x1 link, and 64-bit streaming/coherent DMA masks. The offline kernel contains XHCI_NO_64BIT_SUPPORT (bit 23); its global quirks parameter is read-only at runtime. A 32-bit-addressing experiment therefore requires a separately prepared boot/module change, not a live sysfs toggle. It remains an untested hypothesis. Do not change unrelated controller quirks or bypass read-only quarantine to claim a fix.
 
@@ -87,7 +87,7 @@ A separate cold-boot issue was observed: both internal data pools refused startu
 
 ### Small-device write reproduction — 31 October 2026
 
-The owner substituted a disposable 16 GB SanDisk flash drive. It enumerated at SuperSpeed with usb-storage and no mounted filesystem/holders. A serial/capacity/attachment-bound probe saved a 4 KiB original block, then attempted an unchanged-content direct write at 1 MiB. The write stalled and the controller failure removed both USB devices; no successful write/readback was recorded. This reproduces a USB write-path failure independently of the TR-004 and its large capacity, although it does not prove the ultimate cause. The original bytes and diagnostic plan remain private. No formatting or write to the TR-004 occurred.
+I substituted a disposable 16 GB SanDisk flash drive. It enumerated at SuperSpeed with usb-storage and no mounted filesystem/holders. A serial/capacity/attachment-bound probe saved a 4 KiB original block, then attempted an unchanged-content direct write at 1 MiB. The write stalled and the controller failure removed both USB devices; no successful write/readback was recorded. This reproduces a USB write-path failure independently of the TR-004 and its large capacity, although it does not prove the ultimate cause. The original bytes and diagnostic plan remain private. No formatting or write to the TR-004 occurred.
 
 An exact EJ188 PCI-function unbind/reset/rebind restored host-controller operation. This was USB-only: the internal SATA array continued recovery beyond 66.5%, and the OS mirror remained healthy. This is recovery evidence, not a write-fault fix. The 32-bit DMA-address restriction remains a prepared investigation direction requiring a controlled boot change; no runtime global-quirk write was attempted.
 
@@ -114,7 +114,7 @@ or an independent controller/member-health check.
 
 A fresh identity-bound proposal specifies two approximately 15 TB unencrypted
 ext4 volumes, separate from internal MD and the disposable small USB drive. It
-requires owner approval before releasing quarantine and initializing; the failed
+requires explicit approval before releasing quarantine and initializing; the failed
 historical format is not retried automatically.
 
 The proposed long split-volume names exposed an ext4-label truncation collision.
@@ -126,7 +126,7 @@ fixture tests passed. Physical creation of these proposed volumes remains pendin
 
 ## Mounted-volume campaign — 2 November 2026
 
-The owner approved replacing the disposable enclosure's presented layout with
+I approved replacing the disposable enclosure's presented layout with
 two approximately 15 TB unencrypted ext4 filesystems, each below 16 TiB and with
 the 64bit feature disabled. The enclosure's hardware RAID mode and all internal
 disks were excluded. Exact-device PCIe MRRS remained 128 bytes.
@@ -148,7 +148,7 @@ the dated validation report. Unexpected power loss, NAS cold boot with the enclo
 media verification and proprietary enclosure/member RAID health are separate
 limits; software reconnect is not a physical unplug test.
 
-The final owner-assisted physical cable and clean enclosure-only power-cycle
+The final attended physical cable and clean enclosure-only power-cycle
 checks both passed exact filesystem/inode/direct-read proofs at SuperSpeed.
 Both volumes remain mounted read/write. These were safe-eject tests; unexpected
 power loss during writes was not tested. See

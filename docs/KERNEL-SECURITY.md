@@ -14,7 +14,7 @@ python3 tools/check-kernel.py --kernel YOUR_RUNNING_KERNEL_VERSION
 
 It reads the maintained release list over verified HTTPS, reports the running base, current release and whether the series is active, and fails explicitly if verification is unavailable. It does not flash an image or pronounce the system CVE-free. Debian `apt` updates do not replace this custom NAND kernel.
 
-Direct verified HTTPS access and Debian main, trixie-updates and trixie-security metadata refresh were rechecked after the owner restored upstream connectivity. The signed package simulation reported zero pending upgrades. `deploy/configure-security-updates.sh` records this guarded conversion, retaining the old source configuration privately and refusing unknown/repeated replacements; it does not upgrade packages or reboot. No Mac package mirror is required for subsequent direct updates.
+Direct verified HTTPS access and Debian main, trixie-updates and trixie-security metadata refresh were rechecked after I restored upstream connectivity. The signed package simulation reported zero pending upgrades. `deploy/configure-security-updates.sh` records this guarded conversion, retaining the old source configuration privately and refusing unknown/repeated replacements; it does not upgrade packages or reboot. No Mac package mirror is required for subsequent direct updates.
 
 The earlier native NAS package update campaign also applied the available Debian security/point updates for OpenSSL and its providers, Expat, liblzma, PCRE2, Brotli and CA certificates, plus timezone data. The affected long-lived services and systemd manager were then refreshed. A fresh process-map scan found no remaining process using the replaced security libraries. SSH/LAN access returned, no systemd unit was failed, and the OS mirror remained healthy. No chassis reboot or kernel flash was needed for this userspace update. This does not imply that the uninstalled VPN kernel candidate has passed RAM-boot or physical acceptance.
 
@@ -88,8 +88,7 @@ without a cache change. Reachability alone did not establish NAS health.
 
 The session finished with a normal, uninterrupted boot from the unchanged NAND
 image. Automatic cooling and the ten-second PID-1 watchdog started without manual
-intervention; both arrays were healthy/idle and both data volumes mounted. The
-owner subsequently cleared the Mac neighbor-cache entry. This proves the bounded
+intervention; both arrays were healthy/idle and both data volumes mounted. I subsequently cleared the Mac neighbor-cache entry. This proves the bounded
 RAM-update/rollback/installed-return path, not permanent update installation.
 
 ## Hardened RAM candidate — 1 November 2026

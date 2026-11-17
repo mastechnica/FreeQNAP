@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Per-bay presence/activity LEDs, with required MCU green enable at startup.
 
-The owner observed none of the four green LEDs during the October 28 test,
+I observed none of the four green LEDs during the October 28 test,
 including occupied bays 1 and 2, before the required MCU @O61 enable was found.
 The exact stock kernel's al_ahci_transmit_led_message confirms GPIO control.
-With MCU @O61 enabled, the owner confirmed occupied-bay presence and real read
+With MCU @O61 enabled, I confirmed occupied-bay presence and real read
 activity in all four bays, by moving the two mirrored OS drives while powered off.
 Physical LEDs are active-low; empty bays remain dark under the presence policy.
 Sysfs brightness alone is not proof of physical illumination.
@@ -69,7 +69,7 @@ def run():
     # This board's AHCI ports enumerate ata1..4, port_no1..4, corresponding to
     # its model.conf device-port0..3. Do not map by mutable sdX names.
     assert [int((Path('/sys/class/ata_port')/p.name/'port_no').read_text()) for p in ports]==[1,2,3,4]
-    # Physical LEDs are active-low: the owner observed idle raw1 as dark and
+    # Physical LEDs are active-low: I observed idle raw1 as dark and
     # activity raw0 as a light pulse. Older test DTs incorrectly declare HIGH;
     # compensate only for those flags, without double inversion on corrected DTs.
     kernel_active_low = []

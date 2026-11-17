@@ -1,6 +1,6 @@
 # Illustrative scenic photo thumbnails
 
-The owner requested sunsets and daytime beaches for the public Photos screenshot.
+I requested sunsets and daytime beaches for the public Photos screenshot.
 `scenic-thumbnails.png` is a generated contact sheet created for that purpose with
 the built-in image generation tool. No personal photographs, photo-library capture,
 credentials or private metadata were supplied to the generator.
@@ -8,7 +8,7 @@ credentials or private metadata were supplied to the generator.
 The **Photos gallery** image uses a real application capture. Only its photo
 thumbnail areas are replaced with crops of the scenic sheet. Controls, spacing,
 colors, counters and surrounding application pixels are retained, with no claim
-that the scenic photos exist in the owner's live library. It is labeled
+that the scenic photos exist in my live library. It is labeled
 illustrative in the showcase. Other screenshots remain unmodified live captures
 apart from the documented privacy crops and network-address mask.
 

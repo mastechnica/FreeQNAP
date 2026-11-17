@@ -21,7 +21,7 @@ async function importFolderTo(pane,entry=null){
 }
 function showPlaceMenu(pane,place,x,y){
  closeFileContext();focusFileWindow(pane);const source={...pane,share:place.value,path:'',selected:new Set()},menu=el('div',null,{class:'file-context-menu',role:'menu','aria-label':'Drive actions'});fileContext=menu;
- for(const [label,fn]of [['Import to…',()=>importFolderTo(source)],['Import folder to My Radio…',()=>importPaneLibrary(source,'radio')],['Import folder to Personal Photos & Videos…',()=>importPaneLibrary(source,'photos')],['Refresh',()=>refreshFileLocations()]])menu.append(action(label,async()=>{closeFileContext();await fn();},false,true));
+ for(const [label,fn]of [['Import to…',()=>importFolderTo(source)],['Import folder to My Radio…',()=>importPaneLibrary(source,'radio')],['Import folder to Personal Photos & Videos…',()=>importPaneLibrary(source,'photos')],['Refresh',()=>refreshFileLocations()],['Properties',()=>showFileProperties(source,null)]])menu.append(action(label,async()=>{closeFileContext();await fn();},false,true));
  document.body.append(menu);menu.style.left=Math.max(8,Math.min(x,window.innerWidth-menu.offsetWidth-8))+'px';menu.style.top=Math.max(8,Math.min(y,window.innerHeight-menu.offsetHeight-8))+'px';menu.querySelector('button')?.focus();
 }
 

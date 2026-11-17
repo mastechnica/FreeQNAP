@@ -1,7 +1,7 @@
 # Agent API and network playback
 
 FreeQNAP supports provider-neutral agents through local HTTPS. No model provider,
-cloud service, shell, or separate agent runtime is required. The owner controls
+cloud service, shell, or separate agent runtime is required. You control
 credentials under **Settings → AI agent access** in the dashboard.
 
 ## Issue and revoke access
@@ -338,3 +338,25 @@ or an explicitly managed administrator target. They are not bearer-agent
 operations. Status requires photo access; changes require photo and iCloud write
 rights. Archive location and Apple account must be configured before enabling or
 requesting an import. Shared-library sessions cannot change these controls.
+
+### File/folder Properties
+
+`files.properties` is read-only and included in the file-reader preset. Request:
+`{"share":"media","path":"Music/Album"}`; an empty `path` inspects the selected
+share root. `pool:<registered-name>` and owned `foreign:<session-id>` locations use
+the same authorization as file browsing. Personal accounts require `files.read`;
+API credentials require the explicit `files.properties` grant or its preset.
+
+The response includes `name`, share-relative `path`, `volume`, `type` (`File` or
+`Folder`), `bytes` (logical total), `allocated_bytes`, `files`, `folders` (excluding
+the requested folder itself), `modified_at`, `accessed_at`, `changed_at`, optional
+`created_at`, octal `mode`, `read_only`, `skipped_links`, `complete`, `warnings` and
+`calculated_at`. Times are Unix seconds. If `complete` is false, totals are partial;
+never present them as an exact full-tree size. Limits are eight seconds, 100,000
+entries and 64 nested levels. Private system folders, links and nested mounts are
+not traversed. No arbitrary host path or ownership override is accepted.
+
+Queued `files.transfer` now validates freshness at submission and durably binds
+that acceptance to the specific job/account. Queue waiting does not expire an
+already accepted transfer. Actual execution still checks identities and the
+unused digest-bound plan. Request/response shapes are unchanged.

@@ -223,3 +223,12 @@ class RegionalRadioTests(unittest.TestCase):
         with self.ctx.state.connect() as db:db.execute('INSERT INTO radio_feeds VALUES(?,?,?,?,NULL)',('a'*32,'https://public.example/rss?private=TOKEN','Old podcast','{}'))
         result=self.radio.feeds({});self.assertFalse(result['feeds']);self.assertEqual(len(result['unclassified_feeds']),1);self.assertNotIn('TOKEN',json.dumps(result))
         self.radio.feed_add({'id':'a'*32,'country':'CA'});result=self.radio.feeds({});self.assertEqual(result['feeds'][0]['metadata']['countrycode'],'CA')
+
+class MusicCompanionFilteringTests(unittest.TestCase):
+    setUp=MyRadioTests.setUp
+    def test_source_music_import_ignores_release_notes_and_keeps_audio(self):
+        source=self.volume/'incoming-music';source.mkdir();(source/'song.mp3').write_bytes(b'fixture audio');(source/'review.txt').write_text('Release review');(source/'book.epub').write_bytes(b'not music');cfg=self.ctx.config();cfg['shares']['incoming']={'name':'incoming','pool':'data','path':str(source),'gid':__import__('os').getegid()};self.ctx.save(cfg)
+        result=self.radio.import_folder({'category':'music','share':'incoming','path':''})
+        self.assertEqual(result['imported'],1)
+        names=[v['name'] for v in self.radio.catalog({'category':'music'})['items']]
+        self.assertEqual(names,['song.mp3']);self.assertTrue((source/'review.txt').exists());self.assertTrue((source/'book.epub').exists())

@@ -69,7 +69,7 @@ functions, not per-book or per-folder restrictions.
 | `myradio.station-check` | `{id}` | Bounded sample verification; unavailable station retained and marked not working |
 | `myradio.station-source` | `{id}` | Public station URL/name for an authorized client; no private proxy access |
 | `myradio.station-refresh` | `{group?:"",query?:"",country?:"US"|"CA"}` | Queued US/Canada-only directory search; up to 25 candidates per selected country; returned country codes rechecked; older entries retained |
-| `myradio.podcasts` | `{feed?:id,query?:""}` | Regional subscriptions/searchable episodes plus unclassified_feeds requiring owner country confirmation; and saved asset IDs; private source URLs omitted |
+| `myradio.podcasts` | `{feed?:id,query?:""}` | Regional subscriptions/searchable episodes plus unclassified_feeds requiring manual country confirmation; and saved asset IDs; private source URLs omitted |
 | `myradio.podcast-add` | `{url,country:"US"|"CA"}` or `{id,country:"US"|"CA"}` | Saves/refreshes a regional RSS/Atom feed or classifies an existing subscription; maximum 50 subscriptions |
 | `myradio.podcast-refresh` | `{id}` | Refreshes subscription listings; saved originals retained |
 | `myradio.episode-download` | `{id}` | Queued episode save or already-downloaded item |
@@ -82,7 +82,7 @@ operations; their Bearer token does not authenticate browser endpoints. Never pu
 tokens in stream URLs. Station proxying requires a dashboard session and accepts
 only public destinations; it is not a general URL proxy.
 
-Country filters accept US/CA and their displayed names; other countries are rejected. Radio country follows directory metadata or an owner-declared custom service location, not network geofencing. Podcast country metadata persists through refresh; unclassified feeds cannot refresh or initiate new episode downloads. Existing saved originals are retained. Station-source/check refuse foreign or unclassified station IDs. Book voice/pitch/speed are client-local preferences, not a NAS speech or remote-audio API.
+Country filters accept US/CA and their displayed names; other countries are rejected. Radio country follows directory metadata or an user-declared custom service location, not network geofencing. Podcast country metadata persists through refresh; unclassified feeds cannot refresh or initiate new episode downloads. Existing saved originals are retained. Station-source/check refuse foreign or unclassified station IDs. Book voice/pitch/speed are client-local preferences, not a NAS speech or remote-audio API.
 
 
 ## Private library placement and USB imports

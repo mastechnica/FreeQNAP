@@ -1,5 +1,6 @@
 """Authorized, account-scoped album and book browsing over existing media APIs."""
 import base64,collections,copy,hashlib,json,os,re,threading,time,unicodedata
+from pathlib import Path
 from .state import atomic
 from . import accounts
 from .podcast_browser import scope,image_type
@@ -137,7 +138,8 @@ def track_order(v):
  return (num(m.get('disc',1)),num(m.get('track')),m.get('title',v['name']).casefold(),v['id'])
 
 def albums(g,refresh=False):
- rows=inventory(g,'music',refresh);owner,_=scope(g);sources=g.state.setting('radio-source-groups:'+owner,{})
+ from .nas.radio_metadata import AUDIO
+ rows=[v for v in inventory(g,'music',refresh) if Path(v['name']).suffix.lower() in AUDIO];owner,_=scope(g);sources=g.state.setting('radio-source-groups:'+owner,{})
  performers=collections.defaultdict(set)
  for v in rows:
   m=v['metadata'];group=m.get('source_album_group') or sources.get(v['id'],{}).get('group','')

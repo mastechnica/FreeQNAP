@@ -10,7 +10,7 @@ bays while powered off; four simultaneous disks were not tested.
 The [validation plan](VALIDATION-PLAN.md) defines how to test the remaining
 features. It does not promote untested functions to passed. Complete
 flash/bootloader restoration and external-programmer testing are excluded by
-owner decision, so those recovery guarantees remain unavailable.
+my decision, so those recovery guarantees remain unavailable.
 
 ## Driver and control matrix
 
@@ -89,7 +89,7 @@ was not exercised. A configured threshold is not proof of thermal protection.
 
 ## Green LEDs: two prerequisites and a physical test
 
-Early tests showed GPIO changes in software while the owner saw no light.
+Early tests showed GPIO changes in software while I saw no light.
 The vendor implementation revealed a necessary **MCU global enable**. After
 that enable, occupied bays lit, but the initial GPIO polarity was still wrong:
 idle looked dark with brief pulses. Physical observation established active-low

@@ -55,6 +55,10 @@ subscriptions. Sidecars do not replace a backup of the library and application
 state. A future fresh-install index reconstruction from all sidecars still needs
 separate acceptance; it is not advertised as a tested disaster-recovery procedure.
 
+Music scanning and album browsing accept audio formats only. Release notes, cue
+sheets, playlists and ebook documents remain supporting files rather than songs.
+The Books collection continues to accept both readable books and audiobooks.
+
 ## Books and playback
 
 | Format | Current behavior |

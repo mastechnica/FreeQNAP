@@ -66,7 +66,7 @@ requires a separate clean-snapshot secret scan and destination/identity check.
 
 ## Scenic Photos preview
 
-At the owner’s request, the real Photos gallery capture includes seven illustrative
+At my request, the real Photos gallery capture includes seven illustrative
 sunset/daytime-beach thumbnails. The original personal image areas are fully
 replaced locally; no personal photographs were sent to the image generator.
 Pixel comparison verifies that the surrounding interface is unchanged. Exact

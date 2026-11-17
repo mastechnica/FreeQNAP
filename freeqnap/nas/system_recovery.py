@@ -4,7 +4,18 @@ from pathlib import Path
 from .common import name
 from ..state import atomic
 
-LIMIT=128*1024**2
+LIMIT=256*1024**2
+FILE_LIMIT=64*1024**2
+DATABASE_LIMIT=128*1024**2
+
+def stream_hash(stream):
+    digest=hashlib.sha256()
+    while chunk:=stream.read(1024*1024):digest.update(chunk)
+    return digest.hexdigest()
+
+def file_hash(path):
+    fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW)
+    with os.fdopen(fd,'rb') as stream:return stream_hash(stream)
 
 class SystemRecovery:
     def __init__(self,ctx,root=Path('/')):self.ctx=ctx;self.root=Path(root)
@@ -32,18 +43,27 @@ class SystemRecovery:
             if len(files)>=20000:raise ValueError('Recovery file-count limit')
             info=path.lstat()
             if not stat.S_ISREG(info.st_mode):raise ValueError('Recovery capture refuses symlinks/special files: '+archive_name)
-            if info.st_size>64*1024**2 or total+info.st_size>LIMIT:raise ValueError('Recovery snapshot size limit; private incomplete stage retained')
+            cap=DATABASE_LIMIT if sqlite else FILE_LIMIT
+            if info.st_size>cap or total+info.st_size>LIMIT:raise ValueError('Recovery snapshot size limit; private incomplete stage retained')
             output=stage/archive_name;output.parent.mkdir(parents=True,mode=0o700,exist_ok=True)
             if sqlite:
-                src=sqlite3.connect(path.as_uri()+'?mode=ro',uri=True);dst=sqlite3.connect(output)
+                src=dst=None
                 try:
-                    src.backup(dst);tables={r[0] for r in dst.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+                    src=sqlite3.connect(path.as_uri()+'?mode=ro',uri=True);dst=sqlite3.connect(output)
+                    deadline=time.monotonic()+60;page_size=src.execute('PRAGMA page_size').fetchone()[0]
+                    def progress(status,remaining,pages):
+                        if pages*page_size>cap or total+pages*page_size>LIMIT:raise ValueError('Recovery database grew past size limit; private incomplete stage retained')
+                        if time.monotonic()>deadline:raise ValueError('Recovery database snapshot timed out; private incomplete stage retained')
+                    src.backup(dst,pages=256,progress=progress);tables={r[0] for r in dst.execute("SELECT name FROM sqlite_master WHERE type='table'")}
                     for table in ('sessions','account_sessions','recent_cloud_auth','oidc_transactions'):
                         if table in tables:dst.execute('DELETE FROM '+table)
                     if 'settings' in tables:dst.execute("DELETE FROM settings WHERE key IN ('enrollment','oidc_states')")
                     dst.commit()
                     if dst.execute('PRAGMA integrity_check').fetchone()[0]!='ok':raise ValueError('Recovery database snapshot failed integrity verification')
-                finally:src.close();dst.close()
+                except sqlite3.Error as error:raise ValueError('Consistent database snapshot unavailable; private incomplete stage retained') from error
+                finally:
+                    if src is not None:src.close()
+                    if dst is not None:dst.close()
             else:
                 src=os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK)
                 try:
@@ -51,7 +71,7 @@ class SystemRecovery:
                     if before.st_ino!=info.st_ino or before.st_dev!=info.st_dev:raise ValueError('Recovery source changed')
                     with os.fdopen(os.open(output,os.O_CREAT|os.O_EXCL|os.O_WRONLY|os.O_NOFOLLOW,0o600),'wb') as out:
                         while data:=os.read(src,1024*1024):
-                            if out.tell()+len(data)>64*1024**2 or total+out.tell()+len(data)>LIMIT:raise ValueError('Recovery source grew past size limit')
+                            if out.tell()+len(data)>cap or total+out.tell()+len(data)>LIMIT:raise ValueError('Recovery source grew past size limit')
                             out.write(data)
                         out.flush();os.fsync(out.fileno())
                     after=os.fstat(src)
@@ -62,8 +82,8 @@ class SystemRecovery:
             try:os.fsync(fd)
             finally:os.close(fd)
             size=output.stat().st_size;total+=size
-            if total>LIMIT:raise ValueError('Recovery snapshot exceeds limit')
-            files[archive_name]={'sha256':hashlib.sha256(output.read_bytes()).hexdigest(),'bytes':size,'original_uid':info.st_uid,'original_gid':info.st_gid,'original_mode':stat.S_IMODE(info.st_mode),'sqlite_consistent':sqlite}
+            if size>cap or total>LIMIT:raise ValueError('Recovery snapshot exceeds limit')
+            files[archive_name]={'sha256':file_hash(output),'bytes':size,'original_uid':info.st_uid,'original_gid':info.st_gid,'original_mode':stat.S_IMODE(info.st_mode),'sqlite_consistent':sqlite}
         # Only selected state/configuration, never arbitrary user paths or logs.
         copy(self.ctx.state.database,'state/nas/state.sqlite3',True)
         # Read consistent identity snapshots without writing into console state.
@@ -82,7 +102,12 @@ class SystemRecovery:
             if source.exists():
                 for file in sorted(source.rglob('*')):
                     if file.is_symlink():raise ValueError('Unexpected symlink in private recovery source')
-                    if file.is_file():copy(file,'state/nas/'+directory+'/'+str(file.relative_to(source)))
+                    relative=str(file.relative_to(source))
+                    # Runtime lock inodes are not restorable configuration. The
+                    # network guardian chmods its lock even without config changes.
+                    if (directory,relative) in {('network','lock'),('vpn','operations.lock')}:
+                        excluded.append('state/nas/'+directory+'/'+relative);continue
+                    if file.is_file():copy(file,'state/nas/'+directory+'/'+relative)
         token=self.ctx.directory/'downloads-rpc-token'
         if token.exists():copy(token,'state/nas/downloads-rpc-token')
         required=self.host('/etc/freeqnap-install-id')
@@ -130,7 +155,7 @@ class SystemRecovery:
             fd=os.open(directory,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
             try:os.fsync(fd)
             finally:os.close(fd)
-        manifest={'format':'freeqnap-system-recovery-v1','created_at':time.time(),'installation_id':required.read_text().strip(),'kernel':kernel,'files':files,'total_bytes':total,'sessions_and_enrollment_excluded':True,'console_login_database_included':console.exists(),'fresh_console_administrator_required':True,'local_user_ids_and_library_shares_included':console.exists(),'icloud_sessions_included':False,'root_authorized_keys_included':False,'contains_credentials_and_private_keys':True,'automatic_restore_supported':False,'identity_files_require_rebinding':['system/etc/freeqnap-install-id','system/etc/mdadm/mdadm.conf','system/etc/fstab','system/etc/ssh'],'os_disk_image_included':False,'flash_image_included':False,'review':'Restore privately to staging. Never copy these databases live or publish this bundle as a file share. Reconcile jobs, schedules, device identities, accounts and export policies before activation.'}
+        manifest={'format':'freeqnap-system-recovery-v1','created_at':time.time(),'installation_id':required.read_text().strip(),'kernel':kernel,'files':files,'total_bytes':total,'excluded_runtime_files':excluded,'sessions_and_enrollment_excluded':True,'console_login_database_included':console.exists(),'fresh_console_administrator_required':True,'local_user_ids_and_library_shares_included':console.exists(),'icloud_sessions_included':False,'root_authorized_keys_included':False,'contains_credentials_and_private_keys':True,'automatic_restore_supported':False,'identity_files_require_rebinding':['system/etc/freeqnap-install-id','system/etc/mdadm/mdadm.conf','system/etc/fstab','system/etc/ssh'],'os_disk_image_included':False,'flash_image_included':False,'review':'Restore privately to staging. Never copy these databases live or publish this bundle as a file share. Reconcile jobs, schedules, device identities, accounts and export policies before activation.'}
         atomic(stage/'manifest.json',manifest)
         self.verify(stage);return stage
     def verify(self,stage):
@@ -139,7 +164,7 @@ class SystemRecovery:
         for relative,info in m['files'].items():
             if Path(relative).is_absolute() or '..' in Path(relative).parts:raise ValueError('Unsafe recovery manifest')
             file=stage/relative
-            if file.is_symlink() or not file.is_file() or file.stat().st_size!=info['bytes'] or hashlib.sha256(file.read_bytes()).hexdigest()!=info['sha256']:raise ValueError('Private recovery stage changed; reconcile before retry')
+            if file.is_symlink() or not file.is_file() or file.stat().st_size!=info['bytes'] or file_hash(file)!=info['sha256']:raise ValueError('Private recovery stage changed; reconcile before retry')
         return m
     def backup(self,request,operation,backups):
         entry=backups.get(name(request.get('repository')));stage=self.capture(operation);manifest=self.verify(stage)

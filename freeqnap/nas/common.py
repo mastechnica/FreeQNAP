@@ -84,7 +84,7 @@ class Context:
         atomic(self.directory / 'plans' / (ident + '.json'), value)
         return value
 
-    def reviewed(self, request, kind):
+    def reviewed(self, request, kind, *, accepted_at=None):
         ident = request.get('plan_id', '')
         if not re.fullmatch('[a-f0-9]{32}', ident):
             raise ValueError('A reviewed plan is required')
@@ -94,7 +94,7 @@ class Context:
         if value.get('actor') and value['actor']!=current():raise ValueError('This plan belongs to another account')
         computed=hashlib.sha256(canonical({k:v for k,v in value.items() if k!='digest'})).hexdigest()
         if not secrets.compare_digest(computed,value.get('digest','')):raise ValueError('Stored plan contents changed')
-        if value['kind'] != kind or value['consumed'] or not 0 <= time.time() - value['created_at'] < 600:
+        if value['kind'] != kind or value['consumed'] or not 0 <= (time.time() if accepted_at is None else accepted_at) - value['created_at'] < 600:
             raise ValueError('Plan is expired, used, or belongs to another operation')
         if not secrets.compare_digest(str(request.get('digest', '')), value['digest']):
             raise ValueError('Reviewed plan digest changed')

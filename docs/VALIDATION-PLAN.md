@@ -8,7 +8,7 @@ Run isolated tests on the spare before service-impacting tests. The second unit
 must retain its current role until it has its own approved maintenance window.
 
 **Full-chip/bootloader flash restoration and external-programmer testing are
-excluded by owner decision.** They remain unvalidated, with no guarantee of
+excluded by my decision.** They remain unvalidated, with no guarantee of
 recovery from damaged SPI, bootloader or environment. Do not buy programming
 equipment, erase preserved loader regions or interrupt flash writes for this
 plan. Preserve the demonstrated UART/TFTP RAM-rescue path, private backups,
@@ -223,7 +223,7 @@ and enough dwell to see it; restore prior state afterward. An MCU “USB LED”
 command does not establish that the board actually has that lamp.
 
 Existing short-beep acceptance remains valid; other tones/durations and mute
-policy are separate bounded audible tests, with the owner present. Do not emit
+policy are separate bounded audible tests, with me present. Do not emit
 unsolicited warning tones. **Pass:** named physical indicator/behavior observed,
 restoration confirmed and no side effects. **Stop:** unexpected power/fan
 behavior or inability to restore a known state. Unsupported/unfitted indicators
@@ -286,7 +286,7 @@ decision; a live keepalive process alone is not proof of service health.
 
 ## Phase 4 — Disposable storage failure and rebuild
 
-The owner has explicitly designated the two installed mirror disks as
+I have explicitly designated the two installed mirror disks as
 disposable. They currently carry the OS and any data mirror, so removal affects
 more than a scratch disk. A third disposable disk is available but its capacity
 must be measured. Do not require two additional disks unnecessarily: use a
@@ -397,4 +397,4 @@ Update the ledger with case IDs, image/source hashes, equipment classes, results
 and unresolved limits. Keep unsupported and excluded features visible. In
 particular, **complete flash/bootloader restoration remains excluded and
 unvalidated** even if every planned test passes. Only reviewed documentation,
-sources and redacted evidence may be published after owner approval.
+sources and redacted evidence may be published after explicit approval.

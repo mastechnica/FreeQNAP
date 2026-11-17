@@ -27,7 +27,7 @@ Passed:
 
 These are real Restic-engine failure tests, not a claim that every filesystem,
 SFTP outage or power-loss scenario has been accepted. Independent off-NAS disaster
-recovery remains unaccepted and its destination deferred by the owner.
+recovery remains unaccepted and its destination deferred by me.
 
 ### Source-root identity safeguard
 
@@ -46,7 +46,7 @@ paused state, nonzero Range resume and final SHA-256 verification. The additiona
 local BitTorrent test passed a generated **2 MiB** transfer between two unprivileged
 engines through a loopback tracker with matching SHA-256. Public DHT, peer exchange,
 local peer discovery and public trackers were disabled inside an isolated network
-namespace. No actual download queue, public peer or owner file was involved.
+namespace. No actual download queue, public peer or personal file was involved.
 
 A deliberately tiny RAM destination reproduced ENOSPC after verified partial
 pieces. The engine's resume-control file could become unreadable. Straight resume
@@ -101,4 +101,4 @@ Attended kernel rollback/cold-start and permanent installation, fresh approved
 TR-004 formatting/mounted write tests, physical replacement/degraded boot, intended
 external clients/providers, complete full-disk torrent recovery and long mixed
 soak remain open. These bounded tests are not production sign-off. Full-chip/SPI
-restoration remains excluded by the owner.
+restoration remains excluded by me.

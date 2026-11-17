@@ -18,7 +18,7 @@ class PersonalCloud:
         if getattr(self.client,'data',{}).get('termsUpdateNeeded') is True:code='apple-terms-required';message='Apple requires you to review updated iCloud terms. Sign in at iCloud.com yourself, review any prompts, and open Photos. Then return here and sign in again. The NAS cannot accept terms for you.'
         elif getattr(self.client,'data',{}).get('isRepairNeeded') is True:code='apple-account-action-required';message='Apple requires an account setup step. Sign in at iCloud.com yourself, complete its prompts, and open Photos. Then return here and sign in again.'
         elif 'web access to icloud data is disabled' in text:code='web-access-disabled';message="Apple web access is disabled. On your iPhone enable Allow Data Access / Access iCloud Data on the Web, then select Check saved sign-in."
-        elif 'timed out waiting' in text and 'approval' in text:code='approval-timed-out';message='Apple verification finished, but iCloud web-access approval timed out. Select Check saved sign-in and approve the separate request on your iPhone.'
+        elif 'timed out waiting' in text and 'approval' in text:code='approval-timed-out';message='Apple verification finished, but iCloud web-access approval timed out. Select Request Apple web access again and approve the separate request on your iPhone.'
         elif any(v in kind for v in ('timeout','connection','ssl')):code='connection-failed';message='The NAS could not reach Apple. Check the connection and try Check saved sign-in; do not repeatedly enter verification codes.'
         elif stage=='verification':code='verification-failed';message='Apple verification did not finish. Request a fresh sign-in and verification code.'
         elif stage=='photo-access':code='photo-access-needed';message='Apple has not granted photo-library access yet. Check saved sign-in and watch your iPhone for a separate web-access approval.'
@@ -31,15 +31,23 @@ class PersonalCloud:
         self.auth_state='account-action-required' if code in ('apple-terms-required','apple-account-action-required') else 'photo-access-needed' if self.client is not None and stage=='photo-access' else 'sign-in-needed'
     def clear_problem(self):self.problem=None;self.ctx.state.set('personal-icloud-problem',None)
     def check(self,r=None):
+        fresh=(r or {}).get('reinitialize',False)
+        if type(fresh) is not bool:raise ValueError('Choose whether to request fresh Apple web access')
         if not self.settings()['account']:raise ValueError('Save your Apple Account email address first')
+        if time.monotonic()-self.last_auth<15:raise ValueError('Please wait before requesting Apple access again')
         if self.photos.busy.locked() or not self.auth_lock.acquire(False):raise ValueError('A download or connection check is already running')
         try:
-            self.auth_state='checking-saved-session';self.clear_problem()
-            threading.Thread(target=copy_context().run,args=(self._check,),daemon=True).start()
+            self.last_auth=time.monotonic();self.auth_state='checking-saved-session';self.clear_problem()
+            threading.Thread(target=copy_context().run,args=(self._check,fresh),daemon=True).start()
         except Exception:self.auth_lock.release();raise
         return {'started':True,'message':'Checking the saved Apple session. Watch your iPhone for web-access approval.'}
-    def _check(self):
-        try:self.restore(locked=True,force=True)
+    def _check(self,fresh=False):
+        try:
+            if fresh:
+                # Discard only the in-memory client. Retain saved sign-in files,
+                # archive configuration, originals and resumable partial files.
+                self.client=None;self.restored=False
+            self.restore(locked=True,force=True)
         finally:self.auth_lock.release()
     def save(self,r):
         old=self.settings();account=text(r.get('account',old['account']),254).strip();interval=r.get('interval_minutes',30)

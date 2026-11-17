@@ -89,7 +89,7 @@ not power-loss certification of the flash controller. References:
 
 `tools/native-usb-crypto-validation.py` is an explicit destructive acceptance tool,
 not an installer or a device autodetector. It requires a private, fresh,
-identity-bound owner-approved plan. Default invocation performs preflight only;
+identity-bound explicitly approved plan. Default invocation performs preflight only;
 `--apply` consumes the plan before the first mutation. Never replay a consumed
 plan after interruption. The tool pins the USB serial/descriptor, capacity,
 attachment sequence and stable path, and checks healthy internal-array identities.

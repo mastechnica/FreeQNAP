@@ -36,7 +36,7 @@ systemctl status freeqnap-console freeqnap-collect.timer
 journalctl -u freeqnap-collect -u freeqnap-console
 ```
 
-Inventory older than two minutes is visibly stale. Missing SMART data is unavailable, not a pass. A healthy OS mirror is not proof that a data pool exists or that recovery works. The activity list retains retryable backup failures. Daily scheduling is off until the owner chooses a policy; see [backups](STORAGE-BACKUPS.md).
+Inventory older than two minutes is visibly stale. Missing SMART data is unavailable, not a pass. A healthy OS mirror is not proof that a data pool exists or that recovery works. The activity list retains retryable backup failures. Daily scheduling is off until I choose a policy; see [backups](STORAGE-BACKUPS.md).
 
 ## VPN, gateway, downloads and media approval
 

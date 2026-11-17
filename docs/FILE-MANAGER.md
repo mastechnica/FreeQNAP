@@ -52,3 +52,14 @@ The primary library location holds the private catalog; it is separate from a li
 My Radio prepares Music, Books and Podcasts folders; Personal Photos prepares Imports. Existing case variants are reused. A primary location's reviewed save creates the visible base folder; ordinary Personal Files creates its selected folder too. File Manager can copy into those folders. Only saved/enabled scan sources are imported; creating an arbitrary folder alone does not enroll it.
 
 The source scanner waits for your active file transfers to finish, then copies supported originals into the private catalog while retaining the source. This uses additional space. Photo sources wait for existing iCloud/photo imports. Per-folder and global scan switches can disable work. Status distinguishes scheduled, waiting, active, complete and needs-attention states, and Activity retains the native import jobs. Large radio trees are split where possible; a single native import still has a 10,000-file limit. No source deletion propagates to the catalog.
+
+## Properties
+
+Right-click a file, folder, empty folder area or drive in Places and choose
+**Properties** at the bottom of the menu. The read-only dialog shows the name,
+location, volume, file/folder type, logical size in bytes, allocated disk space,
+file/subfolder counts, modification date, creation date when available and access
+mode. Folder calculation displays a waiting message. A bounded calculation that
+cannot inspect every entry is clearly marked **Partial size** with a reason.
+Links, nested mounts and private system folders are excluded. Account and encrypted
+volume ownership restrictions are the same as ordinary file browsing.

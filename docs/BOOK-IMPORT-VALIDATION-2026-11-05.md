@@ -32,6 +32,6 @@ The live family Books page was refreshed and visibly showed thirteen items:
 ten existing audiobooks and three distinct eBooks, with the new titles' cover
 images and metadata. An account-scoped catalog check found no missing title,
 author, genre, synopsis or cover in all thirteen books. Initial lighter-genre
-multi-format test editions were withdrawn from the library after the owner's
+multi-format test editions were withdrawn from the library after my
 clarification; only their private staging/evidence was retained. Existing books,
 original audio and ongoing photo copies were preserved.

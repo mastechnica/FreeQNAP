@@ -1,6 +1,6 @@
-# Owner review and release gates
+# Source review and release gates
 
-The owner approved the experimental source and showcase on 31 October 2026 for **mastechnica/FreeQNAP**, with Pages from `/docs`. Publish only the clean audited source snapshot. Other destinations, private development history and OS binaries are outside this approval. The binary installer and hardware acceptance gates below still apply.
+The experimental source and showcase are published at **mastechnica/FreeQNAP**, with Pages from `/docs`. Publish only clean audited source snapshots. Keep private development history and OS binaries out of this repository. The binary installer and hardware acceptance gates below still apply.
 
 ## Review this candidate
 
@@ -24,7 +24,7 @@ The owner approved the experimental source and showcase on 31 October 2026 for *
 
 The [current production-readiness checklist](PRODUCTION-READINESS.md) supersedes older implementation-status wording below; distinguish implemented source/fixtures from uncommissioned physical services.
 
-- Commission data layout only after the owner selects redundancy and capacity; verify initialization and full resync.
+- Commission data layout only after I selects redundancy and capacity; verify initialization and full resync.
 - Add SMB/NFS defaults, users/groups, share permissions, client interoperability and mount-loss protection. No guest write or root-volume fallback.
 - Add shared-file backup and independent off-NAS destination support with explicit credentials and restore drills.
 - Validate degraded/rebuild/replacement, boot/service order, lost mounts, full disks and data recovery under interruption.

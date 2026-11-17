@@ -18,7 +18,7 @@ NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=yes
 PrivateTmp=yes
-ReadWritePaths=/etc /var/lib/freeqnap-system /var/lib/samba /var/cache/samba /var/log/samba /srv/freeqnap /run /dev
+ReadWritePaths=/etc /var/lib/freeqnap /var/lib/freeqnap-system /var/lib/samba /var/cache/samba /var/log/samba /srv/freeqnap /run /dev
 RestrictSUIDSGID=yes
 
 [Install]

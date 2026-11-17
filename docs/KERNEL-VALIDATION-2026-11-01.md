@@ -52,7 +52,7 @@ unplug/replacement or new data-member mutation is part of these kernel checks.
 
 A separate [CPU IBE experiment](CPU-IBE-EXPERIMENT.md) is prepared but unbooted; it is not part of the accepted running-image results above.
 
-The owner confirmed all three fans and four occupied bay indicators normal on the hardened RAM kernel. Original flash backups were also independently hash-verified into the standalone private recovery workspace; no restoration or flash write was performed.
+I confirmed all three fans and four occupied bay indicators normal on the hardened RAM kernel. Original flash backups were also independently hash-verified into the standalone private recovery workspace; no restoration or flash write was performed.
 
 All three exact-identity direct-read proofs passed again after the load. Both arrays
 remained healthy/idle with no failed services. The boot identity was unchanged and
@@ -67,7 +67,7 @@ not acknowledged away or silenced. Returning the cable to the original port and
 verifying HTTPS recovery remains an explicit checkpoint before the next boot.
 The existing OS-filesystem capacity warning also remains visible.
 
-The owner subsequently became unavailable for physical steps. No further reboot
+I subsequently became unavailable for physical steps. No further reboot
 was attempted. UART interception was disarmed while retaining capture. Local HTTPS
 was restored remotely on the connected port with the existing CA and LAN scope;
 strict NAS/Mac probes passed and the critical alert resolved. Full cooling and

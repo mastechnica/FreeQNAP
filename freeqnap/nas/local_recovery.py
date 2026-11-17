@@ -2,7 +2,7 @@
 import base64,hashlib,json,os,re,secrets,shutil,stat,subprocess,tarfile,tempfile,time
 from pathlib import Path
 from .common import secret
-from .system_recovery import LIMIT
+from .system_recovery import LIMIT,DATABASE_LIMIT,stream_hash,file_hash
 
 class LocalRecovery:
     def __init__(self,ctx,recovery):self.ctx=ctx;self.recovery=recovery
@@ -25,11 +25,14 @@ class LocalRecovery:
         total=0;members={};manifest=None
         with tarfile.open(fileobj=stream,mode='r:gz') as archive:
             for member in archive:
-                if not member.isfile() or member.name in members or Path(member.name).is_absolute() or '..' in Path(member.name).parts or not 0<=member.size<=64*1024**2 or len(members)>=20001:raise ValueError('Unsafe recovery archive')
+                if not member.isfile() or member.name in members or Path(member.name).is_absolute() or '..' in Path(member.name).parts or not 0<=member.size<=DATABASE_LIMIT or len(members)>=20001:raise ValueError('Unsafe recovery archive')
                 total+=member.size
                 if total>LIMIT+8*1024**2:raise ValueError('Recovery archive exceeds limit')
-                data=archive.extractfile(member).read();members[member.name]=hashlib.sha256(data).hexdigest()
-                if member.name=='manifest.json':manifest=json.loads(data)
+                with archive.extractfile(member) as source:
+                    if member.name=='manifest.json':
+                        if member.size>8*1024**2:raise ValueError('Recovery manifest exceeds limit')
+                        data=source.read();manifest=json.loads(data);members[member.name]=hashlib.sha256(data).hexdigest()
+                    else:members[member.name]=stream_hash(source)
         if not manifest or manifest.get('format')!='freeqnap-system-recovery-v1' or set(members)!=set(manifest.get('files',{}))|{'manifest.json'}:raise ValueError('Incomplete recovery manifest')
         if any(members[k]!=v['sha256'] for k,v in manifest['files'].items()):raise ValueError('Recovery member checksum mismatch')
         return manifest
@@ -65,7 +68,7 @@ class LocalRecovery:
                     os.fchmod(encrypted.fileno(),0o600);self.crypt(plain,encrypted,password);encrypted.flush();os.fsync(encrypted.fileno())
             with partial.open('rb') as encrypted,tempfile.TemporaryFile(dir=self.ctx.directory) as verified:
                 self.crypt(encrypted,verified,password,True);verified.seek(0);self.verify_tar(verified)
-            checksum=hashlib.sha256(partial.read_bytes()).hexdigest();os.replace(partial,target)
+            checksum=file_hash(partial);os.replace(partial,target)
             fd=os.open(directory,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
             try:os.fsync(fd)
             finally:os.close(fd)
@@ -77,6 +80,25 @@ class LocalRecovery:
         except Exception:
             self.ctx.state.finish(ident,error='Encrypted configuration capture failed; accepted archives retained. Inspect private stages before a new attempt.');raise
         finally:password=None
+
+    def reconcile_failed(self,ident,replacement):
+        """Maintenance-only resolution after a verified replacement; preserve failure evidence."""
+        if not all(isinstance(v,str) and re.fullmatch('[a-f0-9]{32}',v) for v in (ident,replacement)) or ident==replacement:
+            raise ValueError('Choose a failed capture and a distinct accepted replacement')
+        with self.ctx.lock():
+            path,record=self.info(replacement)
+            if file_hash(path)!=record['sha256']:raise ValueError('Replacement archive checksum changed')
+            with self.ctx.state.connect() as db:
+                db.execute('BEGIN IMMEDIATE')
+                old=db.execute('SELECT * FROM jobs WHERE id=?',(ident,)).fetchone()
+                new=db.execute('SELECT * FROM jobs WHERE id=?',(replacement,)).fetchone()
+                if not old or old['kind']!='system-local-capture' or old['status']!='retryable' or not old['error']:
+                    raise ValueError('Only an inactive failed local capture can be reconciled')
+                if not new or new['kind']!='system-local-capture' or new['status']!='succeeded' or new['created']<=old['created'] or json.loads(new['result'] or '{}').get('sha256')!=record['sha256']:
+                    raise ValueError('A newer successful verified local capture is required')
+                result={'reconciliation':{'replacement_id':replacement,'sha256':record['sha256'],'verified_at':time.time()},'previous_result':json.loads(old['result'] or 'null'),'failed_attempt_retained':True}
+                db.execute("UPDATE jobs SET status='reconciled',result=?,updated=? WHERE id=?",(json.dumps(result),time.time(),ident))
+        return result
 
     def info(self,ident):
         if not isinstance(ident,str) or not re.fullmatch('[a-f0-9]{32}',ident):raise ValueError('Choose a local recovery archive')

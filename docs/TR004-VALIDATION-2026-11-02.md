@@ -1,6 +1,6 @@
 # TR-004 mounted-storage validation — 2 November 2026
 
-The owner approved erasing only the identified disposable 30 TB enclosure LUN.
+I approved erasing only the identified disposable 30 TB enclosure LUN.
 Two approximately 15 TB unencrypted ext4 volumes were created, below the ARM32
 16 TiB filesystem boundary, with the 64bit feature disabled. The hardware RAID
 mode, internal disks, small USB drive and installed kernel/flash were unchanged.
@@ -44,13 +44,13 @@ large-block-device tool-access limitation remains relevant to recovery tooling.
 
 ## Physical cable reconnection
 
-After another verified safe eject, the owner disconnected and reconnected the
+After another verified safe eject, I disconnected and reconnected the
 USB cable without changing enclosure power or RAID switches. It returned at
 5 Gb/s with the same two filesystem UUIDs. Both saved inode/direct-read proof
 hashes passed and both volumes mounted read/write. Temporary proof files were
 removed. No USB reset was logged in this physical reconnection; the complete
 SCSI disk and partitions appeared one second after the new-device kernel event.
-That timestamp does not measure the owner's actual plug-in instant.
+That timestamp does not measure my actual plug-in instant.
 
 The cache-sync message after physical cable removal had a disconnected-host
 result; both normal pre-unplug cache flushes had already succeeded and both
@@ -59,7 +59,7 @@ successful post-disconnect command.
 
 ## Clean enclosure power cycle
 
-The owner powered off only the safely ejected enclosure, waited, then powered it
+I powered off only the safely ejected enclosure, waited, then powered it
 on with USB attached and RAID switches unchanged. It returned at 5 Gb/s. Both
 exact UUID/inode/direct-read proof hashes passed after manual mounting through
 the storage backend; both volumes remain mounted read/write. All temporary

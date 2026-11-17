@@ -1,6 +1,6 @@
 # 128 GiB OS expansion — physical completion checkpoint, 2 November 2026
 
-The owner-approved four-internal-disk layout was applied. The OS partitions are
+The explicitly approved four-internal-disk layout was applied. The OS partitions are
 128 GiB each; the mounted ext4 filesystem reports about 126 GiB, with 116 GiB free
 at the first post-boot check. The two-member OS mirror is non-degraded and idle.
 

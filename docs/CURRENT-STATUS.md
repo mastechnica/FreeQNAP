@@ -1,4 +1,120 @@
-# Accepted personal media maintenance — 5 November 2026
+# Configuration backup repaired — 17 November 2026
+
+The live backup broker now captures consistent console and personal SQLite
+snapshots within the reviewed size bounds. Runtime network/VPN lock files are
+excluded from recovery configuration; their settings remain included. A fresh
+338-file encrypted configuration archive passed full checksum, decryption and
+member verification, with a matching independent Mac copy. Incorrect-password
+verification was rejected. The reviewed failed captures retain their original
+errors and private stages and explicitly link to the verified replacement.
+
+The normal health monitor reports zero active alerts, no failed checks and a
+hardware-confirmed green status-light setting. Required NAS services are active.
+This covers configuration recovery, not media-original backup or a full disaster
+restore. See [repair and validation](BACKUP-REPAIR-2026-11-17.md). Earlier dated
+status snapshots below are historical.
+
+# Direct EyeQ media connection — 12 November 2026
+
+The optional direct NAS connector is paired and online. Personal Photos and Videos
+are enabled following my latest sharing decision. Real bounded media
+reads and signed-in Synthia music search/play/pause acceptance passed. Expanded
+sharing controls and metadata editing remain local development; see
+[connector acceptance and limits](EYEQ-CLOUD-CONNECTOR.md).
+
+# Permanent Ethernet repair installed — 11 November 2026
+
+The focused TS-431XeU Ethernet statistics fix is installed in both early boot and
+disk root. Physical fixed RAM boot, original-image RAM rollback, repeated fixed
+RAM acceptance and two normal installed boots completed. The final ordinary boot
+passed 601 seconds of observation with stable services and no matching new kernel
+fault. Both arrays are idle/non-degraded; both data volumes, full-speed cooling,
+its guard, the ten-second watchdog and certificate-verified LAN/public HTTPS are
+available. No further physical visit is needed for this completed installation.
+
+Two earlier failed configuration-backup warnings remain retained. A newer complete
+encrypted configuration backup passed independent member/hash verification, but
+the live broker's backup namespace restriction still requires separate repair.
+The hardened-kernel update, cold-start/other-port physical tests and whole-content/
+parity validation are not claimed completed. See
+[final validation and limits](REMOTE-UART-ETHERNET-VALIDATION-2026-11-11.md).
+All earlier status snapshots below are historical.
+
+# LAN HTTPS restored; Ethernet activation pending — 11 November 2026
+
+LAN HTTPS now works on the alternate Ethernet port using a renewed certificate
+under the existing local CA. Independent Mac checks verify both LAN and public
+HTTPS without disabling certificate checks. The native broker was not restarted;
+fresh cached monitoring reports no active alerts in the checked snapshot.
+
+The reviewed driver is staged and the original is independently backed up on NAS
+and Mac. An isolated RAM-only image passed header/hash, embedded-module and
+installation-restriction checks. The running driver and accepted boot flash are
+unchanged. UART recovery and a supervised first RAM boot/rollback remain necessary;
+no permanent driver installation or physical acceptance is claimed. See
+[maintenance evidence and remaining steps](ETHERNET-HTTPS-MAINTENANCE-2026-11-11.md).
+Earlier critical-alert snapshots below are historical.
+
+# Alternate-port recovery capture — 11 November 2026
+
+Pinned SSH access returned after my Ethernet-port change and power cycle.
+The prior boot's retained journal confirms another Ethernet-statistics kernel
+abort in the same driver function. The compiled repair remains uninstalled and
+has no physical acceptance. Both data volumes subsequently mounted automatically;
+data RAID and OS mirror are fully populated and non-degraded, with no resync shown.
+Fresh cached monitoring reports full-speed cooling, all three fan RPMs, CPU 41 C,
+disks 30–31 C and a ready guard. The sole current critical alert is LAN HTTPS's
+saved-address binding mismatch on the alternate port. Root consistency checking
+logged device-busy and is not accepted as passed. No matching new kernel abort
+appeared in the checked interval; this is a short recovery observation, not a
+permanent repair or stability soak. See the
+[updated incident evidence](NATIVE-MANAGEMENT-OUTAGE-2026-11-11.md).
+
+# Native management outage — 11 November 2026
+
+Cloud sign-in/web serving remain reachable, but native NAS status is unavailable
+and pinned SSH cannot complete authentication. Current hardware, RAID and cooling
+health are **unverified**. An earlier Ethernet statistics kernel abort is the
+strongest retained lead; its compiled repair remains uninstalled and untested on
+hardware. The current recurrence is not yet confirmed from fresh kernel logs.
+No reboot, service restart or hardware/storage change was performed. See the
+[incident investigation and repair limits](NATIVE-MANAGEMENT-OUTAGE-2026-11-11.md).
+The dated acceptance snapshots below are historical, not current health claims.
+
+# Completed music organization — 5 November 2026
+
+All 5,877 explicitly approved music moves completed with full before/after checksum
+proofs. A fresh independent check verified all 13,353 source/managed originals,
+current paths, identity-bound metadata, both move ledgers and 11,062 cover files.
+The other 7,476 originals retain their source paths to protect cue/playlist
+references or unresolved/unavailable recordings. No original audio was discarded.
+
+Final native scanning completed 13,366 entries with zero errors, including all
+music and 13 books. Authorized browsing and signed-in Firefox confirm 1,160 albums,
+12,307 main tracks, 147 identical copies and 899 other versions: all 13,353 files
+remain represented. There are 936 albums with artwork and clear disc headings.
+The exact watched-folder settings were restored and normal scanning has resumed.
+
+Remaining quality limits: 148 catalog identification flags, 63 unusable originals,
+14 blank performer fields and 43 blank album fields. Missing tracks were not
+invented. No whole-library decoding/listening or third full audio rehash is claimed.
+See [final acceptance and evidence limits](MUSIC-ADDITIONS-VALIDATION-2026-11-05.md).
+
+Both RAID arrays are idle and non-degraded; both data volumes are mounted with
+their expected identities. Dashboard/storage/HTTPS, full-speed cooling, its guard
+and the enabled ten-second watchdog are healthy in the checked interval. Prior
+unattended-startup and broader hardware/whole-content acceptance limits remain.
+
+The interrupted photo-import ledger and deliberate iCloud pause are retained for
+a separate unfinished campaign. Its old independent full-copy verifier needs both
+music move ledgers to resolve changed paths. Successful copy jobs were not replayed.
+Regression remains 729 tests (16 environment-specific skips), plus four passing
+Music UI checks. Documentation/source changes are committed locally only; nothing
+was published. The completed music monitoring automation is removed.
+
+# Earlier personal media maintenance — 5 November 2026
+
+Music counts in this earlier checkpoint are superseded by the final acceptance above.
 
 Music reconciliation is applied and verified: 5,487 corrections, 7,958 originals
 preserved, 706 album cards and 7,270 main tracks with expandable alternative files.
@@ -97,7 +213,7 @@ Deployed per-volume copy protection and dashboard typed confirmations using only
 CONFIRM. Exact plan/disk binding remains enforced internally. Busy/wait/error
 feedback now appears inside the confirmation dialog rather than only behind it.
 
-The owner-approved worker cutover retained all 8,143 staged files (about 8.8 GB)
+The explicitly approved worker cutover retained all 8,143 staged files (about 8.8 GB)
 and their identities. Three sample hashes matched both original and staged files.
 The same stage is continuing under a fresh identity-matched plan, with no source
 or published destination overwrite. At verification it had rechecked/reused over
@@ -163,7 +279,7 @@ Retry image and cancellation when closed. All 83 photo tests and 45 JavaScript
 tests passed; targeted concurrency/identity tests passed on ARM. Three live large
 previews loaded during active iCloud ingestion. New previews took about six seconds;
 a cached preview took about 0.1 seconds. The archive continued with 502 files and
-no reported download errors at inspection. The owner confirmed images now load; subsequent proportional-fit sizing was
+no reported download errors at inspection. I confirmed images now load; subsequent proportional-fit sizing was
 deployed and checked with synthetic desktop/mobile layouts. No reboot or storage-layout change was performed. Changes are local.
 See [dated validation](PHOTOS-USB-UX-VALIDATION-2026-11-04.md).
 
@@ -174,7 +290,7 @@ read-only native comparisons passed both decoder isolation paths, and the broker
 served a corrected thumbnail. GPS details now include an online city-scale map or
 an offline fallback, with a per-profile privacy setting in Library locations and
 Import & iCloud. The requested online setting is enabled for existing profiles.
-The Settings interface was checked live; the owner confirmed corrected images
+The Settings interface was checked live; I confirmed corrected images
 and the location map both look correct.
 The archive download resumed after the controlled update, with 236 files and no
 reported download errors at inspection. Data RAID remains healthy/idle; no reboot
@@ -183,7 +299,7 @@ See [dated validation](PHOTOS-USB-UX-VALIDATION-2026-11-04.md).
 
 # iCloud archive downloading — 4 November 2026
 
-Following owner review of Apple account prompts, real photo access is connected
+Following my review of Apple account prompts, real photo access is connected
 and downloading. Consecutive checks showed growth from 17 to 27 archived originals,
 with zero reported errors. Three bounded original-file identity/checksum reads
 passed. Initial live ingestion is accepted; the first full library pass and later
@@ -193,7 +309,7 @@ See [dated evidence](PHOTOS-USB-UX-VALIDATION-2026-11-04.md).
 # Apple account review required — 4 November 2026
 
 The latest real login reports an Apple terms-review requirement before web photo
-access. The dashboard now identifies this account action explicitly; the owner
+access. The dashboard now identifies this account action explicitly; I
 must review Apple prompts personally at iCloud.com. The account-action release
 passed 71 photo tests locally and on ARM and is deployed. Actual photo access
 and archive download are still unaccepted. RAID remained healthy/idle, with
@@ -208,7 +324,7 @@ and station logos with generated artwork alternatives. Actual folder browsing an
 radio artwork were verified in the running dashboard. Local regression passed
 492 Python tests (four expected skips) and 38 JavaScript tests; native ARM checks
 also passed. Data RAID is non-degraded/idle, OS mirror healthy, full cooling and
-watchdog active. Fresh owner Apple sign-in and actual archive download acceptance
+watchdog active. Fresh my Apple sign-in and actual archive download acceptance
 remain pending; no download success is claimed. No reboot or disk operation occurred.
 See [dated results](PHOTOS-USB-UX-VALIDATION-2026-11-04.md) and
 [behavior guide](PHOTOS-USB-AND-BROWSING.md). Updates are committed locally only.
@@ -228,7 +344,7 @@ media and phone/family acceptance remain pending; protocol/root audit limits are
 
 # Cloud identity, offline access and landing pages — 4 November 2026
 
-Deployed and validated the optional provider connection. The owner manually linked
+Deployed and validated the optional provider connection. I manually linked
 the existing administrator and a separate family profile through the dashboard.
 Actual administrator Authentik round trips succeeded, retaining the original
 profile/password; new administrator sign-ins land on Overview. Family users can
@@ -248,7 +364,7 @@ the native share sheet; download fallback is available. Independent reader check
 fail closed. The update is deployed. Local regression and native synthetic photo/video
 cleaning, original preservation and metadata sidecar checks passed. See the
 [dated validation](SHARING-VALIDATION-2026-11-04.md).
-Actual phone/PWA app availability and delivery require owner testing. No real
+Actual phone/PWA app availability and delivery require manual testing. No real
 external shares were sent. See [privacy and sharing](METADATA-AND-SOCIAL-SHARING.md).
 
 # Local family accounts and File Manager follow-up — 4 November 2026
@@ -258,7 +374,7 @@ and iCloud settings, administrator-assigned folders, optional Authentik setup/li
 and distinct read-only scoped sharing. File Manager gains numbered pages,
 Copy/Move-to pickers, drag/drop choice and folder-wide fullscreen media arrows.
 The account/features checkpoint is deployed. Native private account and file-operation fixtures passed; no real family account or provider was created. Real family accounts, Authentik/Apple
-logins and mobile sharing acceptance require owner setup; none are seeded.
+logins and mobile sharing acceptance require manual setup; none are seeded.
 See [accounts](LOCAL-USERS-AND-AUTHENTIK.md) and [Files](FILE-MANAGER.md).
 
 # Explicit private library locations — 4 November 2026
@@ -269,7 +385,7 @@ changes through a reviewed, verified copy; previous archives remain retained.
 File Manager offers named shortcuts and explicit source-preserving folder imports
 from mounted USB volumes, including validated read-only unlock sessions. Copies
 placed in visible folders require import to appear in the library catalog.
-Owner selection of the actual production locations remains pending; deployment
+Manual selection of the actual production locations remains pending; deployment
 does not choose them or migrate personal content automatically.
 See [the workflow](MY-RADIO.md#choose-library-locations-and-import-usb-folders).
 
@@ -280,7 +396,7 @@ search, regional podcast subscriptions and episode search, plus selectable local
 book-reading voices with speed/pitch controls saved per browser. The starter list
 contains 55 sampled stations; the live installation retains 57 regional entries.
 Actual listening, phone/PWA speech behavior and device-specific pitch support
-remain owner acceptance items. No sound was played and no publication was made.
+remain physical acceptance items. No sound was played and no publication was made.
 See [validation](MY-RADIO-VALIDATION-2026-11-04.md#uscanada-discovery-and-book-voice-follow-up--4-november-2026).
 
 # Interrupted data RAID recovery completed — 4 November 2026
@@ -338,7 +454,7 @@ has not published or pushed a new public snapshot.
 
 # Latest incident checkpoint — 3 November 2026
 
-After a management stall and owner hard reset, the OS mirror is healthy but the
+After a management stall and manual hard reset, the OS mirror is healthy but the
 initial data RAID5 did not automatically resume: it refused dirty/degraded
 assembly with its fourth member about 90.86% rebuilt. Exact-member forced
 read-only recovery was explicitly approved and completed after independent
@@ -356,7 +472,7 @@ The original management-stall cause remains unknown. See the
 
 ## Personal Photos & Videos
 
-The private timeline, albums, favorites, original downloads, metadata viewer and offline GPS map are locally deployed. The optional iCloud connector is installed, disabled and signed out; no real Apple account or archive is configured. Downloaded originals are retained independently of later cloud deletion. Native synthetic and permission/streaming regressions passed; real Apple sign-in and first-library acceptance still require owner setup. See [Personal Photos](PERSONAL-PHOTOS.md).
+The private timeline, albums, favorites, original downloads, metadata viewer and offline GPS map are locally deployed. The optional iCloud connector is installed, disabled and signed out; no real Apple account or archive is configured. Downloaded originals are retained independently of later cloud deletion. Native synthetic and permission/streaming regressions passed; real Apple sign-in and first-library acceptance still require manual setup. See [Personal Photos](PERSONAL-PHOTOS.md).
 
 ## Current physical expansion checkpoint — 2 November 2026
 
@@ -400,7 +516,7 @@ recovery or maintenance settings.
 
 ## Historical RAM-only maintenance checkpoint
 
-The owner-approved OS expansion is in its offline imaging stage. The NAS is
+The explicitly approved OS expansion is in its offline imaging stage. The NAS is
 running a separate RAM maintenance image; the existing OS mirror is assembled
 read-only, and the data array is not assembled. Installed NAS services and the
 dashboard are intentionally offline. No partition changes, data-array erasure
@@ -448,19 +564,19 @@ Four covered-chassis ten-minute runs passed:
 | High-airflow adaptive idle/read load | 53°C | 35°C | Passed; approximately 580 seconds of observed high-speed sample intervals |
 | Adaptive heavy load | 66°C | 34°C | Passed; high airflow changed to full at a sampled CPU temperature of 60°C |
 
-All three fan counters responded and the owner confirmed normal visible rotation.
+All three fan counters responded and I confirmed normal visible rotation.
 The earlier 65°C commissioning stops and interrupted guard-restart run remain
 recorded. A reviewed 70°C load stop is below the unchanged 80°C kernel bench trip;
 the retained stock board configuration's 105°C trip is not a silicon-rating or
 physical thermal-protection claim. No thermal trip was exercised.
 
 The permanent local controller, independent guard, full/automatic controls,
-read-only status and bounded history are implemented. **The bounded high/full automatic profile is now accepted and enabled** after the final attended stale-input and stopped-controller checks. Stale readings restored full mode in 0.950 seconds; stopped-controller recovery took 3.747 seconds and retained its fault latch after restart. The owner confirmed all three fans stayed normal through both. Temporary trial permission expires on owner death,
+read-only status and bounded history are implemented. **The bounded high/full automatic profile is now accepted and enabled** after the final attended stale-input and stopped-controller checks. Stale readings restored full mode in 0.950 seconds; stopped-controller recovery took 3.747 seconds and retained its fault latch after restart. I confirmed all three fans stayed normal through both. Temporary trial permission expires on controller-process exit,
 cancellation or deadline. Only the tested high-airflow levels 6/7 are implemented;
 no fan-stop, low-speed or arbitrary PWM setting is adopted.
 
 Three ten-second SP805 expiry resets and explicit disarm observations passed in
-diskless RAM. The **installed watchdog is active under systemd PID 1 at ten seconds**. Advancing heartbeats and one owner handle were observed across multiple timeout periods, including a short CPU load. Maintenance disarm stayed inactive without a late reset for 24 seconds, then re-enable passed. An ordinary restart of the installed kernel restored active watchdog supervision and permanent Auto without intervention; both arrays and mounts returned healthy and all direct proof hashes matched. The owner confirmed all fans and four bay indicators normal. Reboot/kexec watchdog timers remain disabled; no expiry was induced on mounted storage.
+diskless RAM. The **installed watchdog is active under systemd PID 1 at ten seconds**. Advancing heartbeats and one owner handle were observed across multiple timeout periods, including a short CPU load. Maintenance disarm stayed inactive without a late reset for 24 seconds, then re-enable passed. An ordinary restart of the installed kernel restored active watchdog supervision and permanent Auto without intervention; both arrays and mounts returned healthy and all direct proof hashes matched. I confirmed all fans and four bay indicators normal. Reboot/kexec watchdog timers remain disabled; no expiry was induced on mounted storage.
 
 See [cooling controls](COOLING.md), [physical cooling record](COOLING-VALIDATION-2026-11-01.md),
 [watchdog record](WATCHDOG-VALIDATION-2026-11-01.md) and
@@ -479,10 +595,10 @@ CVE review of external drivers. See [kernel maintenance](KERNEL-SECURITY.md) and
 
 The exact-board EJ188 MRRS-128 workaround passed bounded normal-kernel flash-drive
 and TR-004 write/readback tests, including a 1 GiB enclosure regression and offsets
-beyond 16 TiB. The owner-approved TR-004 layout is now two approximately 15 TB
+beyond 16 TiB. The explicitly approved TR-004 layout is now two approximately 15 TB
 unencrypted ext4 volumes, mounted read/write. Three mounted cycles per volume
 passed 3 GiB of writes and 6 GiB of direct verification, cache flushes, remounts
-and both offline filesystem checks. Safe eject and owner-assisted physical USB
+and both offline filesystem checks. Safe eject and attended physical USB
 reconnection and a clean enclosure-only power cycle passed. Software reauthorization exceeded its readiness deadline
 before returning; that limitation and remaining NAS-cold-boot/power-loss/controller-health
 limits are retained in [the dated enclosure report](TR004-VALIDATION-2026-11-02.md).
@@ -510,11 +626,11 @@ and physical gateway clients, live DDNS, real torrent exchange and enabled exter
 notification receipt remain open. Fixture/protocol tests are not those results.
 Email, push and buzzer preferences are unchanged; no test sound/message was sent.
 Local private-CA HTTPS, signed package-update reachability and valid time sync have
-prior evidence; phone PWA installation/push receipt remain owner tests.
+prior evidence; phone PWA installation/push receipt remain manual tests.
 
 Bounded file backup/staged restore and encrypted local configuration capture/download
 passed. Fresh-install/system restoration and operational independent data backup
-remain separate; the owner deferred an external destination. RAID/recycle bins and
+remain separate; I deferred an external destination. RAID/recycle bins and
 same-pool copies are not independent disaster backups.
 
 ## Remaining release and hardware boundaries
@@ -524,7 +640,7 @@ post-write/degraded cold-start and abrupt-power recovery, long mixed-workload so
 10GbE/SFP+, broader USB SuperSpeed/fault testing and wake behavior remain unaccepted.
 Host/MCU electrical failure, fan stall and actual overtemperature-trip behavior are
 not inferred from the bounded cooling results. Full-chip/SPI restoration is
-**excluded by owner decision**.
+**excluded by my decision**.
 
 A turnkey binary release still needs a clean pinned build, complete corresponding
 source/dependency/license review, signed immutable artifacts and independently
@@ -544,7 +660,7 @@ See [the attended kernel validation record](KERNEL-VALIDATION-2026-11-01.md) for
 
 ### Remote maintenance checkpoint
 
-With the owner away, further experimental RAM boots and cold-start checks are
+While I was away, further experimental RAM boots and cold-start checks are
 deferred. UART capture is passive so an unexpected restart can use the retained
 installed boot path. Full cooling and the PID-1 watchdog remain active.
 
@@ -592,7 +708,7 @@ non-destructive cleanup plan. No NAS reboot, TR-004 formatting or cleanup occurr
 
 ## OS-space cleanup checkpoint
 
-After owner authorization and independent private archival verification, historical
+After explicit authorization and independent private archival verification, historical
 source-review staging was removed with fresh identity/content and live-reference
 checks. This reclaimed 2.35 GB and left 3.33 GB available on the OS filesystem.
 The next normal inventory/health sample resolved the capacity warning naturally;
@@ -601,11 +717,11 @@ cooling and watchdog supervision remained healthy. Releases, modules, flash back
 and encrypted recovery archives were retained. No reboot or service restart occurred.
 See [the maintenance record](ROOT-SPACE-MAINTENANCE.md).
 
-## Owner-requested OS expansion preparation
+## Requested OS expansion preparation
 
 A disk-specific proposal now covers a 128 GiB OS mirror and destructive recreation
 of the internal RAID5 as two approximately 14.794 TB unencrypted data filesystems
 before overhead. Fresh encrypted configuration backup verification and an owned-loop
-offline-resize rehearsal passed. The owner confirmed the exact plan. The physical layout remains unchanged; the
+offline-resize rehearsal passed. I confirmed the exact plan. The physical layout remains unchanged; the
 privileged transfer-helper restart, verified RAM maintenance and a consistent
 offline OS image remain pre-write requirements. See [the expansion plan](OS-EXPANSION-128G.md).

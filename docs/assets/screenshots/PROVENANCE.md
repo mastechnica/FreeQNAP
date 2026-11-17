@@ -19,7 +19,7 @@ sign-in, storage configuration or notification preference was changed for captur
   The import is still running and attention items remain visible. This screenshot
   does not establish whole-account completeness or resolve its flagged items.
 - **Photos gallery:** seven private photo tiles are replaced with generated sunsets
-  and daytime beaches at the owner’s request. Unchecked selection boxes and location
+  and daytime beaches at my request. Unchecked selection boxes and location
   badges are reproduced within those regions. The surrounding interface, metrics,
   layout and status remain exact original pixels. The showcase labels this exception;
   the scenic images were not added to the NAS. See [scenic asset provenance](../SCENIC-PREVIEW.md).

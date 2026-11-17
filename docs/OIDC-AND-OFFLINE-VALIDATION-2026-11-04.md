@@ -1,7 +1,7 @@
 # Cloud identity, offline access and landing acceptance — 4 November 2026
 
 Deployed the locally committed account/landing update to the second FreeQNAP NAS.
-The owner's actual identity-provider connection was configured and exercised.
+My actual identity-provider connection was configured and exercised.
 Private provider credentials, domains, user emails, exact subjects, account IDs and
 raw evidence are excluded from this report and the source repository.
 
@@ -11,7 +11,7 @@ raw evidence are excluded from this report and the source repository.
   callback, immutable user-UUID subjects, Authorization Code with PKCE, and two
   explicitly allowed provider users. No existing application or signing private
   key was changed/exported. Other grants remain disabled.
-- The owner applied both identity assignments through the NAS dashboard, with
+- I applied both identity assignments through the NAS dashboard, with
   private local-administrator password confirmation. The original administrator
   profile, role and local-password hash match the encrypted pre-change snapshot.
   The second identity maps to a distinct enabled family profile, without NAS
@@ -55,7 +55,7 @@ raw evidence are excluded from this report and the source repository.
   source, no test message/audio was sent, and the first EyeQ/Spectrum NAS was
   untouched. No NAS reboot, RAID mutation or notification change was needed.
 
-## Remaining owner/family checks
+## Remaining personal/family checks
 
 The newly provisioned family member must test their own Authentik sign-in and may
 choose Create Local Account with a different NAS password. That person's real

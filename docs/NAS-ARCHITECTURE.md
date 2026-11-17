@@ -1,6 +1,6 @@
 # Full NAS implementation
 
-The owner authorized the NAS expansion on 29 October 2026: SMB, NFS and AFP, shared-file backup/restore, encrypted volumes, media indexing/scraping/discovery, a complete manual dashboard and a guided installer. GitHub publication remains review-gated. This document is the implementation contract, not a declaration that every item is operational.
+I authorized the NAS expansion on 29 October 2026: SMB, NFS and AFP, shared-file backup/restore, encrypted volumes, media indexing/scraping/discovery, a complete manual dashboard and a guided installer. GitHub publication remains review-gated. This document is the implementation contract, not a declaration that every item is operational.
 
 ## Native services
 
@@ -27,7 +27,7 @@ The dashboard must expose operation results, failures and retry/reconciliation s
 
 Overview; disks/SMART; pools/RAID/create/import/replace/check; encryption unlock/lock/recovery key/header; shares and users/permissions; files and staged restore; backup repositories/jobs/retention/checks; media libraries/scan/metadata/discovery; local settings/security; service/activity/recovery logs; installation and recovery tutorial.
 
-Hardware failure/rebuild and full backup/restore drills remain owner-coordinated acceptance. The existing final-poweroff metadata issue must remain visible until fixed and physically retested. No original board photo may be published without redaction review, and no UART pinout may be inferred from appearance or another model.
+Hardware failure/rebuild and full backup/restore drills remain coordinated physical acceptance. The existing final-poweroff metadata issue must remain visible until fixed and physically retested. No original board photo may be published without redaction review, and no UART pinout may be inferred from appearance or another model.
 
 ## Primary references
 
@@ -42,10 +42,10 @@ Hardware failure/rebuild and full backup/restore drills remain owner-coordinated
 
 The broker retains ProtectSystem, ProtectHome and PrivateTmp. Automatic approval review rejected a proposal to remove those restrictions, so that proposal was not applied. Mount/unmount requests instead use standard systemd transient mount units through PID1 (`systemd-mount`), restricted by the broker to exact registered devices and fixed FreeQNAP mountpoints. This makes host-visible mounts without moving an unconfined custom helper outside the broker or disabling its filesystem restrictions. A disposable loop fixture has now verified the mount UUID and file readback inside a service with the retained broker restrictions and on the host. Identical propagated mount aliases are deduplicated; different source/root/options still fail closed. Native mount-loss and real data-pool commissioning remain separate gates.
 
-The owner additionally requires explicit per-client DLNA approval. Unapproved clients must not receive the media catalog or streams; a pending/approved/revoked device list and network enforcement are required. DLNA's weak device identity must not be presented as password-authenticated access. This supersedes the earlier open-LAN DLNA description.
+I additionally requires explicit per-client DLNA approval. Unapproved clients must not receive the media catalog or streams; a pending/approved/revoked device list and network enforcement are required. DLNA's weak device identity must not be presented as password-authenticated access. This supersedes the earlier open-LAN DLNA description.
 
 ## VPN and downloads expansion
 
-The owner also authorized OpenVPN and WireGuard client/server roles, explicit LAN-to-VPN gateway forwarding, untrusted-WAN filtering, full-tunnel kill switches and a resumable URL/torrent manager. These remain local NAS features, without remote fleet management. See [network/download implementation and acceptance](VPN-DOWNLOADS-MEDIA-ACCESS.md) and [kernel currency](KERNEL-SECURITY.md).
+I also authorized OpenVPN and WireGuard client/server roles, explicit LAN-to-VPN gateway forwarding, untrusted-WAN filtering, full-tunnel kill switches and a resumable URL/torrent manager. These remain local NAS features, without remote fleet management. See [network/download implementation and acceptance](VPN-DOWNLOADS-MEDIA-ACCESS.md) and [kernel currency](KERNEL-SECURITY.md).
 
 File-manager and network-control implementation: [file operations and recycle policy](FILE-MANAGER.md), [physical ports/private LAN and timed rollback](NETWORK-CONTROL.md). The private DHCP account has a separate configuration directory/group and cannot access the privileged broker socket. Network rollback runs independently of the web process and storage jobs. Private LAN remains opt-in.

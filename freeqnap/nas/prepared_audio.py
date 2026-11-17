@@ -13,6 +13,8 @@ def register(radio,kind,ident,leaf,metadata,cover=None,replace_identity=None,roo
  from .personal_photos import directory
  kind=category(kind);leaf=filename(leaf)
  if not isinstance(ident,str) or not IDENT.fullmatch(ident):raise ValueError('Invalid audio identity')
+ claim=getattr(radio,'_claim_prepared_identity',None)
+ if claim:claim(ident)
  allowed=set(FIELDS)|{'disc','codec','duration','identification_status','metadata_sources','audio_status','audio_warning'}
  if not isinstance(metadata,dict) or set(metadata)-allowed:raise ValueError('Unknown prepared audio metadata')
  value={}
@@ -57,3 +59,54 @@ def register(radio,kind,ident,leaf,metadata,cover=None,replace_identity=None,roo
    if cfg.get('save_sidecars'):radio.write_file(folder,'metadata.json',json.dumps(value,ensure_ascii=False,indent=2).encode())
   finally:os.close(fd)
  return radio.public({'id':ident,'category':kind,'name':leaf,'bytes':st.st_size,'metadata':value,'created':old['created'] if old else time.time(),'favorite':old['favorite'] if old else 0,'hidden':old['hidden'] if old else 0})
+
+
+def _sync_filesystem(fd):
+ """Flush the one verified data filesystem before committing its catalog rows."""
+ import ctypes,sys
+ if not sys.platform.startswith('linux'):raise RuntimeError('Prepared batches require Linux syncfs')
+ libc=ctypes.CDLL(None,use_errno=True);sync=libc.syncfs;sync.argtypes=[ctypes.c_int];sync.restype=ctypes.c_int
+ if sync(fd)!=0:
+  error=ctypes.get_errno();raise OSError(error,os.strerror(error))
+
+
+class _BufferedMetadata:
+ """A bounded metadata-only writer; originals can never be a write target."""
+ def __init__(self,radio,root):self.radio=radio;self.device=os.fstat(root).st_dev;self.seen=set()
+ def __getattr__(self,key):return getattr(self.radio,key)
+ def _claim_prepared_identity(self,ident):
+  if ident in self.seen or len(self.seen)>=100:raise ValueError('Use distinct identities and at most 100 items per batch')
+  self.seen.add(ident)
+ def write_file(self,fd,leaf,raw):
+  import secrets
+  if not isinstance(leaf,str) or '/' in leaf or '\\' in leaf or not (leaf in ('metadata.json','cover.jpg') or leaf.endswith('.metadata.json') or leaf.startswith('.freeqnap-track-') and leaf.endswith('.json')):raise ValueError('Prepared batches write metadata and covers only')
+  if not isinstance(raw,bytes) or not 0<len(raw)<=512*1024:raise ValueError('Invalid bounded metadata file')
+  st=os.fstat(fd)
+  if not stat.S_ISDIR(st.st_mode) or st.st_dev!=self.device:raise ValueError('Metadata directory is outside the verified filesystem')
+  tmp='.freeqnap-metadata-'+secrets.token_hex(12)+'.next';out=os.open(tmp,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600,dir_fd=fd)
+  try:
+   with os.fdopen(out,'wb') as stream:stream.write(raw);stream.flush()
+   os.replace(tmp,leaf,src_dir_fd=fd,dst_dir_fd=fd)
+  finally:
+   try:os.unlink(tmp,dir_fd=fd)
+   except FileNotFoundError:pass
+
+
+@contextlib.contextmanager
+def batch(radio,root_fd):
+ """Trusted maintenance only: stage <=100 distinct, already-pinned originals.
+
+ Yield a metadata writer and SQLite transaction for register(..., root_fd=...,
+ connection=...). Audio links/metadata are flushed through the verified data
+ filesystem before SQLite FULL commits. A failure rolls back catalog rows;
+ staged sidecars/links remain for explicit identity-based reconciliation. Never
+ retry a failed batch blindly or restore an old whole-database snapshot.
+ """
+ st=os.fstat(root_fd)
+ if not stat.S_ISDIR(st.st_mode):raise ValueError('Verified library directory required')
+ cfg=radio.config();radio.marker(root_fd,{'library_id':cfg['library_id'],'filesystem_uuid':cfg['filesystem_uuid']})
+ writer=_BufferedMetadata(radio,root_fd)
+ with radio.ctx.state.connect() as db:
+  db.execute('BEGIN IMMEDIATE')
+  yield writer,db
+  _sync_filesystem(root_fd)

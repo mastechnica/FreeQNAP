@@ -1,4 +1,77 @@
+## 12 November 2026 — live EyeQ media connection
+
+## 17 November 2026 — Reliable configuration recovery and publication cleanup
+
+- Fix live broker SQLite access with the explicitly approved console-state directory allowance.
+- Install bounded database snapshots and streamed verification; exclude volatile network/VPN lock files while preserving their configuration.
+- Add explicit failed-capture reconciliation against a newer checksum-verified accepted archive, retaining failure history and private stages.
+- Verify a fresh 338-file encrypted configuration backup, wrong-password rejection, an independent Mac copy and zero-alert hardware-confirmed green status.
+- Pass 35 recovery/encryption/health tests; document the repair and its remaining recovery limits.
+- Rewrite personal development and acceptance notes in my voice, remove narrated publication-approval boilerplate, and retain technical account/process ownership terminology.
+
+- Paired the optional direct connector and verified authenticated browser browsing,
+  real media reads, and Synthia music search, playback and pause.
+- Re-enabled Personal Photos and Videos on the existing pairing following the
+  my revised sharing choice, preserving its credentials.
+- Documented deployed acceptance separately from expanded sharing/editing work
+  still in development. No public repository publication performed.
+
+## Direct EyeQ Cloud media connector — 12 November 2026
+
+- Prepare and install the optional direct outbound AuraStore connector, independent of Mac/AVE40/Guessla, without pairing or enabling an account connection.
+- Add selected-library restrictions, catalog-only readiness, safe transport status, read-only account state and native photo/book compatibility; retain per-request NAS authorization.
+- Prepare matching Cloud download, authenticated artwork and photo-preview handling. Document deployment/pairing and real-playback acceptance still required; no Cloud deployment or publication performed.
+
+## Permanent Ethernet repair acceptance — 11 November 2026
+
+- Complete remote UART fixed-image boot, original-image rollback and repeated RAM acceptance; retain independent boot-slot and full encrypted configuration backups privately.
+- Install the exact explicitly approved first-slot image once with readback, matching disk-root module and normal installed boot/restart verification. Preserve bootloader, second slot, data and USB storage.
+- Add a bounded read-only runtime verifier; final installed acceptance passes 601 seconds, 550 link dumps and 330 counter reads with stable services and no matching kernel fault.
+- Verify direct-read initialization samples, hashed memory-only transfers, RAID/mount/cooling/watchdog health and LAN/public HTTPS. Close temporary boot transfer, leave UART passive, and preserve backup warnings and remaining acceptance limits.
+
+## Native management outage investigation — 11 November 2026
+
+## Remote UART and fixed-driver RAM validation — 11 November 2026
+
+- Verify the selected remote serial recovery host and both UART directions without changing its fleet/application or adding access credentials.
+- Complete the first fixed-driver RAM boot, 200 link dumps, 1,200 counter reads, native status checks, direct-read data proofs and bidirectional memory transfers; installed flash remains unchanged while rollback/final acceptance continues.
+- Stream bounded recovery snapshots for larger personal SQLite catalogs, retain previous/failed captures and return structured database errors. Nineteen targeted recovery tests pass; a fresh independent encrypted configuration backup is verified through an isolated capture process. Live broker namespace limitations remain open.
+
+
+## LAN HTTPS recovery and Ethernet RAM package — 11 November 2026
+
+- Restore LAN HTTPS after the port/address change using the existing CA and server key; preserve public sign-in origins and the native broker. Certificate-verified LAN/public checks pass and the stale HTTPS critical alert clears.
+- Preserve original driver and HTTPS rollback copies; stage the exact-ABI Ethernet candidate without loading it.
+- Add an isolated RAM-image packager with exact baseline/module checks, embedded-bootstrap comparison and enforced RAM-only/no-flash restrictions. Build/package checks pass; UART hardware boot, rollback and permanent installation remain pending.
+
+
+- Capture the alternate-port reboot through pinned SSH; confirm a second retained Ethernet-statistics kernel abort, initial non-degraded RAID membership, and explicit filesystem-check/HTTPS startup limits. No driver or system changes deployed.
+
+- Document the current partial outage, retained Ethernet statistics abort, recurring monitoring exposure and possible native-worker exhaustion; distinguish observed evidence from hypotheses.
+- Mark current hardware health unverified and the driver repair uninstalled; preserve private evidence without restarting or modifying the NAS.
+
+## Additional music reconciliation — 5 November 2026
+
+- Complete and independently verify all 5,877 approved music moves, all 13,353 originals, metadata/artwork and exact scan-settings restoration. Final scan has zero errors; 1,160 albums retain every file and version. Keep unresolved/unusable originals and separate photo/copy-validation limits explicit.
+
+- Verify the signed-in family Music catalog retains every original across 1,160 albums; add clear multi-disc headings. Native visibility scan completed without errors; final organization/scanning remains supervised.
+
+- Complete all 13,353 music metadata registrations and the reviewed refinements/artwork. Begin 5,877 checksum-proven file moves; reconcile 525 completed moves and continue without long catalog locks. Preserve uncertain/cue-linked originals and explicit remaining acceptance limits.
+
+- Add bounded metadata batches with data-before-catalog durability, rollback and long-filename regression coverage; reconcile interrupted work by original identity. Prepare explicitly approved non-overwriting album organization with full hashes and a durable move ledger. Final hardware/library acceptance remains pending.
+
+- Recover from physically confirmed power loss through serial inspection and the unchanged installed boot command; restore the prior Ethernet/service address and verify both direct-read initialization proofs and all music-original identities. Final music continuation/scanner acceptance remains pending; no copy replay or flash change.
+- Preserve explicit scanner-maintenance holds through unavailable startup storage and in-flight errors, with regression tests.
+
+- Review 5,395 additional audio originals, identify albums/performers and multi-disc groups using local tags and corroborated release lists, and add matching artwork.
+- Exclude release notes and readable-book documents from Music imports, scans and album browsing; preserve original files and archived companion records.
+- Preserve the active storage worker, photo import, audio originals, editions and uncertain-identification warnings. Final application evidence is recorded in the dated validation report.
+
 ## Evidence-based album reconciliation — 5 November 2026
+
+- Missing music batch completed: 17,040 files / 277.44 GB passed copy readback; independent whole-import checksums and local photo import remain in progress.
+
+- Fix accepted file-transfer approvals expiring while queued; add account-scoped file/folder Properties with bounded recursive sizes. Recover an unstarted music batch and begin importing the completed USB photo copy; full completion verification remains in progress.
 
 - Showcase Photos gallery: privacy-safe illustrative sunsets and daytime beaches; exact surrounding interface preserved and replacement regions documented.
 
@@ -107,7 +180,7 @@
 
 ## Complete iPhone previews and photo location maps — 4 November 2026
 
-- Owner confirmed the corrected images and GPS location map look correct after refreshing the gallery.
+- I confirmed the corrected images and GPS location map look correct after refreshing the gallery.
 
 - Decode complete primary HEIF/HEIC images with an isolated libheif helper, preserving orientation and originals. Version derived caches so older incorrect previews are not reused.
 - Add a GPS pin map below photo/video details, city-scale OpenStreetMap views, and a per-user online/offline preference in Library locations and Import & iCloud.
@@ -115,12 +188,12 @@
 
 ## Live Apple photo archive started — 4 November 2026
 
-- Verified connected real photo access and growing local archive after owner account review, with zero reported download errors at inspection.
+- Verified connected real photo access and growing local archive after my account review, with zero reported download errors at inspection.
 - Independently checked three downloaded originals by exact file identity and SHA-256. The first full library pass remains running and is not claimed complete.
 
 ## Explicit Apple account action — 4 November 2026
 
-- Detect Apple terms-review and account-repair flags before requesting photo access; show an actionable iCloud.com link instead of generic photo-access errors. Legal acceptance stays with the owner.
+- Detect Apple terms-review and account-repair flags before requesting photo access; show an actionable iCloud.com link instead of generic photo-access errors. Legal acceptance stays with me.
 - The observed real account requires terms review; actual photo download acceptance remains pending. All 71 photo tests and JavaScript syntax checks passed.
 
 ## Apple photo-access diagnosis — 4 November 2026
@@ -135,7 +208,7 @@
 - Added expandable directory trees for file-window navigation, Copy/Move to, personal storage selection and photo/music imports, including visible unavailable drive states.
 - Added same-origin radio logos and generated local fallback thumbnails, bounded safe fetching/decoding and cache behavior; no audio is played by artwork loading.
 - Added backend and UI regression checks; actual Apple account/iPhone approval acceptance is reported separately.
-- Deployed and verified real station artwork and attached-drive tree browsing. Passed 492 Python tests (four expected skips), 38 JavaScript tests and native ARM checks; fresh owner Apple sign-in/download acceptance remains pending.
+- Deployed and verified real station artwork and attached-drive tree browsing. Passed 492 Python tests (four expected skips), 38 JavaScript tests and native ARM checks; fresh my Apple sign-in/download acceptance remains pending.
 
 ## Private volumes and family activity — 4 November 2026
 
@@ -173,7 +246,7 @@
 ## Local family identities, optional Authentik and file usability — 4 November 2026
 
 - Added local account administration, family permissions, forced temporary-password changes, session revocation and stable user IDs; kept the original administrator and local fallback.
-- Added optional owner-configured Authentik/OIDC with explicit issuer/subject linking, PKCE/state/nonce/signed-token validation and an embedded setup guide. No provider was enabled automatically.
+- Added optional user-configured Authentik/OIDC with explicit issuer/subject linking, PKCE/state/nonce/signed-token validation and an embedded setup guide. No provider was enabled automatically.
 - Isolated personal catalogs, iCloud accounts/session paths and private storage. Added administrator-assigned read/write folders and distinct authenticated read-only library/album/item sharing.
 - Added numbered file paging, Copy to…/Move to… destination pickers, drag/drop choice, verified cross-volume moves with recycled originals, read-only USB copy sources and fullscreen folder media navigation.
 - Expanded private recovery snapshots for user/library identity continuity while excluding sessions and Apple cookies. No account restore or personal import is automatic.
@@ -183,14 +256,14 @@
 - Added first-use volume/folder setup and Settings → Library locations for My Radio and Personal Photos & Videos.
 - Added reviewed, checksum-verified relocation with retained old archives, atomic catalog identity/config cutover, serialized library I/O and interruption/stale-plan safeguards.
 - Added named File Manager location shortcuts and folder-import actions, including registered read-only USB and validated foreign unlock sessions; retained source files and agent session ownership.
-- No owner library location was selected automatically and no disk was formatted.
+- No personal library location was selected automatically and no disk was formatted.
 
 ## Regional radio and book voices — 4 November 2026
 
 - Limited radio listings, online searches and stream/check endpoints to US/Canada; refreshed 55 verified regional seeds while retaining existing saved rows.
 - Added explicit US/Canada podcast service classification, search of subscribed episodes and safe handling of older unclassified subscriptions.
 - Added selectable local book voices, pitch and speed, saved per browser; prevented old speech callbacks from restarting canceled reading.
-- No audible test or public publication. Country metadata is not IP geofencing; podcast publisher location is owner-declared.
+- No audible test or public publication. Country metadata is not IP geofencing; podcast publisher location is user-declared.
 
 ## Interrupted RAID recovery completion — 4 November 2026
 
@@ -218,7 +291,7 @@
 
 ## Lockup diagnosis and read-only RAID recovery — 3 November 2026
 
-- Captured management recovery after an owner hard reset; the original stall cause remains unconfirmed because prior-boot logs were not persistent.
+- Captured management recovery after an manual hard reset; the original stall cause remains unconfirmed because prior-boot logs were not persistent.
 - Enabled capped persistent journals and included the configuration in console installation.
 - Identified the dirty/degraded RAID5 assembly refusal, saved independently verified member metadata backups, and completed the separately approved exact-member read-only override.
 - Preserved the rebuilding checkpoint and verified both original initialization proof files without mounts or journal replay. This is sample verification, not full contents/parity acceptance.
@@ -229,7 +302,7 @@
 - Bound read requests and isolated a stalled native-status request so base inventory can still render with storage operations disabled.
 - Prevented overlapping refresh polls, retained requested refreshes, and added clear connection-error feedback.
 - Added regression coverage for timeouts, unavailable native status, polling overlap and unchanged mutation completion semantics.
-- Deployed the source fix after the owner reset the stalled NAS; verified the served HTTPS asset. The frontend deployment itself required no service restart.
+- Deployed the source fix after I reset the stalled NAS; verified the served HTTPS asset. The frontend deployment itself required no service restart.
 
 ## Branded sharing preview — 2 November 2026
 
@@ -242,7 +315,7 @@
 - Added an optional pinned iCloud connector with private MFA setup, resumable verified downloads and no cloud-deletion propagation.
 - Kept private originals outside general file/media grants; added explicit photo agent permissions and authenticated range streaming.
 - Isolated metadata/preview decoders with read-only input, reduced privileges, no network and resource limits.
-- Deployed locally with rollback generation retained; connector remains disabled and signed out pending owner setup.
+- Deployed locally with rollback generation retained; connector remains disabled and signed out pending manual setup.
 - Passed 378 host tests (four skips), 74 targeted native tests and native synthetic JPEG/HEIC/QuickTime checks. Real Apple account acceptance remains pending.
 
 ## Installer OS allocation correction — 2 November 2026
@@ -290,7 +363,7 @@ cold-start/full-replacement recovery remain separate acceptance gates.
 
 ## Approved OS-expansion maintenance preparation — 1 November 2026
 
-- Recorded owner confirmation of the exact destructive internal-disk plan; physical layout remains unchanged.
+- Recorded my confirmation of the exact destructive internal-disk plan; physical layout remains unchanged.
 - Built and checked a separate RAM-only maintenance image with no automatic root assembly, unchanged board properties and a passing built-CPIO identity audit.
 - Prepared strict UART-pinned ephemeral SSH and audited RAM tools; corrected only two cached archive permission modes while preserving all file contents.
 - The privileged helper and pinned RAM boot subsequently passed. Offline OS/boot/GPT imaging remains mandatory; the later imaging-integrity gate is described above.
@@ -338,8 +411,8 @@ cold-start/full-replacement recovery remain separate acceptance gates.
 - Restored local HTTPS on the connected port under the unchanged private CA and LAN allowlist, retaining old private certificates/configuration. Strict NAS/Mac probes passed and the real critical alert resolved.
 - Deployed managed hardening-policy backup coverage; independently downloaded, decrypted and checked all 227 files of a fresh encrypted export on the Mac. Older accepted backups remain.
 - Corrected console/HTTPS startup sequencing and bounded readiness verification after a transient deployment check triggered rollback; the ordered native deployment passed.
-- Left UART capture passive, full cooling and watchdog active; further experimental/cold boots await the owner.
-- Passed 512 MiB of repeated direct TR-004 reads without releasing read-only quarantine; prepared the separate owner-reviewed two-volume proposal.
+- Left UART capture passive, full cooling and watchdog active; further experimental/cold boots await me.
+- Passed 512 MiB of repeated direct TR-004 reads without releasing read-only quarantine; prepared the separate reviewed two-volume proposal.
 - Fixed split external-volume label truncation before formatting; 25 external-storage fixture tests passed. No TR-004 initialization has run.
 
 ## Hardened-kernel load regression — 1 November 2026
@@ -352,7 +425,7 @@ cold-start/full-replacement recovery remain separate acceptance gates.
 ## Both-port kernel regression — 1 November 2026
 
 - Passed two restart-and-transfer cycles on each RJ45 under the hardened RAM kernel, with exact identities and independently verified 1 MiB uploads/direct-read downloads.
-- Recorded the owner's normal fan/bay indicator observations; started the supervised ten-minute full-fan CPU and read-only four-disk regression.
+- Recorded my normal fan/bay indicator observations; started the supervised ten-minute full-fan CPU and read-only four-disk regression.
 - Strengthened CPU experiment acceptance to require all four positive per-core mitigation paths without contradictory warnings; 15 checker tests passed.
 - Added the managed hardening policy to private recovery captures with a focused allowlist test; all 12 recovery tests passed. Native backup acceptance remains pending.
 - Consolidated and independently verified original flash backups privately without restoring or programming flash.
@@ -386,13 +459,13 @@ cold-start/full-replacement recovery remain separate acceptance gates.
 
 ## Startup persistence and security-only kernel preparation — 1 November 2026
 
-- Passed a normal installed-kernel restart with automatic cooling and the ten-second watchdog restored, healthy arrays/mounts and matching direct proof hashes; owner confirmed fans and four bay indicators.
+- Passed a normal installed-kernel restart with automatic cooling and the ten-second watchdog restored, healthy arrays/mounts and matching direct proof hashes; I confirmed fans and four bay indicators.
 - Built an isolated 6.12.115/FreeQNAP6 RAM-only image retaining the exact accepted complete-mirror bootstrap, separated from experimental survivor behavior.
 - Verified actual embedded helper hashes and all nine ARM module versions; staged matching modules without loading them. Kernel RAM boot, rollback and any permanent flash plan remain separate.
 
 ## Bounded adaptive cooling and watchdog enabled — 1 November 2026
 
-- Passed actual stale-temperature and stopped-controller checks (full mode observed in 0.950 / 3.747 seconds), fault-latched restart and owner-observed fan continuity.
+- Passed actual stale-temperature and stopped-controller checks (full mode observed in 0.950 / 3.747 seconds), fault-latched restart and directly observed fan continuity.
 - Enabled the exact-install high/full automatic profile after all evidence checks; no unvalidated low-speed settings were admitted.
 - Enabled sole-owner PID-1 hardware supervision at ten seconds, verified advancing live/load heartbeats, and passed maintenance disarm/no-late-reset/re-enable. Ordinary reboot persistence is pending.
 - Saved and independently verified a fresh private encrypted configuration backup; kept notification preferences and all data/boot layouts unchanged.
@@ -473,7 +546,7 @@ cold-start/full-replacement recovery remain separate acceptance gates.
 
 ## Initial public source publication — 31 October 2026
 
-- Owner approved the personal mastechnica/FreeQNAP repository and Pages showcase.
+- I approved the personal mastechnica/FreeQNAP repository and Pages showcase.
 - Rechecked source/assets for private data and retained the screenshot redaction receipts.
 - Published-source history starts from a clean snapshot with personal-account attribution; private development history and binary OS images are excluded.
 
@@ -483,7 +556,7 @@ cold-start/full-replacement recovery remain separate acceptance gates.
 - Added compact graphical summaries, actual network history, SMART reports/schedules and rule-based optional buzzer/email/push controls.
 - Recorded the bounded EJ188 USB write workaround and physical encrypted USB checks without extending their acceptance claims.
 - Prepared the public project showcase, current-status overview and real redacted dashboard screenshots.
-- Added reproducible source-only review packaging and static/provenance checks. Publication remains owner-gated; no remote or binary image is included.
+- Added reproducible source-only review packaging and static/provenance checks. Publication remains review-gated; no remote or binary image is included.
 
 ## 0.1.0-dev — local review candidate, 29 October 2026
 
@@ -492,7 +565,7 @@ cold-start/full-replacement recovery remain separate acceptance gates.
 - Added a local storage console, read-only inventory/SMART collection and unprivileged service boundary.
 - Added verified private configuration snapshots, daily scheduling, UUID-bound mirror copies and durable independent jobs.
 - Recorded actual second-unit autonomous NAND boot results and outstanding hardware, installer and NAS acceptance.
-- Kept all publication and binary-release gates pending owner review.
+- Kept all publication and binary-release gates pending my review.
 
 ### Cold-start check
 
@@ -506,14 +579,14 @@ cold-start/full-replacement recovery remain separate acceptance gates.
 
 ### TR-004 mounted validation — 2 November 2026
 
-- Initialized the two owner-approved unencrypted ext4 volumes using exact enclosure/partition guards; retained the quarantined-child interruption and inspected continuation.
+- Initialized the two explicitly approved unencrypted ext4 volumes using exact enclosure/partition guards; retained the quarantined-child interruption and inspected continuation.
 - Refuse future format plans with read-only child partitions before layout mutation; 34 focused tests passed and the guard is deployed.
 - Passed three write/direct-read/flush/remount cycles per volume, both read-only filesystem checks, safe eject and physical cable reconnection with exact proof identities.
 - Preserved the software reauthorization readiness timeout and late successful verification as distinct evidence; no fast-software-reconnect claim. Internal RAID recovery continued throughout.
 
 ### TR-004 clean cold-start completion — 2 November 2026
 
-- Passed owner-assisted enclosure-only power-off/on after verified safe eject; both exact filesystem/inode/direct hashes passed and both volumes are mounted read/write.
+- Passed attended enclosure-only power-off/on after verified safe eject; both exact filesystem/inode/direct hashes passed and both volumes are mounted read/write.
 - Removed temporary files, retained original timeout/interruption evidence, and confirmed no failed services while internal RAID recovery advanced.
 - Preserve unexpected-power-loss, NAS cold-boot-with-enclosure, full-surface and proprietary controller-health limits.
 
@@ -550,3 +623,31 @@ cold-start/full-replacement recovery remain separate acceptance gates.
   descriptions, hardware limits and the logo/dashboard social-sharing image.
 - Prepared source-only publication for the personal mastechnica/FreeQNAP repository;
   private history, credentials, media originals and unredacted captures stay local.
+
+## 7 November 2026 — iCloud resume clarity
+
+- Show Resume downloads and an explicit paused-state explanation/link in Personal Photos.
+- Verified saved Apple access and resumed the interrupted archive through the existing account-scoped download operation; full inventory completion remains pending.
+
+## 7 November 2026 — Places photo gallery
+
+- Replace the horizontal Places filmstrip with a vertical thumbnail grid that loads further pages while scrolling.
+- Open location photos full-window with left/right and keyboard navigation, position count and optional details.
+- Fix map-specific missing collection/album context; validate live family-account navigation without interrupting imports.
+
+## 7 November 2026 — Optional remote dashboard preparation
+
+- Prepared a dedicated private WireGuard connection and isolated HTTPS proxy, preserving internet routing, accounts and ongoing iCloud downloads.
+- Verified end-to-end private HTTPS and authentication/CSRF denial; retained the existing local identity-provider launch/callback while public activation awaits approval.
+- Added certificate-renewal handling and deployment/validation guidance; no public port was opened.
+
+## 7 November 2026 — Approved remote hostname activated
+
+- Activated a dedicated public HTTPS hostname on existing port 443 through the private WireGuard tunnel; no extra public port opened.
+- Updated the existing identity-provider launcher and strict callback, preserving account links, roles and permissions.
+- Verified public TLS, dashboard/PWA assets, authentication and CSRF denials, OIDC redirect/PKCE, local HTTPS and continuing iCloud downloads.
+
+## 11 November 2026 — optional AuraStore media connector
+
+- Added the separately installed AuraView EyeQ Connector App, with per-user pairing, outbound TLS, revocation, native NAS permissions, bounded media streaming and media-only folder browsing.
+- Included source, installer, service template, documentation and five fixture tests. Live installation remains pending NAS SSH availability; no storage or NAS configuration changed.

@@ -32,3 +32,53 @@ class PreparedAudioTests(unittest.TestCase):
  def test_proven_missing_audio_is_not_advertised_as_playable(self):
   old=self.upload(b'tag-only','missing.mp3','music');v=register(self.radio,'music',old['id'],'missing.mp3',{'title':'Song','disc':'2','audio_status':'unavailable','metadata_sources':{'title':'reviewed-online'}})
   self.assertEqual(v['metadata']['playable'],'original-only');self.assertIn('decodable audio',v['metadata']['reading_note']);self.assertEqual(v['metadata']['disc'],'2')
+
+ def test_batch_flushes_artifacts_before_catalog_commit_and_preserves_audio(self):
+  from freeqnap.nas.prepared_audio import batch
+  import hashlib,json
+  old=self.upload(b'unchanged audio','song.mp3','music');item=self.radio.asset(old['id']);folder=self.volume/'.freeqnap-myradio'/'music'/old['id'];audio=folder/'song.mp3';before=(audio.stat().st_ino,hashlib.sha256(audio.read_bytes()).hexdigest());seen=[]
+  def synced(fd):
+   self.assertEqual(json.loads((folder/'metadata.json').read_text())['title'],'Reviewed')
+   self.assertNotEqual(self.radio.asset(old['id'])['metadata']['title'],'Reviewed');seen.append(True)
+  with self.radio.root() as root,patch('freeqnap.nas.prepared_audio._sync_filesystem',side_effect=synced):
+   with batch(self.radio,root) as (writer,db):register(writer,'music',old['id'],'song.mp3',{'title':'Reviewed'},root_fd=root,connection=db)
+  self.assertEqual(seen,[True]);self.assertEqual(self.radio.asset(old['id'])['metadata']['title'],'Reviewed');self.assertEqual((audio.stat().st_ino,hashlib.sha256(audio.read_bytes()).hexdigest()),before)
+
+ def test_batch_flush_failure_rolls_back_catalog_and_retains_reconcilable_metadata(self):
+  from freeqnap.nas.prepared_audio import batch
+  import json
+  old=self.upload(b'original','song.mp3','music');before=self.radio.asset(old['id']);folder=self.volume/'.freeqnap-myradio'/'music'/old['id']
+  with self.radio.root() as root,patch('freeqnap.nas.prepared_audio._sync_filesystem',side_effect=OSError('fixture flush failure')):
+   with self.assertRaises(OSError):
+    with batch(self.radio,root) as (writer,db):register(writer,'music',old['id'],'song.mp3',{'title':'Staged'},root_fd=root,connection=db)
+  self.assertEqual(self.radio.asset(old['id'])['metadata'],before['metadata']);self.assertEqual(json.loads((folder/'metadata.json').read_text())['title'],'Staged');self.assertEqual((folder/'song.mp3').read_bytes(),b'original')
+
+ def test_batch_exception_and_repeated_identity_do_not_commit_partial_catalog(self):
+  from freeqnap.nas.prepared_audio import batch
+  old=self.upload(b'original','song.mp3','music');before=self.radio.asset(old['id'])
+  with self.radio.root() as root,patch('freeqnap.nas.prepared_audio._sync_filesystem') as flush:
+   with self.assertRaises(ValueError):
+    with batch(self.radio,root) as (writer,db):
+     register(writer,'music',old['id'],'song.mp3',{'title':'One'},root_fd=root,connection=db)
+     register(writer,'music',old['id'],'song.mp3',{'title':'Two'},root_fd=root,connection=db)
+   flush.assert_not_called()
+  self.assertEqual(self.radio.asset(old['id'])['metadata'],before['metadata'])
+
+ def test_batch_cannot_overwrite_an_original_or_accept_an_unmarked_root(self):
+  from freeqnap.nas.prepared_audio import batch
+  with self.radio.root() as root,patch('freeqnap.nas.prepared_audio._sync_filesystem'):
+   with batch(self.radio,root) as (writer,db):
+    with self.assertRaises(ValueError):writer.write_file(root,'original.mp3',b'forbidden')
+  fd=os.open(self.volume,os.O_RDONLY|os.O_DIRECTORY)
+  try:
+   with self.assertRaises((ValueError,OSError)):
+    with batch(self.radio,fd):pass
+  finally:os.close(fd)
+
+ def test_batch_supports_maximum_length_metadata_names(self):
+  from freeqnap.nas.prepared_audio import batch
+  leaf='x'*241+'.metadata.json'
+  self.assertEqual(len(leaf.encode()),255)
+  with self.radio.root() as root,patch('freeqnap.nas.prepared_audio._sync_filesystem'):
+   with batch(self.radio,root) as (writer,db):writer.write_file(root,leaf,b'{"verified":true}')
+  self.assertEqual((self.volume/'.freeqnap-myradio'/leaf).read_bytes(),b'{"verified":true}')

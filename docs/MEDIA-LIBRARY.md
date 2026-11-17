@@ -12,7 +12,7 @@ The title viewer exposes title, type, synopsis, year, genre, actors/roles, direc
 
 ## Online sources
 
-TVmaze supports manual TV search; OMDb supports explicit movie/TV title lookup with an owner-supplied API key. The OMDb key is stored in private NAS state, is never returned by the status API, and is sent only to the fixed OMDb HTTPS endpoint. Redirects are disabled and errors are sanitized. Owner-entered searches go to its fixed HTTPS endpoint; local scans do not automatically send filenames online. Preserve its returned attribution. Arbitrary websites cannot be added as scrapers. Additional arbitrary provider connectors and automatic movie/episode matching remain outstanding; no placeholder is represented as operational. See https://omdbapi.com/ for provider account and usage terms.
+TVmaze supports manual TV search; OMDb supports explicit movie/TV title lookup with a user-supplied API key. The OMDb key is stored in private NAS state, is never returned by the status API, and is sent only to the fixed OMDb HTTPS endpoint. Redirects are disabled and errors are sanitized. User-entered searches go to its fixed HTTPS endpoint; local scans do not automatically send filenames online. Preserve its returned attribution. Arbitrary websites cannot be added as scrapers. Additional arbitrary provider connectors and automatic movie/episode matching remain outstanding; no placeholder is represented as operational. See https://omdbapi.com/ for provider account and usage terms.
 
 ## Validation limits
 

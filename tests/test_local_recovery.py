@@ -32,3 +32,20 @@ class LocalRecoveryTests(unittest.TestCase):
   for request in ({},{'secret':{'path':'/root/key'}},{'secret':{'password':'short'}},{'secret':{'password':self.password},'keep':7}):
    with self.assertRaises(ValueError):self.local.create(request)
   self.assertFalse(self.ctx.state.jobs())
+ def test_explicit_reconciliation_requires_new_verified_backup_and_retains_failure(self):
+  from freeqnap.nas.health import Health
+  old=self.ctx.state.enqueue('system-local-capture',{});self.ctx.state.finish(old,error='original failure evidence')
+  unrelated=self.ctx.state.enqueue('backup.run',{});self.ctx.state.finish(unrelated,error='other failure')
+  with self.assertRaises(ValueError):self.local.reconcile_failed(old,unrelated)
+  good=self.create();monitor=Health(self.ctx)
+  self.assertEqual({r['source'] for r in monitor.jobs(None,None,None)},{old,unrelated})
+  self.local.reconcile_failed(old,good['id'])
+  self.assertEqual({r['source'] for r in monitor.jobs(None,None,None)},{unrelated})
+  with self.ctx.state.connect() as db:row=db.execute('SELECT * FROM jobs WHERE id=?',(old,)).fetchone()
+  self.assertEqual(row['status'],'reconciled');self.assertEqual(row['error'],'original failure evidence');self.assertEqual(json.loads(row['result'])['reconciliation']['replacement_id'],good['id'])
+ def test_changed_replacement_cannot_reconcile_failure(self):
+  old=self.ctx.state.enqueue('system-local-capture',{});self.ctx.state.finish(old,error='retained failure')
+  good=self.create();path,_=self.local.info(good['id']);before=path.stat()
+  raw=path.read_bytes();path.write_bytes(bytes([raw[0]^1])+raw[1:]);os.utime(path,ns=(before.st_atime_ns,before.st_mtime_ns))
+  with self.assertRaisesRegex(ValueError,'checksum'):self.local.reconcile_failed(old,good['id'])
+  with self.ctx.state.connect() as db:self.assertEqual(db.execute('SELECT status FROM jobs WHERE id=?',(old,)).fetchone()[0],'retryable')

@@ -121,7 +121,7 @@ class Health:
         return out
     def jobs(self,data,limits,now):
         with self.ctx.state.connect() as db:rows=db.execute("SELECT id,kind,status,error FROM jobs WHERE kind LIKE 'backup.%' OR kind LIKE 'backup-%' OR kind='system-local-capture'").fetchall()
-        return [fault(r['id'],'warning','A backup, check or restore needs reconciliation',{'job_id':r['id'],'operation':r['kind']}) for r in rows if r['status']!='succeeded' and r['error'] is not None]
+        return [fault(r['id'],'warning','A backup, check or restore needs reconciliation',{'job_id':r['id'],'operation':r['kind']}) for r in rows if r['status']!='succeeded' and not (r['kind']=='system-local-capture' and r['status']=='reconciled') and r['error'] is not None]
     def scheduled(self,data,limits,now):
         out=[];first_seen=self.ctx.state.setting('health_schedule_first_seen',{});seen=set()
         for row in self.schedules.list()['items'] if self.schedules else []:

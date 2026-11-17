@@ -225,7 +225,7 @@ class Backend:
             'files.archive-plan':self.archives.plan, 'files.bundle':self.bundles.start,'files.bundle-info':self.bundles.info,'files.bundle-node':self.bundles.node,'files.bundle-read':self.bundles.read,
             'files.pool-list':lambda r:self.external.list_files(r,registered_pool=True), 'files.pool-read':lambda r:self.external.read_file(r,registered_pool=True),
             'files.metadata-read':self.file_metadata.read,'files.metadata-plan':self.file_metadata.plan,'files.metadata-apply':self.file_metadata.apply,
-            'files.media-neighbors':self.files.media_neighbors,'files.list': self.files.list, 'files.read': self.files.read, 'files.mkdir': self.files.mkdir,
+            'files.properties':self.files.properties,'files.media-neighbors':self.files.media_neighbors,'files.list': self.files.list, 'files.read': self.files.read, 'files.mkdir': self.files.mkdir,
             'files.upload-begin': self.files.upload_begin, 'files.upload-chunk': self.files.upload_chunk,
             'files.upload-finish': self.files.upload_finish, 'files.move-plan': self.files.move_plan,
             'files.move': self.files.move, 'files.transfer-plan': self.files.transfer_plan,
@@ -253,7 +253,7 @@ class Backend:
             schema = {'library.storage-apply':{'plan_id','digest','confirmation'},'myradio.scan':set(),'myradio.import-folder':{'category','share','path'},'myradio.station-refresh':{'group','query','country'},'backup.system-run':{'repository'},'files.archive':{'plan_id','digest','confirmation'},'backup.run': {'repository','shares','same_pool_confirmation'}, 'backup.check': {'repository','read_data'}, 'backup.restore': {'repository','snapshot','pool','include'}, 'media.scan': {'library'},'files.transfer':{'plan_id','digest','confirmation'},'files.delete':{'plan_id','digest','confirmation'},'files.recycle':{'plan_id','digest','confirmation'}}
             if set(request) - schema[action]:
                 raise ValueError('Credentials cannot be saved in a job')
-            return {'job_id': self.ctx.state.enqueue(action, request)}
+            return self.files.enqueue_transfer(request) if action=='files.transfer' else {'job_id': self.ctx.state.enqueue(action, request)}
         raise ValueError('Unknown or unsupported NAS operation')
 
     def job_activity(self,r):

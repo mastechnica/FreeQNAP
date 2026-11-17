@@ -35,7 +35,7 @@ The original management/USB stall has not been diagnosed or declared fixed here.
   limits remain in force; helper timeout stops only its exact transient unit.
 - The live broker initialized separate private My Radio storage. A synthetic text
   upload, reading, bounded byte range, author metadata/filter and archive retention
-  passed. The test original remains archived; no owner media was imported.
+  passed. The test original remains archived; no personal media was imported.
 - The seeded directory contains **41 stations**, individually sampled before
   inclusion. A later native broker check of a seeded station returned an audio
   sample. No sound was played. Availability and browser compatibility can change.
@@ -57,7 +57,7 @@ references. No GitHub publication was performed.
 
 1. Intended phone/PWA audio, local speech voices, lock-screen/background behavior
    and browser-specific codecs. No audible test was run.
-2. Real music tags/artwork, owner book variants, podcast subscriptions and explicit
+2. Real music tags/artwork, personal book variants, podcast subscriptions and explicit
    metadata-provider searches. Online scrapers and scheduled feed refresh remain
    disabled until configured. Protected Kindle/KPF originals require a companion.
 3. New recovery UI mutation paths on a separately approved disposable campaign;
@@ -65,7 +65,7 @@ references. No GitHub publication was performed.
    are not independent file backups or parity verification.
 4. Physical unplug, distinct disk replacement, full content/parity verification,
    recovery cold starts and the other existing NAS hardware/security gates.
-5. Five-tap shutdown and pitched output discovery with the owner present after
+5. Five-tap shutdown and pitched output discovery with me present after
    healthy/idle storage. The held-button shutdown policy is unchanged and the
    requested melody specification is disabled.
 
@@ -85,7 +85,7 @@ not a claim about the location of every streaming CDN.
 
 Podcast search covers subscribed feeds and episodes. New subscriptions require
 an explicit US/Canada service country; older unknown subscriptions remain stored
-and can be classified in the interface. This is owner-declared service/publisher
+and can be classified in the interface. This is user-declared service/publisher
 country, not geographic network blocking or an online podcast directory.
 
 The book reader offers installed local voices, reading speed and pitch from
@@ -94,7 +94,7 @@ verified that the selected voice, rate and pitch reach the utterance and that
 remote voices are excluded. Changing settings while paused does not start audio.
 Devices with no installed local voice cannot offer a voice; some speech engines
 ignore pitch. Actual audible quality and intended phone/PWA behavior still need
-owner listening tests. No audio was played during this campaign.
+manual listening tests. No audio was played during this campaign.
 
 Validation: 410 host Python tests passed (four skipped), 25 JavaScript tests
 passed, and 19 native library tests passed. Final small normalization/count changes

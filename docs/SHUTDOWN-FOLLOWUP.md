@@ -4,7 +4,7 @@ Observed on the second TS-431XeU during the final installed-image cold-start tes
 
 ## Evidence
 
-The shutdown trace showed filesystem synchronization, root remounted read-only, and all filesystems reported unmounted before the late MCU chassis-power-off request. Systemd also reported that one MD device could not be finalized. The owner confirmed the fans stopped, waited, and powered the chassis on normally.
+The shutdown trace showed filesystem synchronization, root remounted read-only, and all filesystems reported unmounted before the late MCU chassis-power-off request. Systemd also reported that one MD device could not be finalized. I confirmed the fans stopped, waited, and powered the chassis on normally.
 
 The next autonomous NAND boot identified all four disks and assembled both members of the OS mirror. The kernel reported `not clean -- starting background reconstruction`, followed by `resync done`. It uses an internal write-intent bitmap. By the post-boot checks, the mirror was clean, non-degraded and idle, all four SMART health checks passed, and no service was failed. A new configuration backup verified successfully.
 
@@ -28,7 +28,7 @@ Inspection of the exact 6.12.114 source explains the ordering risk: `md_notify_r
 
 The existing static shutdown helper now delegates when this registered kernel callback reports ready. Its board, final-PID1 and read-only-root guards remain. Without the module it retains the legacy compatibility path; that path has not acquired clean-MD acceptance merely because the source changed.
 
-A matching module and static helper have been built and installed **on the spare only**, with the original helper retained privately. Native dry-run checks observed the kernel-ready flag change from absent to ready without a power command, and local services stayed healthy. A deterministic test-file checksum and member metadata were saved. **Physical shutdown/cold-start verification is pending the owner's availability. This is a candidate, not a proven fix.** No NAND, SPI, boot command, data layout or RAID metadata was changed by installation.
+A matching module and static helper have been built and installed **on the spare only**, with the original helper retained privately. Native dry-run checks observed the kernel-ready flag change from absent to ready without a power command, and local services stayed healthy. A deterministic test-file checksum and member metadata were saved. **Physical shutdown/cold-start verification is pending my availability. This is a candidate, not a proven fix.** No NAND, SPI, boot command, data layout or RAID metadata was changed by installation.
 
 The optional module builder accepts `freeqnap_poweroff`. On the target, `deploy/install-poweroff.sh` checks exact vermagic/model and installs reviewed local module/helper artifacts without rebooting. The helper can be compiled statically from the included C source with the matching armhf toolchain. Retain the prior helper and module state for rollback; never force-load a different ABI. This does not complete the public clean-build installer.
 
@@ -36,6 +36,6 @@ References: [kernel shutdown ordering](https://github.com/torvalds/linux/blob/v6
 
 ## First candidate physical cycle: passed 30 October 2026
 
-The owner-authorized idle shutdown reached the kernel's final callback **after all four SATA disks synchronized caches and stopped**, followed by the Ethernet shutdown and kernel power-down messages. The owner confirmed the fans stopped, waited, and powered on normally. The next autonomous installed-image boot had a new boot ID, all four SATA links/disks, an unchanged fsynced 16 MiB test-file SHA-256, a healthy `[UU]` OS mirror and no failed services. Neither the boot journal nor captured cold-boot trace contained the previous unclean-array/background-reconstruction report. All four internal SMART short self-tests had completed without error before shutdown.
+The explicitly authorized idle shutdown reached the kernel's final callback **after all four SATA disks synchronized caches and stopped**, followed by the Ethernet shutdown and kernel power-down messages. I confirmed the fans stopped, waited, and powered on normally. The next autonomous installed-image boot had a new boot ID, all four SATA links/disks, an unchanged fsynced 16 MiB test-file SHA-256, a healthy `[UU]` OS mirror and no failed services. Neither the boot journal nor captured cold-boot trace contained the previous unclean-array/background-reconstruction report. All four internal SMART short self-tests had completed without error before shutdown.
 
 This accepts that first idle cycle of the guarded callback. Repeat post-write shutdown, normal reboot, physical data-array shutdown/reassembly and interrupted-power cases remain separate tests. Do not generalize one clean root-mirror cycle into complete storage/power-loss acceptance. The compatibility fallback without the matching module remains unaccepted for clean metadata ordering.

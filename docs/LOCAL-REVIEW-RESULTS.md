@@ -6,7 +6,7 @@
 - Real service backup: private service-account archive created and verified, no administrator/session identity imported.
 - Boundaries: web service unprivileged, no device access, loopback-only; collector separate and root-owned; no failed systemd units.
 - Source-package audit: required source files, board-file hashes, Markdown links and private-path/key-marker checks passed. Manual review remains required; this is not an exhaustive secret or security audit.
-- Installed-image cold start: automatic NAND boot with transfer helper paused, all disks/services restored, all four SMART checks passed, 51°C CPU, three reporting fans; owner confirmed all fans and all four drive LEDs. A fresh post-boot backup verified.
+- Installed-image cold start: automatic NAND boot with transfer helper paused, all disks/services restored, all four SMART checks passed, 51°C CPU, three reporting fans; I confirmed all fans and all four drive LEDs. A fresh post-boot backup verified.
 - Shutdown follow-up: RAID1 reported unclean metadata and performed a brief bitmap recovery, then returned clean/non-degraded. Final power-off ordering is not yet fully accepted.
 - No data pool, shares or destructive storage change was made by console deployment. Nothing was published and no Git remote was configured.
 
@@ -14,7 +14,7 @@ The interface preview uses synthetic data. See ACCEPTANCE.md and RELEASE-REVIEW.
 
 ## Full-NAS expansion in progress
 
-The owner expanded the scope to sharing, encrypted data volumes, shared-file backup/restore, media services and a guided installer. The source now includes a peer-checked Unix broker and fixed native-operation registry, a nine-workspace manual dashboard and a photographed HTML tutorial. The owner-selected appearance is black/dark red with white/grey text, fixed top navigation and a circle containing an inscribed triangle.
+I expanded the scope to sharing, encrypted data volumes, shared-file backup/restore, media services and a guided installer. The source now includes a peer-checked Unix broker and fixed native-operation registry, a nine-workspace manual dashboard and a photographed HTML tutorial. The selected appearance is black/dark red with white/grey text, fixed top navigation and a circle containing an inscribed triangle.
 
 Twenty-five management/guard tests pass on the host. The earlier 23-test set also passed natively on ARMhf. All nine dashboard workspaces render in the read-only synthetic preview with no browser errors and no enabled modifying submit controls. These statements concern the tested source; the expanded broker/servers are not yet commissioned on the NAS.
 
@@ -37,4 +37,4 @@ The local file manager now provides safe extraction into the current or archive-
 
 The complete application suite passed 103 tests on both the Mac and native ARMhf NAS; 36 installer tests also passed. Native read-only fixtures passed LUKS1/ext4, LUKS2/ext4, LUKS2/NTFS and software-encrypted APFS known-file access, write denial and clean lock. Official BitLocker/To Go crypto vectors matched their complete known decrypted hashes; those fixture NTFS metadata did not mount, so complete BitLocker file browsing is still unaccepted. See ENCRYPTED-USB.md for exact boundaries and reader-source pins. No physical encrypted USB disk has passed acceptance.
 
-The required FUSE, userspace skcipher and dm-zero modules match the installed kernel. The APFS reader was built locally from pinned source with a private stdin credential handoff; neither it nor any new kernel/module binary is included in the public candidate. The unsuccessful RAM-only PCIe coherency experiment was rolled back to the installed image. The TR-004 remains read-only, no data pool exists, private DHCP stays disabled and first-run console administration remains owner-initialized. No configuration, media, fleet data or secrets were imported. Nothing was published.
+The required FUSE, userspace skcipher and dm-zero modules match the installed kernel. The APFS reader was built locally from pinned source with a private stdin credential handoff; neither it nor any new kernel/module binary is included in the public candidate. The unsuccessful RAM-only PCIe coherency experiment was rolled back to the installed image. The TR-004 remains read-only, no data pool exists, private DHCP stays disabled and first-run console administration remains manually initialized. No configuration, media, fleet data or secrets were imported. Nothing was published.

@@ -55,7 +55,7 @@ as successful or broadly delete unrelated validation directories.
 
 Both filesystems share one physical RAID. This validates file/restore mechanics,
 not an independent disaster backup or bare-metal recovery. An off-NAS production
-backup destination remains deferred by the owner.
+backup destination remains deferred by me.
 
 ## Encrypted NAS configuration capture
 
@@ -63,14 +63,14 @@ A separate disposable-state capture of the current real NAS configuration passed
 194 captured files, about 18.8 MB encrypted, matching streamed download SHA-256,
 verified decrypted manifest and SQLite integrity, consistent Samba credential
 capture, wrong-password rejection and no persisted export password. Only this
-validation archive/state was removed afterward; no owner archive was pruned and
+validation archive/state was removed afterward; no accepted archive was pruned and
 no live configuration was restored. This is capture/download/decryption evidence,
 not a fresh-system or full disaster restore.
 
 ## Physical-member test preparation
 
 Two new 16 MiB proof files (one per internal data filesystem) were fsynced and
-independently copied to the owner's Mac with matching SHA-256. They remain private
+independently copied to my Mac with matching SHA-256. They remain private
 and are retained for the proposed physical-member test. These independent copies
 protect only the disposable proof data, not all NAS data or configuration.
 
@@ -128,7 +128,7 @@ See [current status](CURRENT-STATUS.md), [production readiness](PRODUCTION-READI
 
 ## Approved real-array member test — completed
 
-After the earlier checkpoint, the owner explicitly approved the fresh data-only
+After the earlier checkpoint, I explicitly approved the fresh data-only
 member plan. The original proof copies on the Mac were re-hashed; the same disk,
 partition, array, filesystem and root-exclusion identities passed a new preflight.
 
@@ -186,6 +186,6 @@ boot and cold-start/power-loss recovery are not established.
   delegation were denied. It was revoked and verified unusable, with no token
   included in public output or saved test evidence.
 - Real TV/speaker playback, device-specific codecs and seek behavior still need
-  owner-attended acceptance. No AirPlay/Cast or transcoding support is claimed.
+  attended acceptance. No AirPlay/Cast or transcoding support is claimed.
 - New source is committed locally; no private history or new public push is part
   of this validation.

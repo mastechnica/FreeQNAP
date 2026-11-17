@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fresh-plan, owner-approved disposable USB encryption campaign.
+"""Fresh-plan, explicitly approved disposable USB encryption campaign.
 
 Never selects by /dev name alone. The private plan pins the USB descriptor,
 serial/capacity/attachment sequence, stable link, existing registration and both

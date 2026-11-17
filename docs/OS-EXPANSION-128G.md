@@ -1,9 +1,9 @@
 # Proposed OS expansion to 128 GiB
 
-Prepared 1 November 2026 after the owner requested a larger OS partition and
+Prepared 1 November 2026 after I requested a larger OS partition and
 explicitly permitted destruction of the internal data RAID. This is a reviewed
 proposal, **not a completed physical resize**. The original OS mirror and data
-array remain unchanged. The owner has now confirmed the exact disk plan; execution
+array remain unchanged. I have now confirmed the exact disk plan; execution
 awaits the privileged transfer-helper restart and offline recovery preparation.
 
 ## Intended result
@@ -27,7 +27,7 @@ new geometry, plan digest and backup records remain in the private plan.
 Fresh identity/geometry and health reads found both physical arrays healthy/idle,
 with no configured data shares, users, media libraries or backup repositories and
 no active application jobs. A fresh password-encrypted configuration backup was
-independently downloaded, decrypted and verified on the owner's host: all 227
+independently downloaded, decrypted and verified on my host: all 227
 manifest members matched. Older accepted recovery archives remain retained.
 This is configuration protection, not a full OS image or a backup of destroyed
 user data.
@@ -72,7 +72,7 @@ because a supervised process timed out. Full-chip/SPI recovery remains excluded.
 
 ## Approved maintenance preparation
 
-The owner confirmed execution of the exact plan. A separate flash-prohibited RAM
+I confirmed execution of the exact plan. A separate flash-prohibited RAM
 maintenance image was built from the tested hardened kernel configuration, changing
 the initramfs and boot arguments rather than board hardware properties. Header,
 CRC/SHA, unchanged hardware-tree properties and the built 46-entry CPIO identity
@@ -88,9 +88,9 @@ and machine-ID permissions. A private derivative corrected only those two modes,
 verified all 9,564 regular-file contents unchanged and passed the complete base
 identity/configuration audit. These tools will run in RAM; they do not replace the
 installed OS. Temporary SSH access must use a newly generated RAM host key pinned
-through UART, with key-only owner access and separate strict host-key checking.
+through UART, with key-only administrator access and separate strict host-key checking.
 
-The owner must restart the immutable boot-transfer helper because its existing
+You must restart the immutable boot-transfer helper because its existing
 process pins the older image and macOS requires administrator access to its port.
 No reboot, application stop, physical array destruction or partition change has
 been performed during this preparation. Consistent offline OS/boot/GPT capture

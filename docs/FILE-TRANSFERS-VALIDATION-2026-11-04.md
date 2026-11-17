@@ -2,7 +2,7 @@
 
 ## Diagnosis
 
-The owner's USB-to-private-Photos-folder copy was not running: the visible job had
+My USB-to-private-Photos-folder copy was not running: the visible job had
 failed during staging-directory creation with an operation-not-permitted error,
 and had published no destination items. Recursive copying requested a setgid
 permission bit prohibited by the broker's existing RestrictSUIDSGID protection.
@@ -53,7 +53,7 @@ The selected folder was still unpublished, as expected: whole selected folders
 appear only after verification, while the transfer card reports staging progress.
 
 The iCloud archive job was paused at its resumable checkpoint for backend activation,
-then restored. Apple requested trusted-device approval and the owner approved it.
+then restored. Apple requested trusted-device approval and I approved it.
 Both iCloud download and file copy were subsequently confirmed active. Later UI
 updates restarted only the console and did not reconnect the Apple session or
 restart the copy. No NAS reboot, disk-layout change, overwrite, notification-setting
@@ -68,7 +68,7 @@ Mac/iPhone approval. Apple's popup branding was not changed or promised; no acti
 Apple session was modified to experiment with labels.
 
 The large copy, its final readback/publication, and whole-library iCloud completion
-remain in progress. Additional owner visual acceptance of the live Files panel is
+remain in progress. Additional my visual acceptance of the live Files panel is
 separate from the API/native/JavaScript checks. Nothing was publicly published.
 
 ## Path display and history follow-up
@@ -86,9 +86,9 @@ separate from the API/native/JavaScript checks. Nothing was publicly published.
   checks passed both targeted Python tests and both transfer-panel tests.
 - Deployment restarted only the web console/proxy. The broker process remained
   unchanged and the real copy advanced past 4,300 verified files. Full-copy
-  completion and an owner browser confirmation are still pending.
+  completion and an browser confirmation are still pending.
 
-## Scoped storage and owner-approved continuation
+## Scoped storage and explicitly approved continuation
 
 - All 556 Python checks passed with 16 environment/optional skips; all 53 JavaScript
   checks passed. An additional continuation-checkpoint interruption test passed.
@@ -97,7 +97,7 @@ separate from the API/native/JavaScript checks. Nothing was publicly published.
 - Confirmed byte reuse and inode preservation across an intentional partial-file
   interruption. Mismatching retained bytes and another account were rejected.
   An interruption before rescan retained a new recoverable stage pointer.
-- With the owner's explicit permission, paused only the operation broker after
+- With my explicit permission, paused only the operation broker after
   private state backups and unchanged source/destination identity checks. Saved
   an inventory of 8,143 staged files/about 8.8 GB; three sample hashes matched
   original sources. No reboot, formatting, source deletion or source overwrite.

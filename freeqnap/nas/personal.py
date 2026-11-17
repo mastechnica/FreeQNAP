@@ -18,7 +18,7 @@ RADIO_METHODS={'station-artwork':'station_artwork','status':'status','configure'
 PHOTO_METHODS={'metadata-read':'metadata_read','metadata-plan':'metadata_plan','metadata-apply':'metadata_apply','status':'status','catalog':'catalog','places':'places','related':'related','read':'read','annotate':'annotate','album-create':'album','album-add':'album_add','import-folder':'import_folder'}
 CLOUD_METHODS={'photos.icloud-check':'check','photos.icloud-status':'status','photos.icloud-save':'save','photos.icloud-login':'login','photos.icloud-code':'code','photos.icloud-run':'run','photos.pause':'pause'}
 QUEUED={'library.storage-apply','myradio.scan','myradio.import-folder','myradio.station-refresh','myradio.download','files.transfer','files.delete','files.recycle','files.archive'}
-FILE_METHODS={'transfer-resume-plan':'transfer_resume_plan','transfer-retry-plan':'transfer_retry_plan','transfers':'transfers','media-neighbors':'media_neighbors','list':'list','read':'read','mkdir':'mkdir','upload-begin':'upload_begin','upload-chunk':'upload_chunk','upload-finish':'upload_finish','move-plan':'move_plan','move':'move','transfer-plan':'transfer_plan','recycle-plan':'recycle_plan','delete-plan':'delete_plan','trash':'trash_items','restore-plan':'restore_plan','restore':'restore','purge-plan':'purge_plan','purge':'purge','policy':'policy','policy-plan':'policy_plan','policy-save':'policy_apply','stages':'stages','stage-plan':'stage_plan','stage-remove':'stage_remove'}
+FILE_METHODS={'properties':'properties','transfer-resume-plan':'transfer_resume_plan','transfer-retry-plan':'transfer_retry_plan','transfers':'transfers','media-neighbors':'media_neighbors','list':'list','read':'read','mkdir':'mkdir','upload-begin':'upload_begin','upload-chunk':'upload_chunk','upload-finish':'upload_finish','move-plan':'move_plan','move':'move','transfer-plan':'transfer_plan','recycle-plan':'recycle_plan','delete-plan':'delete_plan','trash':'trash_items','restore-plan':'restore_plan','restore':'restore','purge-plan':'purge_plan','purge':'purge','policy':'policy','policy-plan':'policy_plan','policy-save':'policy_apply','stages':'stages','stage-plan':'stage_plan','stage-remove':'stage_remove'}
 
 class PersonalContext(Context):
  def __init__(self,base,owner):self.base=base;self.owner=owner;super().__init__(base.directory/'personal'/owner,runner=base.run)
@@ -151,7 +151,7 @@ class Personal:
    if any(k in payload for k in ('password','secret','key_base64')):raise ValueError('Secrets cannot enter jobs')
    schemas={'library.storage-apply':{'plan_id','digest','confirmation'},'myradio.scan':set(),'myradio.import-folder':{'category','share','path'},'myradio.station-refresh':{'group','query','country'},'myradio.download':{'source'},'files.transfer':{'plan_id','digest','confirmation'},'files.delete':{'plan_id','digest','confirmation'},'files.recycle':{'plan_id','digest','confirmation'},'files.archive':{'plan_id','digest','confirmation'}}
    if set(payload)-schemas[action]:raise ValueError('Unknown queued setting')
-   return {'job_id':s['ctx'].state.enqueue(action,payload)}
+   return s['files'].enqueue_transfer(payload) if action=='files.transfer' else {'job_id':s['ctx'].state.enqueue(action,payload)}
   if action=='library.storage-apply':
    return s['storage'].apply(payload)
   if action.startswith('myradio.'):

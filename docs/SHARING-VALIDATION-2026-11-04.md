@@ -33,11 +33,11 @@ Raw logs and generated fixtures remain private and excluded from Git. No private
 photo, real recipient, message, social upload, family account, cloud identity or
 Apple login was used. The first EyeQ/Spectrum NAS was untouched.
 
-## Remaining owner acceptance
+## Remaining physical acceptance
 
 Choose actual library volumes/folders, create desired family accounts and assign
 their permissions. Optional Authentik and individual Apple connections require
-private owner setup and end-to-end provider tests. On each target phone/PWA,
+private manual setup and end-to-end provider tests. On each target phone/PWA,
 verify Share Social offers the desired apps, cancellation works and a chosen
 recipient receives the intended privacy copy. Native sharing app availability and
 delivery are not proven by the simulated browser tests. Large files and unusual

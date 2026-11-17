@@ -146,6 +146,25 @@ class CloudTests(PhotosTests):
  def verified_client(self,**extra):
   from types import SimpleNamespace as NS
   return NS(photos=NS(all=[]),requires_2fa=False,requires_2sa=False,validate_2fa_code=lambda code:True,trust_session=lambda:(_ for _ in ()).throw(AssertionError('duplicate trust call')),request_pcs_consent=lambda app:None,**extra)
+ def test_fresh_web_approval_recreates_only_the_client_and_keeps_saved_files(self):
+  from unittest.mock import Mock
+  self.cloud.save({'adp':True});old=self.verified_client();new=self.verified_client();self.cloud.client=old;self.cloud.restored=True
+  session=self.ctx.directory/'personal-icloud-sessions'/'retained';session.mkdir(parents=True);saved=session/'cookie';saved.write_text('fixture-session')
+  self.cloud._factory=Mock(return_value=new);self.cloud.auth_lock.acquire();self.cloud._check(True)
+  self.assertIs(self.cloud.client,new);self.cloud._factory.assert_called_once_with('');self.assertEqual(saved.read_text(),'fixture-session');self.assertEqual(self.cloud.auth_state,'connected');self.assertFalse(self.cloud.auth_lock.locked())
+ def test_busy_download_and_invalid_approval_flag_do_not_reset_client(self):
+  client=self.verified_client();self.cloud.client=client;self.photos.busy.acquire()
+  try:
+   with self.assertRaises(ValueError):self.cloud.check({'reinitialize':True})
+  finally:self.photos.busy.release()
+  with self.assertRaises(ValueError):self.cloud.check({'reinitialize':'yes'})
+  self.assertIs(self.cloud.client,client)
+ def test_approval_checks_are_rate_limited(self):
+  from unittest.mock import patch
+  with patch('freeqnap.nas.personal_cloud.time.monotonic',return_value=100),patch('freeqnap.nas.personal_cloud.threading.Thread'):
+   self.cloud.check({'reinitialize':True});self.cloud.auth_lock.release()
+   with self.assertRaisesRegex(ValueError,'Please wait'):self.cloud.check({'reinitialize':True})
+
  def test_verified_code_checks_photo_access_without_double_trust(self):
   self.cloud.client=self.verified_client();self.cloud.auth_state='verification-code-needed';self.cloud.auth_lock.acquire();self.cloud._code('123456');self.assertEqual(self.cloud.auth_state,'connected');self.assertTrue(self.cloud.status()['can_download'])
  def test_adp_approval_timeout_preserves_session_and_explains_next_step(self):

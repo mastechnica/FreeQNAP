@@ -48,7 +48,7 @@ unlock owners fail closed rather than being silently adopted. Protocol exports o
 private encrypted volumes are blocked because those services lack a verified
 mapping to dashboard identities. OS root remains a trusted administrator boundary.
 
-## Remaining owner acceptance and coverage limits
+## Remaining physical acceptance and coverage limits
 
 1. With a disposable encrypted USB drive, sign in as two real users and verify
    owner-only selectors, browsing, media, upload/copy/import, direct links, lock and

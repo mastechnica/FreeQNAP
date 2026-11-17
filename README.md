@@ -5,8 +5,8 @@
 
 ![Running FreeQNAP overview](docs/assets/screenshots/overview.png)
 
-**Experimental source project · 5 November 2026.** FreeQNAP is running on real
-TS-431XeU hardware. The owner approved this source publication under
+**Experimental source project · 17 November 2026.** FreeQNAP is running on real
+TS-431XeU hardware. Source and project updates are published at
 [mastechnica/FreeQNAP](https://github.com/mastechnica/FreeQNAP). No prebuilt OS image
 is included. The public installer workflow
 and several recovery/hardware acceptance gates remain unfinished. Do not put
@@ -165,7 +165,7 @@ isolation. APFS access is experimental/read-only; BitLocker browsing still lacks
 complete acceptance. Public binary release requires clean builds, corresponding
 source/license packaging, signed artifacts and a tested update/recovery path.
 
-The illustrated UART connector guide marks the owner-confirmed far-right GND
+The illustrated UART connector guide marks the physically confirmed far-right GND
 and leaves other positions/voltage explicitly unmeasured. Never power the board
 from the USB UART adapter or assume a related model's pinout is verified here.
 
@@ -201,7 +201,7 @@ Fixture tests do not program hardware or certify recovery. The release review
 also checks static links, image redaction receipts and the complete package
 inventory. See [publication preparation](docs/PUBLICATION-PACKAGE.md).
 
-Original FreeQNAP code is MIT, subject to final owner license review. Linux-derived
+Original FreeQNAP code is MIT, subject to final license review. Linux-derived
 files retain their GPL terms and notices. This source-only package contains no OS
 images, vendor firmware, private flash dumps, keys, credentials, runtime databases
 or previous private project history. Screenshot crops and opaque masks are

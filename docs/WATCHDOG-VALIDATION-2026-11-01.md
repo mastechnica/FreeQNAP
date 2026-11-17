@@ -1,9 +1,9 @@
 # Watchdog RAM expiry validation — 1 November 2026
 
-**Bounded physical expiry test passed.** With the owner present, three intentional
+**Bounded physical expiry test passed.** With me present, three intentional
 SP805 resets completed from diskless RAM. The watchdog remains inactive in the
 installed OS; no unattended reset policy has been enabled. Fixed full-speed
-cooling was retained throughout and the owner observed all three fans spinning.
+cooling was retained throughout and I observed all three fans spinning.
 
 ## Physical results
 
@@ -21,12 +21,12 @@ register value, so that remains unavailable rather than inferred from zero.
 The arm/feed/disarm check passed before the expiry sequence and again afterward,
 each with a 23-second inactive observation and no late reset. Every RAM session
 showed only volatile mounts, no assembled arrays and acknowledged full-speed mode.
-CPU readings were 49–50°C. The owner confirmed normal fans and all four bay LEDs
+CPU readings were 49–50°C. I confirmed normal fans and all four bay LEDs
 on return. The original saved boot command was used; no flash or saved environment
 write was performed.
 
 The approved fresh configuration export was encrypted, verified and independently
-copied to the owner's private Mac folder, with its password kept private. Private
+copied to my private Mac folder, with its password kept private. Private
 raw serial records, identities, checksums and backup material remain ignored.
 
 ### Return-to-service issue found and fixed
@@ -93,7 +93,7 @@ Two explicit operations are provided only for the accepted RAM shell:
 
 ## Attended sequence used / remaining policy
 
-1. Have the owner at the correct NAS with UART and Ethernet retained, and start
+1. Be present at the correct NAS with UART and Ethernet retained, and start
    the checksum-pinned transfer helper on the Mac. It serves only this image to
    this NAS, drops elevated privileges and accepts no uploads.
 2. Preserve the reviewed pre-test recovery material. Any new export containing
@@ -136,6 +136,6 @@ The subsequent ordinary restart of the installed 6.12.114 kernel passed with a n
 boot identity. The managed ten-second watchdog became active automatically and
 accepted permanent Auto cooling resumed. Both arrays were non-degraded/idle and
 both data volumes mounted without startup errors. Independent direct proof hashes
-matched again; the owner confirmed all three fans and all four occupied bay
+matched again; I confirmed all three fans and all four occupied bay
 indicators normal. This establishes the tested warm-start persistence case, not
 power-loss or watchdog-expiry recovery with mounted filesystems.

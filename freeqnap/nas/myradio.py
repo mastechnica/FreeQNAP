@@ -50,6 +50,9 @@ def category(value):
     if value not in CATEGORIES:raise ValueError('Choose Music, Books or Podcasts')
     return value
 
+def collection_formats(kind):
+    return AUDIO | BOOKS if category(kind)=='books' else AUDIO
+
 def filename(value):
     value=clean(value,180)
     if len(value.encode('utf-8'))>220 or not value or value.startswith('.') or '/' in value or '\\' in value:raise ValueError('Choose a plain filename')
@@ -383,7 +386,7 @@ class MyRadio:
                                 if not IDENT.fullmatch(entry.name) or not entry.is_dir(follow_symlinks=False):continue
                                 prepared=False
                                 with directory(folder,(entry.name,)) as item_fd:
-                                    candidates=[e.name for e in os.scandir(item_fd) if e.is_file(follow_symlinks=False) and Path(e.name).suffix.lower() in AUDIO|BOOKS]
+                                    candidates=[e.name for e in os.scandir(item_fd) if e.is_file(follow_symlinks=False) and Path(e.name).suffix.lower() in collection_formats(kind)]
                                     if len(candidates)==1:
                                         try:
                                             saved=self.asset(entry.name);st=os.stat(candidates[0],dir_fd=item_fd,follow_symlinks=False)
@@ -422,7 +425,7 @@ class MyRadio:
                             with directory(fd,(entry.name,)) as child:
                                 if os.fstat(child).st_dev!=source_device:continue
                                 walk(child,parts+(entry.name,))
-                        elif entry.is_file(follow_symlinks=False) and Path(entry.name).suffix.lower() in AUDIO|BOOKS:
+                        elif entry.is_file(follow_symlinks=False) and Path(entry.name).suffix.lower() in collection_formats(kind):
                             source=os.open(entry.name,os.O_RDONLY|os.O_NOFOLLOW,dir_fd=fd)
                             try:
                                 st=os.fstat(source)

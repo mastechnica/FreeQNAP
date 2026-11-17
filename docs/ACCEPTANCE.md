@@ -9,20 +9,20 @@ Recorded 29 October 2026. Two matching TS-431XeU units informed this work. The o
 - Generic dev004 image boots the unit's own mirrored Debian 13 armhf root. Per-installation identity/records replace hard-coded first-unit UUIDs.
 - Both original 32 MiB NAND kernel slots and full 2 MiB SPI were privately backed up and matched two independent UART-observed reads each.
 - Only the first NAND kernel slot was programmed. Full padded 32 MiB readback compared equal. SPI, second kernel slot and saved boot command remained unchanged.
-- Two unattended software restarts and one physical cold start booted that installed image with the TFTP helper paused and no bootloader intervention. The owner confirmed all fans had stopped before the cold start. Fresh OS checks passed afterward; see the shutdown follow-up below.
+- Two unattended software restarts and one physical cold start booted that installed image with the TFTP helper paused and no bootloader intervention. I confirmed all fans had stopped before the cold start. Fresh OS checks passed afterward; see the shutdown follow-up below.
 - Healthy synchronized two-member OS mirror, expanded to 128 GiB on 2 November 2026 (see OS-EXPANSION-VALIDATION-2026-11-02.md), all four SATA disks identified, no failed systemd services, key-authenticated SSH, factory MAC restoration and ordinary DHCP on LAN1.
 - Two administrative restart cycles per RJ45, each with matching bidirectional 256 KiB transfers. LAN1 negotiated 1 Gbps; the direct Mac adapter limited LAN2 to 100 Mbps.
-- Acknowledged full cooling, three reporting fan counters, working CPU thermal readings; the owner observed all three fans spinning during the second-unit process. RESET-triggered orderly reboot was observed.
+- Acknowledged full cooling, three reporting fan counters, working CPU thermal readings; I observed all three fans spinning during the second-unit process. RESET-triggered orderly reboot was observed.
 - Normal boot has no maintenance shell/debug arguments. Root password is locked and deferred; a supplied private installation key is used for administration. No application configuration was imported.
 - RTC was explicitly set/read back as UTC. External NTP did not reply and outbound HTTPS was unavailable in the test network. The precise upstream cause is unproven; time synchronization and WAN access must not be claimed healthy.
 
 ## What these results do not establish
 
-The final installed-image cold start passed: a new boot ID, observed automatic NAND read, no TFTP download, healthy synchronized OS mirror, all four disks and SMART health checks, all expected services, three nonzero fan counters and a CPU reading of 51°C. The owner confirmed three visibly spinning fans and correct green/activity indications in all four occupied bays. A fresh service-account configuration backup completed and verified after startup.
+The final installed-image cold start passed: a new boot ID, observed automatic NAND read, no TFTP download, healthy synchronized OS mirror, all four disks and SMART health checks, all expected services, three nonzero fan counters and a CPU reading of 51°C. I confirmed three visibly spinning fans and correct green/activity indications in all four occupied bays. A fresh service-account configuration backup completed and verified after startup.
 
 The boot also reported an unclean RAID1 state and a brief bitmap recovery despite the preceding orderly filesystem shutdown. Recovery completed and the mirror was clean/non-degraded at acceptance. Final RAID metadata/power-off ordering remains an explicit defect to investigate; this test does not establish resync-free clean shutdown. See [shutdown follow-up](SHUTDOWN-FOLLOWUP.md).
 
-No disk-loader fallback, interrupted-NAND recovery or full physical flash restoration is accepted. The latter is excluded by owner decision.
+No disk-loader fallback, interrupted-NAND recovery or full physical flash restoration is accepted. The latter is excluded by my decision.
 
 USB2 reads on all ports, bay LED presence/activity, buzzer, physical orderly chassis-off and earlier warm SATA/network fixes are documented on the original unit. The new generic installer still needs its own complete peripheral regression. Four disks enumerating is not four-disk load, hotplug or rebuild acceptance.
 
@@ -32,7 +32,7 @@ SFP+ traffic, USB SuperSpeed, adaptive cooling, stalled-fan/thermal fault respon
 
 The local suite covers SQLite/WAL consistency and session exclusion, archive corruption, retained good backups after failure, retention, wrong/missing mirror UUID, verified mirror copy, job failure isolation across restart, interruption reconciliation, daily schedule persistence, root/stale/changed disk protection, login/session hashing, forged identity headers, CSRF/origin/Host rejection and read-only synthetic preview. All 14 management tests passed both on the Mac and natively on Debian ARMhf. The root collector reported all four drives with SMART health passed and no inventory errors. A real service-account configuration backup completed and independently verified; state/backup directories were mode 0700 and the root-owned inventory mode 0640. The console listens only on 127.0.0.1, with its separate administrator still unconfigured. These checks do not accept destructive array recovery or a full restore.
 
-Public installation is not ready until clean source builds, artifact/license packaging, a unified guided workflow, remaining native integration/failure tests and the release checklist are complete. Keep private evidence out of the public repository; publish redacted results only after owner review.
+Public installation is not ready until clean source builds, artifact/license packaging, a unified guided workflow, remaining native integration/failure tests and the release checklist are complete. Keep private evidence out of the public repository; publish redacted results only after my review.
 
 
 ## Native NAS/network software fixture campaign — 29 October 2026
@@ -63,7 +63,7 @@ Separate USB identity/import/create/eject controls and the read-only external br
 
 ## Subsequent maintenance checkpoint — 30 October 2026
 
-The original dated observations above remain historical evidence. The owner has now initialized the dashboard administrator privately. LAN-only private-CA HTTPS passed real certificate-verified endpoint and isolated authentication/security checks; client trust remains an owner action. See [local HTTPS](LOCAL-HTTPS.md).
+The original dated observations above remain historical evidence. I have now initialized the dashboard administrator privately. LAN-only private-CA HTTPS passed real certificate-verified endpoint and isolated authentication/security checks; client trust remains an manual action. See [local HTTPS](LOCAL-HTTPS.md).
 
 After upstream access was restored, direct verified HTTPS, official signed Debian main/updates/security metadata and valid NTP synchronization passed. The update simulation reported no pending packages, and the temporary administration-computer package relay was retired. Later clock tracking showed about 1.2 ms system offset and 3.4 ms root dispersion.
 
@@ -74,7 +74,7 @@ The approved internal RAID5 has two mounted bounded ext4 filesystems; initial sy
 
 The local incident dashboard and independent workers are deployed. Live checks report fresh monitoring, only the expected protection-incomplete RAID incident during initial synchronization, no startup/worker errors, verified HTTPS, zero push subscriptions/outbound notification jobs and no DDNS profiles. Email/push remain disabled. The signed DDNS driver is installed with its stock daemon masked and a separate non-login execution account.
 
-All 192 native ARMhf application tests passed, including real Web Push encryption/decryption and VAPID signatures. Six Node desktop/PWA checks passed. Isolated native SMTP STARTTLS/implicit-TLS authentication, later-recipient acceptance despite another recipient failure, restart recovery and untrusted-CA rejection passed. The real DynDNS2 driver passed verified-TLS/authentication/cache receipt, provider rejection and untrusted-CA refusal inside its unprivileged transient-unit sandbox and a disconnected namespace. Native HTTPS authentication/origin/CSRF/subnet checks passed again. No owner mailbox, browser subscription or external DDNS account was contacted by these tests.
+All 192 native ARMhf application tests passed, including real Web Push encryption/decryption and VAPID signatures. Six Node desktop/PWA checks passed. Isolated native SMTP STARTTLS/implicit-TLS authentication, later-recipient acceptance despite another recipient failure, restart recovery and untrusted-CA rejection passed. The real DynDNS2 driver passed verified-TLS/authentication/cache receipt, provider rejection and untrusted-CA refusal inside its unprivileged transient-unit sandbox and a disconnected namespace. Native HTTPS authentication/origin/CSRF/subnet checks passed again. No personal mailbox, browser subscription or external DDNS account was contacted by these tests.
 
 The live manifest, worker, icons and new scripts were independently retrieved over strict CA-verified HTTPS. This is not proof of phone installation/permission/receipt, live provider updates, external reachability or production storage acceptance. See [health/push/email](HEALTH-NOTIFICATIONS.md), [DDNS](DYNAMIC-DNS.md) and [readiness](PRODUCTION-READINESS.md). No kernel flash, chassis reboot, RAID member change or firewall expansion occurred.
 

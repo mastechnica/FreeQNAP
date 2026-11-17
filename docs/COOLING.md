@@ -28,7 +28,7 @@ A separate service watches a short controller lease. It binds process identity t
 the current boot and start time, latches controller loss before terminating that
 owner, and requests checked full speed. A restart cannot clear the same-generation
 fault latch into automatic operation. Selecting Full speed then Automatic creates
-a fresh owner-requested configuration generation, subject to acceptance checks.
+a fresh requested configuration generation, subject to acceptance checks.
 Dead UART/MCU and host-hang safety remain separate physical requirements; a
 software guard cannot send a command through a failed communication channel.
 
@@ -71,7 +71,7 @@ and [the kernel watchdog API](https://docs.kernel.org/watchdog/watchdog-api.html
 
 `tools/cooling-load-validation.py` defaults to read-only preflight. An applied
 campaign requires a fresh private root-owned exact-install plan, four internal
-SATA identities, both array UUIDs, owner attendance and a bounded workload.
+SATA identities, both array UUIDs, physical attendance and a bounded workload.
 It reads disk sectors directly without issuing disk writes. CPU/disk temperature,
 tach, array health, disk identity, worker health and independent guard freshness
 are checked throughout. The initial stop limits are 65°C CPU and 48°C disks. A reviewed 70°C CPU campaign additionally requires the exact recorded thermal basis and unchanged 80°C kernel trip. These are commissioning limits, not silicon ratings; the automatic full-speed threshold stays at 60°C. See the dated record for the original-stock 105°C configuration evidence and its limits.

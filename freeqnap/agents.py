@@ -23,7 +23,7 @@ PRESETS = {
     'health-reader': ['health.alerts','smart.status','smart.history','system.frontpanel','system.history','network.status','network.history'],
     'media-editor': ['media.catalog','media.provider-status','media.scanner-status','media.lookup','media.metadata','media.artwork','media.scan'],
     'media-playback': ['media.catalog','media.players','media.play','media.playback-control','media.playback-status'],
-    'file-reader': ['files.transfers','files.list','files.read','files.pool-list','files.pool-read'],
+    'file-reader': ['files.properties','files.transfers','files.list','files.read','files.pool-list','files.pool-read'],
     'file-editor': ['files.list','files.read','files.mkdir','files.upload-begin','files.upload-chunk','files.upload-finish','files.move-plan','files.move','files.transfer-plan','files.transfer-resume-plan','files.transfer','files.recycle-plan','files.recycle'],
     'download-manager': ['downloads.status','downloads.add','downloads.control','downloads.files','downloads.read'],
 }

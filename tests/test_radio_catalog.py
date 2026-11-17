@@ -87,3 +87,8 @@ class CatalogTests(unittest.TestCase):
  def test_padded_disc_and_track_numbers_share_the_same_intended_slot(self):
   self.g.rows=[item(1,title='Song',track='01/12',disc='01',duration=200),item(2,title='Song',track='1',disc='1/2',duration=200)]
   self.assertEqual(catalog.music(self.g,{})['items'][0]['track_count'],1)
+
+ def test_music_browser_excludes_legacy_release_note_entries(self):
+  self.g.rows=[item(1),{**item(2,title="Release notes",album="Noise"),"name":"review.txt"}]
+  result=catalog.music(self.g,{})
+  self.assertEqual(result["total"],1);self.assertEqual(result["file_count"],1);self.assertEqual(result["track_count"],1)

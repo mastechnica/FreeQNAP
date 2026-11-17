@@ -16,13 +16,13 @@ was used. The normal cooling service remains fixed at full speed.
 | CPU temperature | 54°C | 53–54°C | 53°C |
 
 These RPM values use the stock counter multiplier; they are not optical
-calibration or a mapping of each counter to its physical fan. The owner confirmed
+calibration or a mapping of each counter to its physical fan. I confirmed
 all three fans continued spinning normally during the step.
 
 ## Controller-loss guard
 
 A separate service watches a short lease from the attended test controller.
-It identifies the owner by process ID, start time and boot identity, terminates
+It identifies the controller process by process ID, start time and boot identity, terminates
 only that owner on lease failure, and requests verified full speed. The web
 interface and network are not part of this guard.
 
@@ -85,7 +85,7 @@ that full-mode restoration waited that long. This test did not start at level 6.
 A read-only four-disk/three-CPU-worker full-speed baseline stopped after 27.15
 seconds at its conservative 65°C CPU guard. Disk temperature peaked at 46°C; full
 mode was retained, and the immediate post-load CPU reading was 58°C. The campaign
-therefore did not pass its intended duration. The lighter one-worker baseline also stopped at the same conservative guard after 338.65 seconds (143 samples; peak observed CPU 66°C, disks 46°C). Sampling is discrete, so the observed value can cross the configured 65°C stop between reads. The immediate post-load CPU reading was 62°C. No writes were issued, all load workers stopped, both arrays stayed healthy and the owner is checking cover/airflow before another thermal campaign. Neither duration test passed; automatic mode remains locked. A stop threshold is
+therefore did not pass its intended duration. The lighter one-worker baseline also stopped at the same conservative guard after 338.65 seconds (143 samples; peak observed CPU 66°C, disks 46°C). Sampling is discrete, so the observed value can cross the configured 65°C stop between reads. The immediate post-load CPU reading was 62°C. No writes were issued, all load workers stopped, both arrays stayed healthy and I am checking cover/airflow before another thermal campaign. Neither duration test passed; automatic mode remains locked. A stop threshold is
 not the board's silicon maximum, and must not be raised merely to produce a pass.
 
 The current kernel version check still reports installed 6.12.114 and maintained
@@ -94,7 +94,7 @@ is part of this checkpoint. The enclosure remains read-only and unmounted.
 
 ## Covered-chassis baseline
 
-After the owner refitted the top cover, cleared the vents and reconnected UART,
+After I refitted the top cover, cleared the vents and reconnected UART,
 the same one-worker/four-disk-read full-speed baseline passed 601.1 seconds and
 252 samples. Peak CPU was 57°C, peak disk temperature 45°C, all three fan counters
 remained normal and cleanup verified full mode. No disk writes were issued.
@@ -145,7 +145,7 @@ samples, 415 at level 6 and 579.972 seconds of adjacent observed high-speed samp
 intervals. Peak CPU was 53°C and disks 35°C. Other samples were full mode; this
 is sampled evidence, not uninterrupted electrical monitoring. A short diagnostic
 trace saw 75 consecutive high-speed controller observations with no fault. The
-owner confirmed all three fans visibly spinning normally. Cleanup verified full
+I confirmed all three fans visibly spinning normally. Cleanup verified full
 mode; its immediate RPM sample can precede mechanical acceleration.
 
 The following three-worker adaptive load campaign passed 601.481 seconds and
@@ -163,18 +163,18 @@ warning remains. Notification preferences were not changed.
 
 The live status/history interface and expected-but-inactive watchdog detection are
 deployed. Twenty-five focused native ARMhf tests passed. The last two attended
-stale-reading/stopped-controller checks remain pending owner readiness; saved
+stale-reading/stopped-controller checks remain pending my availability; saved
 cooling is Full speed, permanent Auto is locked and the watchdog remains inactive.
 
 ## Attended fault acceptance and adoption
 
-Both final exact-install checks passed with the owner watching. Stale disk
+Both final exact-install checks passed with me watching. Stale disk
 telemetry caused the actual controller to request and verify full mode in 0.950
 seconds. A new actual collector snapshot restored freshness; no old inventory was
 restored over newer data. Stopping the exact cooling service owner from high mode
 caused the independent guard to kill that owner and verify full mode in 3.747
 seconds. The restarted owner remained fault-latched at full speed. Final counters
-were 8730/8700/8340 vendor RPM. The owner confirmed all three fans stayed normal.
+were 8730/8700/8340 vendor RPM. I confirmed all three fans stayed normal.
 
 After verifying every result and the saved evidence hashes, a private exact-install
 receipt admitted only levels 6/7. Permanent Auto was enabled and physical level 6
@@ -184,5 +184,5 @@ bench-environment and software-fault acceptance, not proof of physical fan-stall
 electrical UART/MCU failure, environmental extremes or critical-trip behavior.
 
 A fresh encrypted configuration capture (226 files, 21,333,388 bytes) was
-independently downloaded/hash-verified on the owner's computer before production
+independently downloaded/hash-verified on my computer before production
 supervision was enabled. It and its separate password remain private.

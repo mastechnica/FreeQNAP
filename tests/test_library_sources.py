@@ -63,3 +63,29 @@ class SourcesTests(unittest.TestCase):
   n=len(self.g.calls);self.sources.tick();self.assertEqual(len(self.g.calls),n)
   with self.assertRaises(ValueError):self.sources.request_scan()
   with self.assertRaises(ValueError):self.save()
+
+ def test_release_notes_do_not_turn_album_tree_into_one_import(self):
+  self.save();self.g.entries['Music'].append({'name':'readme.txt','directory':False});self.sources.tick()
+  self.assertEqual(len(self.sources.run()['tasks']),2)
+  self.assertTrue(all(p['path']!='Music' for a,p in self.g.calls if a=='myradio.import-folder'))
+
+ def test_background_startup_preserves_maintenance_without_contacting_storage(self):
+  from unittest.mock import patch
+  from freeqnap.library_sources import tick_all
+  self.save();hold={'state':'maintenance','message':'Pinned review in progress'};self.sources.put_run(hold);before=self.sources.run()
+  with patch('freeqnap.library_sources.Sources',side_effect=OSError('Volume not mounted yet')) as factory:
+   tick_all(self.g.state,object());factory.assert_not_called()
+  self.assertEqual(self.sources.run(),before)
+
+ def test_background_error_cannot_overwrite_a_new_maintenance_hold(self):
+  import json
+  from unittest.mock import patch
+  from freeqnap import accounts
+  from freeqnap.library_sources import tick_all
+  self.save();accounts.ensure(self.g.state)
+  with self.g.state.connect() as db:
+   db.execute('INSERT INTO local_accounts VALUES(?,?,?,?,?,?,?,?,?,?,?)',(self.g.user['id'],'fixture','Fixture','member',json.dumps(self.g.user['permissions']),'null',1,0,1,0,time.time()))
+  def unavailable(*args,**kwargs):
+   self.sources.put_run({'state':'maintenance','message':'Review started during request'});raise OSError('Storage unavailable')
+  with patch('freeqnap.library_sources.Sources',side_effect=unavailable):tick_all(self.g.state,object())
+  self.assertEqual(self.sources.run()['state'],'maintenance');self.assertEqual(self.sources.run()['message'],'Review started during request')

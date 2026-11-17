@@ -106,13 +106,37 @@ class FileManager(Files):
             body={'share':source,'items':items,'target_share':target_share,'target_path':target_path,'target_identity':[parent.st_dev,parent.st_ino], 'target_uuid':pool['filesystem_uuid'],'mode':mode,'review':'Copy is staged and hash-verified before publication; live files are not a consistent filesystem snapshot. Existing targets are never overwritten. Interrupted staging is retained. Cross-volume moves verify the copy, then retain the original in its source recycle bin; completed items remain recorded after partial failures.'}
         return self.ctx.plan('file-transfer',body,mode.upper()+' '+str(len(items))+' ITEM(S)')
 
+    def enqueue_transfer(self,request):
+        """Accept a fresh approval now, then retain it while this exact job waits."""
+        if set(request)!={'plan_id','digest','confirmation'}:raise ValueError('A reviewed transfer is required')
+        with self.ctx.lock():
+            self.ctx.reviewed(request,'file-transfer')
+            ident=self.ctx.state.enqueue('files.transfer',request)
+            accepted=time.time()
+            from ..access_scope import current
+            atomic(self.ctx.directory/'transfer-approvals'/(ident+'.json'),{'job_id':ident,'request':request,'actor':current(),'accepted_at':accepted})
+        return {'job_id':ident}
+
+    def reviewed_transfer(self,request,job_id):
+        receipt=self.ctx.directory/'transfer-approvals'/(job_id+'.json') if job_id else None
+        if receipt and receipt.exists():
+            approved=json.loads(receipt.read_text())
+            with self.ctx.state.connect() as db:
+                job=db.execute('SELECT j.*,p.actor FROM jobs j LEFT JOIN job_principals p ON p.id=j.id WHERE j.id=?',(job_id,)).fetchone()
+            from ..access_scope import current
+            if not job or job['kind']!='files.transfer' or job['status']!='running' or json.loads(job['payload'])!=request or approved.get('request')!=request or approved.get('job_id')!=job_id or approved.get('actor')!=current() or job['actor']!=current():raise ValueError('Queued transfer approval does not match this job and account')
+            accepted=approved['accepted_at']
+            if not job['created']<=accepted<=job['created']+10 or accepted>time.time():raise ValueError('Invalid queued approval time')
+            return self.ctx.reviewed(request,'file-transfer',accepted_at=accepted)
+        return self.ctx.reviewed(request,'file-transfer')
+
     @contextlib.contextmanager
     def transfer_guard(self,request,job_id):
         from .volume_leases import lease
         from .transfer_resume import claim
         with contextlib.ExitStack() as handles:
             with self.ctx.lock():
-                plan_path,plan=self.ctx.reviewed(request,'file-transfer');body=plan['body']
+                plan_path,plan=self.reviewed_transfer(request,job_id);body=plan['body']
                 keys=[]
                 for share_id in (body['share'],body['target_share']):
                     if share_id.startswith('foreign:'):keys.append(share_id)

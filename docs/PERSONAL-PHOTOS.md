@@ -115,7 +115,7 @@ verified the compact gallery, location clustering, cluster-to-filmstrip selectio
 photo viewer. Map dragging originally intercepted pin clicks; this was corrected and
 selection was verified again. These checks do not establish live Apple compatibility.
 
-The owner must sign in privately, choose archive storage and connect Apple with MFA.
+You must sign in privately, choose archive storage and connect Apple with MFA.
 Real-account inventory completeness, authentication renewal, actual download throughput
 and representative personal-library playback remain unaccepted until that session.
 The map is an offline geographic overview, not a street-level mapping service. There
@@ -182,7 +182,7 @@ rather than bypassing its identity check.
 
 ### Physical acceptance — 5 November 2026
 
-The owner's existing saved session successfully listed eighteen personal albums.
+My existing saved session successfully listed eighteen personal albums.
 The final pass processed 946 distinct Apple asset references into 874 unique
 album/master memberships, with zero failed albums. At that snapshot 260 memberships
 linked to archived originals and 614 awaited downloads. Counts are memberships,

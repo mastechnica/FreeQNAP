@@ -29,13 +29,13 @@ no public push was performed.
   broker, HTTPS and cooling services were active. Current health had no incidents;
   full fan speed remained selected and the hardware watchdog was active.
 
-## iCloud acceptance still requires the owner
+## iCloud acceptance still requires my participation
 
 The configured family account's saved session requires a fresh sign-in. At the last
 check no download was running and no completed archive pass or files were recorded.
 The revised interface states this, disables downloading until access is verified,
 and exposes code verification, trusted-device web-access approval, inventory access,
-background progress and safe failure messages separately. The owner has been asked
+background progress and safe failure messages separately. I have been asked
 to complete Apple authentication privately. Actual Apple sign-in and file download
 are not claimed accepted until that step and an archive pass succeed.
 
@@ -66,7 +66,7 @@ See [behavior and API guide](PHOTOS-USB-AND-BROWSING.md).
 A subsequent saved-token diagnostic successfully logged in, but Apple rejected
 `requestWebAccessState` with authentication-required code 421. The same account
 response explicitly reported `termsUpdateNeeded: true`, no verification challenge,
-and no completed web-session token. The owner was asked to review Apple prompts
+and no completed web-session token. I was asked to review Apple prompts
 personally. This is an observed account-state gate, not an accepted photo download.
 The connector now blocks consent/download before terms/account-repair review and
 the dashboard provides a direct account-action explanation. All 71 photo regression
@@ -75,11 +75,11 @@ tests passed, including both account-action flags; JavaScript syntax checks pass
 The account-action release `59b5d38` also passed all 71 photo tests on the ARM NAS
 in 49 seconds before activation. Broker, console and both cooling services were
 active afterward; data RAID was idle/non-degraded and the OS mirror non-degraded.
-No public publication or NAS reboot was performed. Owner Apple review remains pending.
+No public publication or NAS reboot was performed. My Apple account review remains pending.
 
 ## Live download acceptance
 
-After the owner completed Apple's account prompts, the real account reached
+After I completed Apple's account prompts, the real account reached
 `connected` with no connection problem and an active download. Two consecutive
 checks showed the archive growing from 17 to 27 indexed originals, approximately
 46 MB at the latter check, with zero reported download errors. Three bounded
@@ -103,7 +103,7 @@ production service-manager isolation. Originals and old derived evidence were re
 Local regression passed 503 tests (16 environment/dependency skips), and all 38
 existing JavaScript tests plus three new online/offline/polar map tests passed.
 Private map preferences were tested independently from landing-page preferences
-and other users. The owner explicitly approved OpenStreetMap coordinate/map-area
+and other users. I explicitly approved OpenStreetMap coordinate/map-area
 requests and requested online maps enabled with a retained offline setting.
 
 The deployed broker served a corrected version-2 thumbnail from a real archived
@@ -118,19 +118,19 @@ restart the download broker. Both arrays remained non-degraded, data RAID idle,
 and cooling services active. The approved online setting was enabled for existing
 profiles while new profiles retain the offline default. The real administrator
 Settings page showed the enabled checkbox; the private setting-isolation test
-also passed on ARM. Owner photo-viewer/map visual acceptance is still requested.
+also passed on ARM. My photo-viewer/map visual acceptance is still requested.
 No private photo previews, coordinates or raw account state were added to Git.
 
-## Owner visual acceptance
+## Visual acceptance
 
-The owner refreshed Personal Photos & Videos and confirmed that the corrected
+I refreshed Personal Photos & Videos and confirmed that the corrected
 images and the location map both look correct. This closes the requested visual
 acceptance for the complete-image previews and GPS viewer map. Whole-library
 archive completion and future session renewal remain separate acceptance items.
 
 ## Viewer responsiveness during downloads
 
-The owner subsequently reported intermittent full-image loading while details and
+I subsequently reported intermittent full-image loading while details and
 map appeared. Review found that photo reads used the same serialization lock held
 across network ingestion. Completed immutable originals and preview caches now use
 identity-checked read-only descriptors independently of that long-running lock.
@@ -152,16 +152,16 @@ seconds each and a cached render about 0.1 seconds. The inspected archive had 50
 files, connected/downloading, with zero reported download errors. Both arrays
 remained non-degraded, data RAID idle and cooling services active. No reboot,
 disk-layout change, map-setting change or notification change occurred.
-Owner confirmation of reliability across additional images remains requested.
+My confirmation of reliability across additional images remains requested.
 
 ## Fit viewer media to available space
 
-The owner confirmed images now load, then requested larger automatic fitting.
+I confirmed images now load, then requested larger automatic fitting.
 The viewer now explicitly sizes image/video boxes to the available media cell
 with proportional containment. Toolbar and details remain separate grid regions,
 with bounded toolbar overflow and scrollable details. Synthetic desktop and
 390-pixel mobile layout checks showed the complete image and unobscured controls;
 no private media were used in those screenshots. The CSS-only console release
 `0c95677` was activated without restarting the download broker, and the served CSS
-matched the reviewed local source byte-for-byte. Owner confirmation on additional
+matched the reviewed local source byte-for-byte. My confirmation on additional
 real images remains distinct from these synthetic layout checks.

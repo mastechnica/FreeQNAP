@@ -13,7 +13,7 @@ def permission(operation):
  if operation.startswith('photos.'):return 'photos.write'
  if operation.startswith('myradio.'):return 'myradio.write'
  if operation.startswith('library.'):return 'storage.choose'
- if operation in ('files.transfers','files.metadata-read','files.media-neighbors','files.list','files.read','files.trash','files.policy','files.stages','files.bundle','files.bundle-info','files.bundle-node','files.bundle-read','recovery.list'):return 'files.read'
+ if operation in ('files.properties','files.transfers','files.metadata-read','files.media-neighbors','files.list','files.read','files.trash','files.policy','files.stages','files.bundle','files.bundle-info','files.bundle-node','files.bundle-read','recovery.list'):return 'files.read'
  if operation.startswith(('files.','recovery.')):return 'files.write'
  return None
 
