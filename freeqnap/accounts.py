@@ -1,7 +1,7 @@
 """Local identities, roles and revocable sessions, independent of a cloud provider."""
 import hashlib,json,re,secrets,sqlite3,time,threading
 from .auth import password_hash
-PERMISSIONS={'myradio.read','myradio.write','photos.read','photos.write','photos.icloud','files.read','files.write','storage.choose','libraries.share','metadata.edit','social.share','storage.unlock'}
+PERMISSIONS={'media.read','media.write','downloads.use','health.read','myradio.read','myradio.write','photos.read','photos.write','photos.icloud','files.read','files.write','storage.choose','libraries.share','metadata.edit','social.share','storage.unlock'}
 DEFAULT=sorted(PERMISSIONS)
 USERNAME=re.compile(r'[a-z][a-z0-9._-]{1,39}\Z')
 

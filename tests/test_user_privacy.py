@@ -55,9 +55,9 @@ class PrivacyTests(unittest.TestCase):
    self.assertEqual(json.loads(db.execute('SELECT payload FROM jobs WHERE id=?',(ident,)).fetchone()[0]),{'plan_id':'fixture'})
   self.ctx.state.finish(ident,result={})
   result=activity.listing(self.ctx.state,{'id':'a'*32,'role':'member'},{});self.assertEqual(result['events'][0]['operation'],'job.files.transfer')
- def test_audit_only_self_plus_sanitized_system_notices(self):
+ def test_member_audit_only_self_and_admin_keeps_system_notices(self):
   activity.record(self.ctx.state,A,'files.mkdir');activity.record(self.ctx.state,B,'photos.annotate');activity.record(self.ctx.state,'system','system.restart',scope='system',severity='warning')
-  member=activity.listing(self.ctx.state,{'id':'a'*32,'role':'member'},{});self.assertEqual({v['actor'] for v in member['events']},{A,'system'})
+  member=activity.listing(self.ctx.state,{'id':'a'*32,'role':'member'},{});self.assertEqual({v['actor'] for v in member['events']},{A})
   admin=activity.listing(self.ctx.state,{'id':'a'*32,'role':'administrator'},{});self.assertEqual(len(admin['events']),3)
  def test_audit_pagination_does_not_cross_user_boundary(self):
   for _ in range(4):activity.record(self.ctx.state,A,'files.list');activity.record(self.ctx.state,B,'files.read')

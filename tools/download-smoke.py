@@ -83,7 +83,11 @@ def main():
     try:paused=rpc('tellStatus',[gid,['status']])['status']=='paused';break
     except OSError:time.sleep(.1)
    assert paused,'restored jobs must start paused until durable desired state is reconciled'
-   rpc('unpause',[gid])
+   ident='a'*32
+   context.state.set('downloads_settings',{'options':options})
+   context.state.set('downloads_jobs',{ident:{'id':ident,'gid':gid,'desired':'running','state':'active','created':0,'completed_bytes':progress}})
+   manager.target=lambda settings=None:target
+   manager.reconcile()
    done=False
    for _ in range(180):
     try:status=rpc('tellStatus',[gid,['status','completedLength']])
@@ -101,7 +105,7 @@ def main():
    except urllib.error.HTTPError as error:
     assert error.code==400;unauthorized=json.load(error)
    assert 'error' in unauthorized
-   print(json.dumps({'native_http_range_resume_after_engine_restart':True,'sha256_verified':True,'private_rpc_rejects_missing_token':True,'manager_handles_missing_gid_rpc_response':True,'engine_restore_starts_paused':True,'torrent_peer_transfer_tested':False},indent=2),flush=True)
+   print(json.dumps({'native_http_range_resume_after_engine_restart':True,'manager_resumes_without_manual_action':True,'sha256_verified':True,'private_rpc_rejects_missing_token':True,'manager_handles_missing_gid_rpc_response':True,'engine_restore_starts_paused':True,'torrent_peer_transfer_tested':False},indent=2),flush=True)
   finally:
    for process in procs:
     if process.poll() is None:process.terminate()

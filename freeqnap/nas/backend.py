@@ -37,6 +37,7 @@ from .media import Media
 from .recovery import Recovery
 from .vpn import VPN
 from .downloads import Downloads
+from .download_destinations import DownloadDestinations
 from .dlna import Access
 from .external import External
 from .network import Network
@@ -81,6 +82,7 @@ class Backend:
         self.network = Network(self.ctx)
         self.vpn = VPN(self.ctx)
         self.downloads = Downloads(self.ctx)
+        self.downloads.destinations = DownloadDestinations(self)
         self.dlna = Access(self.ctx)
         if not self.ctx.state.setting('dlna_udn'):
             self.ctx.state.set('dlna_udn', 'uuid:' + str(uuid.uuid4()))
@@ -195,7 +197,9 @@ class Backend:
             'vpn.status': self.vpn.status, 'vpn.plan': self.vpn.plan, 'vpn.apply': self.vpn.apply,
             'vpn.confirm': self.vpn.confirm, 'vpn.rollback': self.vpn.rollback,
             'vpn.peer': self.vpn.peer, 'vpn.revoke': self.vpn.revoke, 'vpn.wireguard-profile':self.vpn.wireguard_profile,
-            'downloads.status': self.downloads.status, 'downloads.setup': self.downloads.setup,
+            'downloads.status': self.downloads.status, 'downloads.setup': self.downloads.setup, 'downloads.limits':self.downloads.limits,
+            'downloads.discover':lambda r:__import__('freeqnap.nas.download_discovery',fromlist=['discover']).discover(r),
+            'downloads.destination':self.downloads.choose_destination,
             'downloads.add': self.downloads.add, 'downloads.control': self.downloads.control,
             'downloads.files':self.downloads.list_files,'downloads.read':self.downloads.read_file,
             'media.dlna-options':self.dlna.options, 'media.dlna-options-save':self.dlna.save_options, 'media.client-profile':self.dlna.client_profile, 'system.frontpanel':lambda r:frontpanel_snapshot(), 'network.history':self.metrics.network_history, 'system.history':self.metrics.history, 'media.clients': self.dlna.list, 'media.approve': self.dlna.approve,
@@ -434,6 +438,15 @@ class Backend:
             if settings and settings['pool'] in pools:self.ctx.run('systemctl','stop','freeqnap-downloads.service')
         try:return self.external.eject(request,stop)
         finally:self.sharing.apply();self.configure_media()
+
+    def download_delivery_worker(self):
+        recovered=False
+        while not self.stop_event.is_set():
+            try:
+                if not recovered:self.downloads.destinations.recover();recovered=True
+                self.downloads.destinations.one();self.health.pop('download_delivery_error',None)
+            except Exception:self.health['download_delivery_error']='Download saving needs attention; private files were retained'
+            self.stop_event.wait(1)
 
     def recycle_worker(self):
         while not self.stop_event.is_set():

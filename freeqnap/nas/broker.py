@@ -87,6 +87,7 @@ def main():
         for _ in range(2):threading.Thread(target=backend.worker, daemon=True).start()
         threading.Thread(target=backend.guardian, daemon=True).start()
         threading.Thread(target=backend.download_worker, daemon=True).start()
+        threading.Thread(target=backend.download_delivery_worker, daemon=True).start()
         threading.Thread(target=backend.recycle_worker, daemon=True).start()
         threading.Thread(target=backend.backup_schedule_worker, daemon=True).start()
         threading.Thread(target=backend.health_worker, daemon=True).start()

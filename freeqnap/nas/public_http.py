@@ -35,11 +35,13 @@ def target(url, resolver=socket.getaddrinfo):
     return p, addresses
 
 @contextlib.contextmanager
-def open_url(url, *, headers=None, timeout=8, method='GET'):
+def open_url(url, *, headers=None, timeout=8, method='GET', allowed_origin=None):
     if method not in ('GET', 'HEAD'):raise ValueError('Only read requests are supported')
     connection = None
     try:
         for _ in range(5):
+            candidate=urllib.parse.urlsplit(url)
+            if allowed_origin is not None and (candidate.scheme,candidate.hostname,candidate.port or (443 if candidate.scheme=='https' else 80))!=allowed_origin:raise ValueError('Redirect leaves the selected site')
             p, addresses = target(url)
             connection = http.client.HTTPConnection(p.hostname, p.port or (443 if p.scheme == 'https' else 80), timeout=timeout)
             def connect():

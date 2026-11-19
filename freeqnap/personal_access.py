@@ -3,8 +3,12 @@ from . import accounts,library_shares
 from .access_scope import Broker
 from .nas.personal import READ_RADIO,READ_PHOTOS
 
-def is_personal(operation):return operation.startswith(('myradio.','photos.','library.','files.','recovery.'))
+def is_personal(operation):return operation.startswith(('myradio.','photos.','library.','files.','recovery.','media.','downloads.')) or operation=='health.alerts'
 def permission(operation):
+ if operation.startswith('downloads.'):return 'downloads.use'
+ if operation=='health.alerts':return 'health.read'
+ if operation in ('media.catalog','media.scanner-status','media.provider-status'):return 'media.read'
+ if operation.startswith('media.'):return 'media.write'
  if operation=='library.files-status':return 'files.read'
  if operation in READ_RADIO:return 'myradio.read'
  if operation=='photos.icloud-status':return 'photos.read'
@@ -86,7 +90,7 @@ class Gateway:
   if user['must_change']:raise PermissionError('Change your temporary password first')
   if operation.startswith(('personal.','access.')):raise PermissionError('Internal operation unavailable')
   if operation.startswith('activity.') and operation!='activity.system':raise PermissionError('Internal activity operation unavailable')
-  if operation=='activity.system':return self.nas.request(operation,{})
+  if operation=='activity.system':return self.nas.request(operation,{}) if user['role']=='administrator' else []
   if operation=='users.usage' and user['role']!='administrator':raise PermissionError('Administrator access required')
   if user['role']!='administrator' and operation in ('external.discover','external.unlock-capabilities','external.session-files','external.session-read'):
    if not accounts.permitted(user,'files.read'):raise PermissionError('File browsing is not enabled for this account')
@@ -132,7 +136,7 @@ class Gateway:
    if operation=='myradio.item':result={**result,'progress':{'position':0}}
    return result
   if user['role']=='administrator':
-   if user['primary_admin'] or operation.startswith(('files.','recovery.')) or not is_personal(operation):return self.nas.request(operation,payload)
+   if user['primary_admin'] or operation.startswith(('files.','recovery.','media.','downloads.')) or not is_personal(operation):return self.nas.request(operation,payload)
   elif not needed or not accounts.permitted(user,needed):raise PermissionError('Permission not granted')
   return self.nas.request('personal.invoke',{'owner':user['id'],'label':user['label'],'action':operation,'payload':payload,'assignments':accounts.assignments(self.state,user['id'])})
  def owner_request(self,grant,operation,payload):
@@ -147,7 +151,11 @@ class Gateway:
    if not user['primary_admin']:
     own=self.nas.request('personal.invoke',{'owner':user['id'],'label':user['label'],'action':'personal.jobs','payload':{}});result['jobs']+=own['jobs']
    return result
-  return self.nas.request('personal.invoke',{'owner':user['id'],'label':user['label'],'action':'personal.status','payload':{},'assignments':accounts.assignments(self.state,user['id'])})
+  result=self.nas.request('personal.invoke',{'owner':user['id'],'label':user['label'],'action':'personal.status','payload':{},'assignments':accounts.assignments(self.state,user['id'])})
+  if not accounts.permitted(user,'downloads.use'):result.pop('downloads',None)
+  if not accounts.permitted(user,'media.read'):result['libraries']=[]
+  if not accounts.permitted(user,'health.read'):result['health']={'monitor_stale':True,'items':[]}
+  return result
  def jobs(self):
   s=self.session();user=s['user']
   if user['role']=='administrator' and user['primary_admin']:return self.nas.request('jobs.list',{})

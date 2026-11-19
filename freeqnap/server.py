@@ -162,7 +162,7 @@ def handler(state, destination, snapshot=None, preview=False, broker=None, origi
                     if path=='/api/users/usage' and user['role']!='administrator':self.send(403,{'error':'Administrator access required'});return
                     try:
                         if path=='/api/activity':
-                            q={k:v[0] for k,v in parse_qs(urlsplit(self.path).query).items()};result=activity.listing(state,user,q);result['security']=activity.security_events(state,user);result['system']=self.gateway().request('activity.system',{})
+                            q={k:v[0] for k,v in parse_qs(urlsplit(self.path).query).items()};result=activity.listing(state,user,q);result['security']=activity.security_events(state,user);result['system']=self.gateway().request('activity.system',{}) if user['role']=='administrator' else []
                             from .access_scope import Broker
                             result['jobs']=Broker(nas,'user:'+user['id']).request('activity.jobs',{'administrator':user['role']=='administrator'});result['logging_warning']=getattr(self.server,'audit_error',None)
                         else:

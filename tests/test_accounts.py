@@ -10,6 +10,8 @@ from freeqnap.personal_access import Gateway
 from freeqnap.nas.personal import Personal
 from freeqnap.nas.common import Context
 from freeqnap.nas.myradio import MyRadio
+from freeqnap.nas.downloads import Downloads
+from freeqnap.nas.health import Health
 from freeqnap.nas.personal_photos import PersonalPhotos
 from freeqnap.server import handler
 
@@ -19,7 +21,7 @@ class Fixture(Context):
   value=self.config()['pools'][key];return value,Path(value['mountpoint'])
 class Device:
  def __init__(self,root):
-  self.ctx=Fixture(root/'broker');volume=root/'data';volume.mkdir();cfg=self.ctx.config();cfg['pools']['data']={'name':'data','mountpoint':str(volume),'filesystem_uuid':'fixture-volume','read_only':False};self.ctx.save(cfg);self.my_radio=MyRadio(self.ctx);self.personal_photos=PersonalPhotos(self.ctx);self.personal=Personal(self);self.calls=[]
+  self.ctx=Fixture(root/'broker');volume=root/'data';volume.mkdir();cfg=self.ctx.config();cfg['pools']['data']={'name':'data','mountpoint':str(volume),'filesystem_uuid':'fixture-volume','read_only':False};self.ctx.save(cfg);self.my_radio=MyRadio(self.ctx);self.personal_photos=PersonalPhotos(self.ctx);self.downloads=Downloads(self.ctx);self.alerts=Health(self.ctx);self.personal=Personal(self);self.calls=[]
  def request(self,action,payload=None):
   if action=='access.invoke':
    from freeqnap.access_scope import using
@@ -96,7 +98,7 @@ class AccountsTests(unittest.TestCase):
   self.assertEqual(request('/api/users')[0],403);self.assertEqual(request('/api/identity')[0],403);self.assertEqual(request('/api/nas/personal.invoke',{'owner':self.admin['id']})[0],403);self.assertEqual(request('/api/nas/network.plan',{})[0],403);self.assertEqual(request('/api/account')[1]['user']['id'],user['id']);self.assertTrue(request('/api/nas/status')[1]['personal_only'])
   with patch('freeqnap.system_summary.inventory.snapshot',return_value={'sampled_at':time.time(),'stale':False,'errors':[],'disks':[{'name':'sda','path':'/dev/sda','type':'disk','size':100,'model':'Test SATA','serial':'private-device-serial'}]}):
    code,summary=request('/api/status');self.assertEqual(code,200);self.assertEqual(summary['inventory']['disks'][0]['model'],'Test SATA');self.assertNotIn('private-device-serial',json.dumps(summary));self.assertTrue(summary['inventory']['health']['monitor_stale'])
-  self.assertEqual(request('/api/nas/health.alerts',{})[0],403);self.assertEqual(request('/api/nas/system.frontpanel',{})[0],403)
+  self.assertEqual(request('/api/nas/health.alerts',{})[0],200);self.assertEqual(request('/api/nas/system.frontpanel',{})[0],403)
   accounts.save_preferences(self.state,user,{'landing_page':'photos-shared'});self.assertEqual(request('/api/login',{'username':'alice','password':PASSWORD+' updated'})[1]['landing_page'],'/#photos?view=shared');self.assertEqual(request('/api/login',{'username':'admin','password':PASSWORD})[1]['landing_page'],'/#overview')
 
  def test_dedicated_files_and_admin_shared_folder_rights_remain_separate(self):
@@ -221,3 +223,23 @@ class CloudLocalPasswordTests(IdentityTests):
  def test_revocation_between_request_and_password_write_is_rechecked(self):
   assigned=self.assign();session,_=self.cloud_login();accounts.change(self.state,self.admin,{'action':'revoke-sessions','id':assigned['user']['id']})
   with self.assertRaises(PermissionError):accounts.configure_local_password(self.state,session,{'password':'separate new fixture password','confirm_password':'separate new fixture password','different_password_ack':True})
+
+ def test_member_download_and_media_features_keep_account_scope_and_admin_boundaries(self):
+  a,at,_=self.user();b,bt,_=self.user('bob');self.configure(a,at)
+  g=self.gateway(at);other=self.gateway(bt);self.device.downloads.target=lambda:None
+  self.device.ctx.state.set('downloads_settings',{'pool':'data'})
+  first=g.request('downloads.add',{'url':'https://example.org/file.zip'})['job']
+  self.assertEqual(first['actor'],'user:'+a['id']);self.assertEqual(len(g.status()['downloads']['jobs']),1);self.assertEqual(other.status()['downloads']['jobs'],[])
+  with self.assertRaises(ValueError):other.request('downloads.control',{'id':first['id'],'action':'pause'})
+  with self.assertRaises(ValueError):g.request('downloads.setup',{'pool':'data'})
+  with self.assertRaises(PermissionError):g.request('health.settings',{})
+  with self.assertRaises(PermissionError):g.request('notifications.save',{})
+  self.assertEqual(g.request('activity.system'),[])
+  lib=g.request('media.save',{'name':'private-movies','share':'my-radio','dlna':True})
+  self.assertFalse(lib['dlna']);self.assertEqual(g.status()['libraries'][0]['name'],'private-movies');self.assertEqual(other.status()['libraries'],[])
+  with self.assertRaises(ValueError):g.request('media.approve',{'id':'other','approved':True})
+ def test_restricted_member_does_not_gain_new_capabilities_via_status_or_payload(self):
+  a,token,_=self.user(permissions=['files.read']);g=self.gateway(token)
+  for operation in ('downloads.add','downloads.status','media.catalog','health.alerts'):
+   with self.assertRaises(PermissionError):g.request(operation,{'owner':self.admin['id']})
+  view=g.status();self.assertNotIn('downloads',view);self.assertEqual(view['libraries'],[]);self.assertEqual(view['health']['items'],[])

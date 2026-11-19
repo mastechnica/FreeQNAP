@@ -54,6 +54,13 @@ class FileManager(Files):
             with self.foreign_view(ident).directory(ident) as (_,_,pool):return pool,Path(pool['mountpoint'])
         return self.ctx.volume(ident)
 
+    def destination(self,request):
+        if set(request)-{'share','path'} or not isinstance(request.get('share'),str):raise ValueError('Choose an available folder')
+        path=request.get('path','');relative(path);self.writable(request['share'])
+        with self.directory(request['share'],path) as (fd,share,pool):
+            info=os.fstat(fd)
+            return {'share':request['share'],'path':path,'pool':pool['name'],'filesystem_uuid':pool['filesystem_uuid'],'identity':[info.st_dev,info.st_ino],'label':(share.get('label') or share.get('name') or request['share'])+(' / '+path if path else '')}
+
     def policy(self,request=None):
         return self.ctx.state.setting('recycle_policy',{'retention_days':30})
 

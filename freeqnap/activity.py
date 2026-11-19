@@ -11,7 +11,7 @@ def record(state,actor,operation,outcome='succeeded',scope='private',severity='i
 def listing(state,user,query):
  ensure(state);before=int(query.get('before',0));limit=max(1,min(100,int(query.get('limit',50))));where=['1=1'];args=[]
  if str(query.get('include_polls','0'))!='1':where += ["operation!='session' AND operation NOT LIKE 'nas.%status'"]
- if user['role']!='administrator':where+=['(actor=? OR scope=?)'];args+=['user:'+user['id'],'system']
+ if user['role']!='administrator':where+=['actor=?'];args+=['user:'+user['id']]
  elif query.get('user'):where+=['actor=?'];args+=['user:'+query['user']]
  if before:where+=['id<?'];args+=[before]
  with state.connect() as db:rows=[dict(v) for v in db.execute('SELECT * FROM activity_events WHERE '+' AND '.join(where)+' ORDER BY id DESC LIMIT ?',args+[limit+1])]

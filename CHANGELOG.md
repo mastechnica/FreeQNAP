@@ -1,3 +1,9 @@
+## 19 November 2026 — Download queue recovery and large lists
+
+Downloads automatically resumes eligible transfers when the worker or engine restarts. Account pauses, destinations, concurrency and bandwidth settings persist. The queue and retained-file history have no fixed entry count. The Downloads view pages through all matching records and URL previews can include more than 500 linked files.
+
+Verified with 1,100 account-visible queue entries, a 1,073-file preview, and a real HTTP Range transfer that resumed automatically after an isolated engine restart and passed its SHA-256 check.
+
 ## 12 November 2026 — live EyeQ media connection
 
 ## 17 November 2026 — Reliable configuration recovery and publication cleanup

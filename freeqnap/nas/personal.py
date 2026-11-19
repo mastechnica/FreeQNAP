@@ -11,14 +11,15 @@ from .recovery import Recovery
 from .bundle import Bundles
 from .archives import Archives
 from .file_metadata import FileMetadata
+from .media import Media
 
 READ_RADIO={'myradio.station-artwork','myradio.status','myradio.catalog','myradio.item','myradio.read','myradio.book-text','myradio.stations','myradio.station-source','myradio.podcasts'}
 READ_PHOTOS={'photos.status','photos.catalog','photos.places','photos.related','photos.read','photos.metadata-read'}
 RADIO_METHODS={'station-artwork':'station_artwork','status':'status','configure':'configure','catalog':'catalog','item':'item','read':'read','book-text':'book_text','upload-begin':'upload_begin','upload-chunk':'upload_chunk','upload-finish':'upload_finish','metadata':'metadata','artwork':'artwork','artwork-url':'artwork_url','progress':'progress','lookup':'lookup','stations':'stations','station-save':'station_save','station-check':'station_check','station-source':'station_source','podcasts':'feeds','podcast-add':'feed_add','podcast-refresh':'feed_refresh'}
 PHOTO_METHODS={'metadata-read':'metadata_read','metadata-plan':'metadata_plan','metadata-apply':'metadata_apply','status':'status','catalog':'catalog','places':'places','related':'related','read':'read','annotate':'annotate','album-create':'album','album-add':'album_add','import-folder':'import_folder'}
 CLOUD_METHODS={'photos.icloud-check':'check','photos.icloud-status':'status','photos.icloud-save':'save','photos.icloud-login':'login','photos.icloud-code':'code','photos.icloud-run':'run','photos.pause':'pause'}
-QUEUED={'library.storage-apply','myradio.scan','myradio.import-folder','myradio.station-refresh','myradio.download','files.transfer','files.delete','files.recycle','files.archive'}
-FILE_METHODS={'properties':'properties','transfer-resume-plan':'transfer_resume_plan','transfer-retry-plan':'transfer_retry_plan','transfers':'transfers','media-neighbors':'media_neighbors','list':'list','read':'read','mkdir':'mkdir','upload-begin':'upload_begin','upload-chunk':'upload_chunk','upload-finish':'upload_finish','move-plan':'move_plan','move':'move','transfer-plan':'transfer_plan','recycle-plan':'recycle_plan','delete-plan':'delete_plan','trash':'trash_items','restore-plan':'restore_plan','restore':'restore','purge-plan':'purge_plan','purge':'purge','policy':'policy','policy-plan':'policy_plan','policy-save':'policy_apply','stages':'stages','stage-plan':'stage_plan','stage-remove':'stage_remove'}
+QUEUED={'media.scan','library.storage-apply','myradio.scan','myradio.import-folder','myradio.station-refresh','myradio.download','files.transfer','files.delete','files.recycle','files.archive'}
+FILE_METHODS={'destination':'destination','properties':'properties','transfer-resume-plan':'transfer_resume_plan','transfer-retry-plan':'transfer_retry_plan','transfers':'transfers','media-neighbors':'media_neighbors','list':'list','read':'read','mkdir':'mkdir','upload-begin':'upload_begin','upload-chunk':'upload_chunk','upload-finish':'upload_finish','move-plan':'move_plan','move':'move','transfer-plan':'transfer_plan','recycle-plan':'recycle_plan','delete-plan':'delete_plan','trash':'trash_items','restore-plan':'restore_plan','restore':'restore','purge-plan':'purge_plan','purge':'purge','policy':'policy','policy-plan':'policy_plan','policy-save':'policy_apply','stages':'stages','stage-plan':'stage_plan','stage-remove':'stage_remove'}
 
 class PersonalContext(Context):
  def __init__(self,base,owner):self.base=base;self.owner=owner;super().__init__(base.directory/'personal'/owner,runner=base.run)
@@ -47,7 +48,9 @@ class PersonalContext(Context):
    pool=cfg['pools'].get(source['pool'],{})
    if any(assignment.get(k)!=source.get(k) for k in ('pool','path')) or assignment.get('filesystem_uuid')!=pool.get('filesystem_uuid'):continue
    shares[source['name']]={**source,'personal_root':True,'read_only':bool(source.get('read_only')) or assignment['access']=='read','admin_assigned':True}
-  return {**cfg,'shares':shares,'users':{},'repositories':{},'libraries':{}}
+  return {**cfg,'shares':shares,'users':{},'repositories':{},'libraries':self.state.setting('personal-media-libraries',{})}
+ def save(self,value):
+  self.state.set('personal-media-libraries',value.get('libraries',{}))
  def save_locations(self):
   rows=self.base.state.setting('personal-library-locations',{});rows[self.owner]=[]
   for key in ('myradio','personal-photos','personal-files'):
@@ -63,7 +66,7 @@ class Personal:
    if owner not in self.scopes:
     if len(self.scopes)>=32:raise ValueError('Personal account capacity reached')
     ctx=PersonalContext(self.ctx,owner);radio=MyRadio(ctx);photos=PersonalPhotos(ctx);cloud=PersonalCloud(photos);storage=LibraryStorage(ctx,radio,photos);storage.owner={'id':owner,'label':label};ctx.state.set('personal-library-owner',storage.owner)
-    ctx.state.reconcile_interrupted();radio.reconcile_downloads();files=FileManager(ctx);bundles=Bundles(ctx,files);self.scopes[owner]={'ctx':ctx,'radio':radio,'photos':photos,'cloud':cloud,'storage':storage,'metadata':FileMetadata(ctx,files),'file_location':FileLocation(ctx,storage.owner),'files':files,'bundles':bundles,'archives':Archives(ctx,files,bundles),'recovery':Recovery(ctx,files)}
+    ctx.state.reconcile_interrupted();radio.reconcile_downloads();files=FileManager(ctx);bundles=Bundles(ctx,files);self.scopes[owner]={'ctx':ctx,'media':Media(ctx),'radio':radio,'photos':photos,'cloud':cloud,'storage':storage,'metadata':FileMetadata(ctx,files),'file_location':FileLocation(ctx,storage.owner),'files':files,'bundles':bundles,'archives':Archives(ctx,files,bundles),'recovery':Recovery(ctx,files)}
    return self.scopes[owner]
  def shared(self,r):
   if set(r)!={'owner','label','primary','action','payload','scope'}:raise ValueError('Invalid shared envelope')
@@ -103,7 +106,9 @@ class Personal:
      except ValueError:pass
     except (ValueError,OSError):pass
     pools.append(row)
-   return {'pools':pools,'shares':list(s['ctx'].config()['shares'].values()),'users':[],'repositories':[],'libraries':[],'jobs':s['ctx'].state.jobs(),'services':{},'packages':{},'worker':{},'health':{'active_total':0},'personal_only':True}
+   return {'pools':pools,'shares':list(s['ctx'].config()['shares'].values()),'users':[],'repositories':[],'libraries':list(s['ctx'].config()['libraries'].values()),'downloads':self.member_downloads(s,'downloads.status',{}),'jobs':s['ctx'].state.jobs(),'services':{},'packages':{},'worker':{},'health':self.member_health(),'personal_only':True}
+  if action.startswith('downloads.'):return self.member_downloads(s,action,payload)
+  if action=='health.alerts':return self.member_health()
   if action=='library.folders':
    from .files import Files,relative
    if set(payload)-{'pool','path','offset','limit'}:raise ValueError('Choose a storage volume and folder')
@@ -149,9 +154,14 @@ class Personal:
       if path and not s['ctx'].shared_usb_path(source[5:],path):raise ValueError('This folder is private personal storage; use your own personal library location')
   if action in QUEUED and not queued:
    if any(k in payload for k in ('password','secret','key_base64')):raise ValueError('Secrets cannot enter jobs')
-   schemas={'library.storage-apply':{'plan_id','digest','confirmation'},'myradio.scan':set(),'myradio.import-folder':{'category','share','path'},'myradio.station-refresh':{'group','query','country'},'myradio.download':{'source'},'files.transfer':{'plan_id','digest','confirmation'},'files.delete':{'plan_id','digest','confirmation'},'files.recycle':{'plan_id','digest','confirmation'},'files.archive':{'plan_id','digest','confirmation'}}
+   schemas={'media.scan':{'library'},'library.storage-apply':{'plan_id','digest','confirmation'},'myradio.scan':set(),'myradio.import-folder':{'category','share','path'},'myradio.station-refresh':{'group','query','country'},'myradio.download':{'source'},'files.transfer':{'plan_id','digest','confirmation'},'files.delete':{'plan_id','digest','confirmation'},'files.recycle':{'plan_id','digest','confirmation'},'files.archive':{'plan_id','digest','confirmation'}}
    if set(payload)-schemas[action]:raise ValueError('Unknown queued setting')
    return s['files'].enqueue_transfer(payload) if action=='files.transfer' else {'job_id':s['ctx'].state.enqueue(action,payload)}
+  if action.startswith('media.'):
+   methods={'media.save':'library','media.catalog':'catalog','media.scan':'scan','media.scanner-status':'scanner_status','media.scanner-settings':'scanner_settings','media.provider-status':'provider_status','media.provider-save':'provider_save','media.lookup':'lookup','media.metadata':'apply_metadata','media.artwork':'artwork'}
+   if action not in methods:raise ValueError('Media-player and DLNA administration requires an administrator')
+   if action=='media.save':payload={**payload,'dlna':False}
+   return getattr(s['media'],methods[action])(payload)
   if action=='library.storage-apply':
    return s['storage'].apply(payload)
   if action.startswith('myradio.'):
@@ -177,6 +187,12 @@ class Personal:
    if key=='recycle':return s['files'].recycle(payload,payload['plan_id'])
    if key in FILE_METHODS:return getattr(s['files'],FILE_METHODS[key])(payload)
   raise ValueError('Unavailable personal operation')
+ def member_health(self):
+  from .member_services import health
+  return health(self.backend)
+ def member_downloads(self,s,action,payload):
+  from .member_services import downloads
+  return downloads(self.backend.downloads,s['ctx'].owner,action,payload)
  def one(self):
   root=self.ctx.directory/'personal'
   ids=[p.name for p in root.iterdir() if p.is_dir() and re.fullmatch('[a-f0-9]{32}',p.name)] if root.exists() else []
