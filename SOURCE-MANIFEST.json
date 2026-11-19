@@ -1,7 +1,7 @@
 {
   "format": 1,
   "project": "FreeQNAP",
-  "source_commit": "5e53760f7db2d98da50f076a87d2fc16a076e454",
+  "source_commit": "90c52027c66e2665bd7224d272fca2c2bb5b7873",
   "scope": "Committed source and public documentation only; no private Git history, credentials, device state or OS binaries",
   "files": [
     {
@@ -26,8 +26,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 59742,
-      "sha256": "6460e96a7d8c044efde5e3c4138bb2f98302773d3e98998c9b60bc48f593c3f2"
+      "bytes": 60069,
+      "sha256": "024d7c74d0f2b3150e337261bcef1f1963b822586d3d8e623776f4591df23e90"
     },
     {
       "path": "CONTRIBUTING.md",
@@ -696,8 +696,8 @@
     },
     {
       "path": "docs/VPN-DOWNLOADS-MEDIA-ACCESS.md",
-      "bytes": 12841,
-      "sha256": "f9af648554d8b8df40f2db590ea4341d321f81fb892ea1c296cf10e0d2f2763c"
+      "bytes": 13106,
+      "sha256": "8f6febc7e2fbb2fea9e018d4795a4e368716d9fa307087242ec68f1318c444b5"
     },
     {
       "path": "docs/WATCHDOG-COOLING-PLAN.md",
@@ -1081,8 +1081,8 @@
     },
     {
       "path": "freeqnap/nas/downloads.py",
-      "bytes": 24223,
-      "sha256": "7498c19d04911cc9f74e599b9967f8b1f74941ebe2bade1306b0b7f3464a734a"
+      "bytes": 26311,
+      "sha256": "5e314c825cd3d92243a3748bc8055f85fba0745dde2c84ccf6de22e88e222bb8"
     },
     {
       "path": "freeqnap/nas/external.py",
@@ -1806,13 +1806,18 @@
     },
     {
       "path": "tests/download-problems.test.cjs",
-      "bytes": 5160,
-      "sha256": "810c01048e343171fb816d259333cf3f5f68c537f3f6ab2762282cfa1f4e0860"
+      "bytes": 3274,
+      "sha256": "7e03a16ec69cca5d362c0dbde3d76f555836f1883e63c602c0104ee43f0a3341"
     },
     {
       "path": "tests/download-view.test.cjs",
       "bytes": 845,
       "sha256": "8104baf9169f2a2530ee2d7f55569d2a7f774bd11902289805bafbece2483a3c"
+    },
+    {
+      "path": "tests/download-workspace.test.cjs",
+      "bytes": 5201,
+      "sha256": "80bfce5bfeab883c0ee8b2742c72e3bd58059f984c73b3d7bcab62af6304ebf2"
     },
     {
       "path": "tests/drive-import.test.cjs",
@@ -2021,8 +2026,8 @@
     },
     {
       "path": "tests/test_download_queue_recovery.py",
-      "bytes": 4559,
-      "sha256": "c2015b5162c16bab909e8c2763d14a7a08281818e84f1acd5633400b675f2857"
+      "bytes": 5977,
+      "sha256": "d2e69b26a3a758050e699637b5e3282f780c30c4fb262025e42f08f81a1b67f3"
     },
     {
       "path": "tests/test_external.py",
@@ -2596,8 +2601,8 @@
     },
     {
       "path": "web/app.js",
-      "bytes": 222397,
-      "sha256": "fede79470c66133e7fb8ad0258dc9a3668cc3ef55cf48294a145ff5e74306a80"
+      "bytes": 226421,
+      "sha256": "3e952a7fd0380848685a7315e401e4eef99933d8961d3438f205cb7067aff2cf"
     },
     {
       "path": "web/array-recovery.js",
@@ -2736,8 +2741,8 @@
     },
     {
       "path": "web/style.css",
-      "bytes": 84829,
-      "sha256": "1d8497ee6f914d1772b984bf1e399962c86f66892ad9beb6ec7d260be098e4d4"
+      "bytes": 86620,
+      "sha256": "91c9889b273ff22ccaf00fa633a2604d9c6a6362b7af1ee7dcfc1bc140bb442d"
     },
     {
       "path": "web/sw.js",
