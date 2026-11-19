@@ -70,6 +70,19 @@ def list_category(row, retained):
     return 'waiting'
 
 
+def bulk_actions(row):
+    delivery=(row.get('delivery') or {}).get('state')
+    if row.get('desired')=='removed' or delivery=='copying' or (row.get('state')=='complete' and delivery=='pending' and row.get('save_to')):
+        return []
+    if row.get('state')=='complete' or row.get('recovery_required'):
+        return ['remove']
+    actions=['remove']
+    if row.get('desired')!='paused':actions.append('pause')
+    if row.get('desired')=='paused' or row.get('state')=='error' and not row.get('manual_retry'):
+        actions.append('resume')
+    return actions
+
+
 def download_list(manager, jobs, retained, request):
     categories=('active','error','waiting','paused','complete','removed')
     view=request.get('filter','all')
@@ -88,12 +101,21 @@ def download_list(manager, jobs, retained, request):
             counts[category]+=1
             if (view=='all' or view==category) and search in row.get('label','').casefold():
                 matches.append((category,archived,row))
+    if request.get('layout')=='selection':
+        after=request.get('after','')
+        if not isinstance(after,str):raise ValueError('Invalid selection cursor')
+        # A stable ID cursor avoids reordering mid-selection as transfers finish.
+        candidates=sorted((row['id'],actions) for _,archived,row in matches
+                          if not archived and row['id']>after and (actions:=bulk_actions(row)))
+        batch=candidates[:1000]
+        return {'items':[{'id':ident,'actions':actions} for ident,actions in batch],
+                'next':batch[-1][0] if len(candidates)>len(batch) else None}
     def order(entry):
         category,_,row=entry
         created=row.get('created',0)
         return (categories.index(category),created if category=='waiting' else -created,row['id'])
     matches.sort(key=order)
-    items=[{**manager.public_job(row),'category':category,'retained':archived}
+    items=[{**manager.public_job(row),'category':category,'retained':archived,'actions':[] if archived else bulk_actions(row)}
            for category,archived,row in matches[offset:offset+PAGE_SIZE]]
     end=offset+len(items)
     return {'items':items,'counts':counts,'matching':len(matches),'next_offset':end if end<len(matches) else None}
@@ -181,7 +203,7 @@ class Downloads:
             return [row for row in rows.values() if actor is None or row.get('actor')==actor]
         jobs=visible(self.jobs())
         retained=visible(self.ctx.state.setting('downloads_retained_files',{}))
-        if request.get('layout')=='list':return download_list(self,jobs,retained,request)
+        if request.get('layout') in ('list','selection'):return download_list(self,jobs,retained,request)
         if type(offset) is not int or offset<0 or view not in ('all','active','paused','complete','error'):
             raise ValueError('Invalid download page or filter')
         matches=jobs
@@ -230,19 +252,35 @@ class Downloads:
             row['sha256']=digest.lower();row['save_to']=binding;row['delivery']={'state':'pending'} if binding else None;rows[ident]=row;self.ctx.state.set('downloads_jobs',rows)
             # The manager performs network submission after this durable commit.
             return {'job':self.public_job(row)}
-    def control(self,request):
+    def control(self,request,actor=None):
+        action=request.get('action')
+        if action not in ('pause','resume','remove'):raise ValueError('Choose pause, resume or remove')
+        batch='ids' in request
+        ids=request['ids'] if batch else [request.get('id')]
+        if batch and ('id' in request or not isinstance(ids,list) or not 1<=len(ids)<=200):
+            raise ValueError('Choose 1–200 queue entries per request')
+        if any(not isinstance(ident,str) or not ident or len(ident)>128 for ident in ids):
+            raise ValueError('Invalid download selection')
         with self.ctx.lock():
-            rows=self.jobs();row=rows.get(request.get('id'))
-            if not row:raise ValueError('Unknown download')
-            action=request.get('action')
-            if action not in ('pause','resume','remove'):raise ValueError('Choose pause, resume or remove')
-            row['desired']={'pause':'paused','resume':'running','remove':'removed'}[action];row['updated']=time.time()
-            if action=='resume' and row.get('recovery_required'):
-                raise ValueError('Resume data is damaged. Existing files are preserved. Start a new download in a fresh job, or recover the partial files manually.')
-            if action=='resume':
-                row['next_retry']=0;row['attention_required']=False
-                if row.get('state')=='error':row['manual_retry']=True
-            self.ctx.state.set('downloads_jobs',rows)
+            rows=self.jobs()
+            changed=0
+            unique=dict.fromkeys(ids)
+            for ident in unique:
+                row=rows.get(ident)
+                if not row or actor is not None and row.get('actor')!=actor:
+                    if batch:continue
+                    raise ValueError('Download not available to this account')
+                if batch and action not in bulk_actions(row):continue
+                if action=='resume':
+                    if row.get('recovery_required'):
+                        raise ValueError('Resume data is damaged. Existing files are preserved. Start a new download in a fresh job, or recover the partial files manually.')
+                    row['next_retry']=0;row['attention_required']=False
+                    if row.get('state')=='error':row['manual_retry']=True
+                row['desired']={'pause':'paused','resume':'running','remove':'removed'}[action]
+                row['updated']=time.time()
+                changed+=1
+            if changed:self.ctx.state.set('downloads_jobs',rows)
+            if batch:return {'changed':changed,'skipped':len(unique)-changed,'files_deleted':False}
             return {'job':self.public_job(row),'files_deleted':False}
     def reconcile(self):
         settings=self.settings()
@@ -272,7 +310,9 @@ class Downloads:
         eligible=(key for key in keys if snapshot[key]['desired']=='running' and not snapshot[key].get('attention_required')
                   and not snapshot[key].get('recovery_required') and decisions.get(key,{}).get('run',True)
                   and (snapshot[key].get('state') in ('active','waiting','paused') or snapshot[key].get('next_retry',0)<=time.time()))
-        for ident in dict.fromkeys([*islice(eligible,16),*batch]):
+        stopping=(key for key in keys if snapshot[key]['desired'] in ('paused','removed')
+                  and snapshot[key].get('state') in ('active','waiting'))
+        for ident in dict.fromkeys([*islice(stopping,16),*islice(eligible,16),*batch]):
             with self.ctx.lock():
                 rows=self.jobs();row=rows.get(ident);changed=False
                 if not row or row.get('state')=='complete' and row['desired']=='running':continue

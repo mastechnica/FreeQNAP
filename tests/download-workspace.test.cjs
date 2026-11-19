@@ -12,10 +12,17 @@ for(const [width,member] of [[1280,false],[390,true]]){
    const fixture=`
     const $=id=>document.getElementById(id),demo=false,nasAvailable=true,currentUser={id:'fixture'};
     const canPersonal=()=>true,familyMember=()=>${member},state={nas:{downloads:{settings:{pool:'fixture',options:{}}},pools:[]}};
-    const jobs=Array.from({length:523},(_,i)=>({id:String(i),label:'File '+i,category:i===0?'active':i===500?'complete':'waiting',state:i===0?'active':i===500?'complete':'paused',desired:'running'}));
+    const jobs=Array.from({length:523},(_,i)=>({id:String(i),label:'File '+i,category:i===0?'active':i===500?'complete':'waiting',state:i===0?'active':i===500?'complete':'paused',desired:'running',actions:i===500?['remove']:['pause','remove']}));
+    const changes=[];let accept=false;window.confirm=()=>accept;
     async function nas(method,query){
+     if(method==='downloads.control'){
+      changes.push(query);
+      for(const id of query.ids){const j=jobs.find(row=>row.id===id);if(query.action==='pause')j.actions=['resume','remove'];}
+      return {changed:query.ids.length,skipped:0};
+     }
      if(method!=='downloads.status')throw Error('Unexpected operation '+method);
      const t=jobs.filter(j=>(query.filter==='all'||j.category===query.filter)&&j.label.toLowerCase().includes(query.search.toLowerCase())),offset=query.offset||0;
+     if(query.layout==='selection')return {items:t.map(j=>({id:j.id,actions:j.actions})),next:null};
      return {items:t.slice(offset,offset+50),matching:t.length,next_offset:offset+50<t.length?offset+50:null,counts:{active:1,complete:1,waiting:521}};
     }
    `;
@@ -35,12 +42,25 @@ for(const [width,member] of [[1280,false],[390,true]]){
      $('downloads-queue-tab').click();mode.value='direct';mode.dispatchEvent(new Event('change'));check(direct.value.includes('example.org'),'draft preserved');
      outer.open=true;await pause(100);check(rows.children.length===50&&rows.scrollHeight>rows.clientHeight,'bounded rows');
      const initialHeight=document.documentElement.scrollHeight;
-     queue.querySelector('button.quiet').click();await pause(100);check(rows.children.length===100,'show more');
+     const button=label=>[...queue.querySelectorAll('button')].find(b=>b.textContent===label);
+     button('Show more downloads').click();await pause(100);check(rows.children.length===100,'show more');
      check(document.documentElement.scrollHeight<=initialHeight+5,'list did not grow the page');
+     const boxes=()=>[...rows.querySelectorAll(':scope > div > input[type=checkbox]')];
+     boxes()[0].click();boxes()[1].click();await queue.refreshQueue();
+     check(boxes()[0].checked&&boxes()[1].checked&&!rows.firstChild.querySelector('details').open,'persistent checkbox selection without expanding');
+     button('Pause selected').click();await pause();check(changes.length===1&&changes[0].ids.join(',')==='0,1','exact pause batch');
+     boxes()[0].click();boxes()[1].click();button('Resume selected').click();await pause();
+     check(changes[1].action==='resume'&&changes[1].ids.length===2,'bulk resume');
+     queue.querySelector('.download-bulk label input').click();check(queue.innerText.includes('100 selected'),'select shown only');
+     button('Select all matching').click();await pause();check(queue.innerText.includes('523 selected'),'includes unloaded matches');
+     button('Remove selected').click();check(changes.length===2,'cancel prevents removal');
+     accept=true;button('Remove selected').click();await pause();
+     check(changes.slice(2).map(r=>r.ids.length).join(',')==='200,200,123'&&queue.innerText.includes('523 updated'),'confirmed removal in bounded batches');
+     boxes()[0].click();
      rows.firstChild.querySelector('details').open=true;await pause();await queue.refreshQueue();
      check(rows.firstChild.querySelector('details').open&&rows.firstChild.innerText.includes('Show files'),'expanded row preserved during refresh');
      const search=queue.querySelector('[type=search]');search.value='File 500';search.dispatchEvent(new Event('input'));await pause(240);
-     check(rows.children.length===1&&rows.innerText.includes('Finished'),'search beyond loaded window');
+     check(rows.children.length===1&&rows.innerText.includes('Finished')&&queue.innerText.includes('0 selected'),'search clears hidden selections');
      check(document.documentElement.scrollWidth<=window.innerWidth,'fits viewport width');
      $('result').textContent='PASS';
     })().catch(error=>{$('result').textContent='FAIL '+error.message;});

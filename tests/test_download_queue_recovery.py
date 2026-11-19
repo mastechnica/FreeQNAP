@@ -66,6 +66,74 @@ class DownloadQueueTests(unittest.TestCase):
         self.assertTrue(page(filter='removed')['items'][0]['retained'])
         self.assertEqual(page(search='neither')['matching'],0)
 
+    def test_member_bulk_controls_use_current_scope_and_state(self):
+        rows=self.rows(7)
+        rows['2']['actor']='user:'+'b'*32
+        rows['3']['state']='complete'
+        rows['4']['recovery_required']=True
+        rows['5']['delivery']={'state':'copying'}
+        rows['6'].update(state='error',attention_required=True)
+        self.ctx.state.set('downloads_jobs',rows)
+        def control(action,ids):
+            return downloads(self.manager,self.actor[5:],'downloads.control',{'ids':ids,'action':action})
+        with using(self.actor):
+            result=control('pause',['0','0','1','2','3','4','5','absent'])
+            self.assertEqual(result,{'changed':2,'skipped':5,'files_deleted':False})
+            self.assertEqual(control('pause',['0','1'])['changed'],0)
+            self.assertEqual(control('resume',list(rows))['changed'],3)
+            self.assertTrue(self.manager.jobs()['6']['manual_retry'])
+            self.assertEqual(control('remove',['1','2','3','5'])['changed'],2)
+            self.assertEqual(control('resume',['1','3','4'])['changed'],0)
+            after=self.manager.jobs()
+            self.assertEqual(after['2'],rows['2'])
+            self.assertEqual(after['5'],rows['5'])
+            self.assertEqual(after['0']['desired'],'running')
+            self.assertEqual(after['3']['desired'],'removed')
+            for bad in [{'ids':'0'},{'ids':[]},{'ids':['0']*201},{'ids':['0',{}]},{'id':'1','ids':['0']}]:
+                with self.assertRaises(ValueError):self.manager.control({'action':'pause',**bad})
+            self.assertEqual(self.manager.jobs(),after)
+
+    def test_worker_applies_bulk_intent_and_retains_removed_records(self):
+        rows=self.rows(80)
+        ids=['70','71']
+        for ident in ids:rows[ident]['state']='active'
+        self.ctx.state.set('downloads_jobs',rows)
+        states={key:row['state'] for key,row in rows.items()}
+        def rpc(method,args):
+            ident=args[0]
+            if method=='tellStatus':return {'status':states[ident],'completedLength':'25'}
+            if method=='forcePause':states[ident]='paused'
+            if method=='unpause':states[ident]='active'
+            if method=='forceRemove':states[ident]='removed'
+        self.manager.rpc=Mock(side_effect=rpc)
+        for action,result in [('pause','paused'),('resume','active'),('remove','removed')]:
+            self.assertEqual(self.manager.control({'ids':ids,'action':action})['changed'],2)
+            for _ in range(6):
+                self.manager.reconcile()
+                if all(states[i]==result for i in ids):break
+            self.assertTrue(all(states[i]==result for i in ids))
+        retained=self.ctx.state.setting('downloads_retained_files',{})
+        self.assertEqual(set(retained),set(ids))
+        self.assertTrue(all(retained[i]['completed_bytes']==25 for i in ids))
+
+    def test_selection_spans_unloaded_matches_and_excludes_retained_and_foreign_rows(self):
+        rows=self.rows(1105)
+        rows['0']['actor']='user:'+'b'*32
+        rows['1']['label']='other'
+        rows['2']['desired']='removed'
+        self.ctx.state.set('downloads_jobs',rows)
+        self.ctx.state.set('downloads_retained_files',{'kept':{'id':'kept','state':'complete','actor':self.actor,'label':'fixture'}})
+        query={'layout':'selection','filter':'waiting','search':'FIXTURE'}
+        def page(after):
+            return downloads(self.manager,self.actor[5:],'downloads.status',{**query,'after':after})
+        first=page('')
+        second=page(first['next'])
+        self.assertEqual(len(first['items']),1000)
+        self.assertIsNone(second['next'])
+        selected=[item['id'] for item in first['items']+second['items']]
+        self.assertEqual(selected,sorted(set(rows)-{'0','1','2'}))
+        self.assertTrue(all(item['actions']==['remove','pause'] for item in first['items']))
+
     def test_restored_job_outside_cursor_runs_in_first_pass(self):
         rows = self.rows(700)
         rows['0']['desired'] = 'paused'

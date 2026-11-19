@@ -1,3 +1,7 @@
+## 19 November 2026 — Bulk download controls
+
+Select queue entries individually, select shown rows, or select all matching downloads across the filtered queue. Pause, resume and remove use current account permissions and transfer state for each entry. Removing entries preserves completed and partial files.
+
 ## 19 November 2026 — Compact Downloads workspace
 
 Combined direct downloads and linked-file discovery in the top add panel. Moved destination and transfer preferences to Settings. The collapsible queue combines active, waiting, completed and removed transfers with filename search, status filtering and in-place expansion.

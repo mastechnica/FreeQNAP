@@ -294,9 +294,82 @@ function downloadQueue(container){
  const list=el('div',null,{class:'download-rows',role:'list','aria-label':'Downloads and retained files',tabindex:0});
  const feedback=el('p',null,{class:'note','aria-live':'polite'}),more=el('button','Show more downloads',{type:'button',class:'quiet'});
  const files=el('section',null,{id:'download-file-browser',class:'download-browse',hidden:''});
- disclosure.append(tools,list,feedback,more,files);panel.append(disclosure);container.append(panel);
+ const bulk=el('div',null,{class:'download-bulk',role:'group','aria-label':'Queue selection'});
+ const shownLabel=el('label'),shown=el('input',null,{type:'checkbox'});shownLabel.append(shown,' Select shown');
+ const all=el('button','Select all matching',{type:'button',class:'quiet'}),clear=el('button','Clear selection',{type:'button',class:'quiet'});
+ const count=el('span','0 selected',{'aria-live':'polite'}),commands=el('div',null,{class:'actions'}),buttons={};
+ for(const [key,title] of [['pause','Pause selected'],['resume','Resume selected'],['remove','Remove selected']]){
+  const button=el('button',title,{type:'button',class:'quiet'});buttons[key]=button;
+  button.addEventListener('click',()=>applySelection(key));commands.append(button);
+ }
+ const outcome=el('p',null,{class:'note','aria-live':'polite'});
+ bulk.append(shownLabel,all,count,clear,commands);
+ disclosure.append(tools,bulk,outcome,list,feedback,more,files);panel.append(disclosure);container.append(panel);
  let wanted=50,generation=0,loading=false,reload=false,timer,records=new Map();
- more.hidden=true;
+ const selected=new Map();let bulkBusy=false,matching=0;
+ function syncSelection(){
+  let available=0,checked=0;
+  for(const [id,record] of records){
+   const eligible=Boolean(record.job.actions?.length);
+   record.box.disabled=bulkBusy||demo||!eligible;
+   record.box.checked=selected.has(id);
+   if(eligible){available++;if(record.box.checked)checked++;}
+  }
+  shown.disabled=bulkBusy||demo||available===0;
+  shown.checked=available>0&&checked===available;shown.indeterminate=checked>0&&checked<available;
+  all.disabled=bulkBusy||demo||!matching;
+  clear.hidden=commands.hidden=selected.size===0;
+  clear.disabled=search.disabled=filter.disabled=bulkBusy;
+  for(const key of Object.keys(buttons)){
+   buttons[key].disabled=bulkBusy||demo||![...selected.values()].some(actions=>actions.includes(key));
+  }
+  count.textContent=selected.size+' selected';
+ }
+ shown.addEventListener('change',()=>{
+  for(const [id,record] of records){
+   if(shown.checked&&record.job.actions?.length)selected.set(id,record.job.actions);
+   else selected.delete(id);
+  }
+  outcome.textContent='';syncSelection();
+ });
+ clear.addEventListener('click',()=>{selected.clear();outcome.textContent='';syncSelection();});
+ all.addEventListener('click',async()=>{
+  if(bulkBusy)return;
+  bulkBusy=true;syncSelection();outcome.textContent='Selecting matching downloads…';
+  const query={layout:'selection',filter:filter.value,search:search.value.trim()},snapshot=new Map();
+  try{
+   let after='';
+   do{
+    const page=await nas('downloads.status',{...query,after});
+    for(const item of page.items)snapshot.set(item.id,item.actions);
+    after=page.next;
+   }while(after);
+   selected.clear();for(const [id,actions] of snapshot)selected.set(id,actions);
+   outcome.textContent=snapshot.size?'':'No matching queue entries can be changed.';
+  }catch(error){outcome.textContent='Could not select matching downloads. '+error.message;}
+  finally{bulkBusy=false;syncSelection();}
+ });
+ async function applySelection(command){
+  if(bulkBusy||demo||!selected.size)return;
+  const ids=[...selected.keys()];
+  if(command==='remove'&&!confirm('Remove the selected downloads from the queue ('+ids.length+')? Downloaded and partial files will be kept.'))return;
+  bulkBusy=true;syncSelection();
+  let changed=0,skipped=0;
+  const summary=()=>changed+' updated · '+skipped+' skipped';
+  try{
+   for(let offset=0;offset<ids.length;offset+=200){
+    const batch=ids.slice(offset,offset+200);
+    outcome.textContent='Updating selected downloads… '+offset+' of '+ids.length;
+    const result=await nas('downloads.control',{action:command,ids:batch});
+    changed+=result.changed;skipped+=result.skipped;
+    for(const id of batch)selected.delete(id);
+   }
+   outcome.textContent=summary()+(skipped?' (unavailable or ineligible for this action).':'.');
+  }catch(error){
+   outcome.textContent=summary()+' confirmed. Check the queue before retrying the remaining selection. '+error.message;
+  }finally{bulkBusy=false;syncSelection();void refreshList();}
+ }
+ more.hidden=true;syncSelection();
  function statusText(job){
   if(job.retained)return job.category==='complete'?'Finished · files kept':job.completed_bytes>0?'Removed · partial files kept':'Removed';
   if(job.category==='error')return 'Needs attention';
@@ -308,6 +381,9 @@ function downloadQueue(container){
  function updateRow(record,job){
   const previous=record.job;
   record.job=job;
+  if(selected.has(job.id)&&!bulkBusy){
+   if(job.actions?.length)selected.set(job.id,job.actions);else selected.delete(job.id);
+  }
   record.name.textContent=job.label||'Download';
   record.badge.textContent=statusText(job);
   record.badge.className='badge '+(job.category==='complete'?'good':job.category==='error'?'warn':'');
@@ -320,8 +396,13 @@ function downloadQueue(container){
  function createRow(job){
   const node=el('div',null,{role:'listitem',class:'download-row'}),detail=el('details'),summary=el('summary');
   const name=el('span',null,{class:'download-row-name'}),progress=el('small'),badge=el('span'),body=el('div',null,{class:'download-row-body'});
-  summary.append(name,progress,badge);detail.append(summary,body);node.append(detail);
-  const record={node,detail,body,name,progress,badge};
+  const box=el('input',null,{type:'checkbox','aria-label':'Select '+(job.label||'download')});
+  summary.append(name,progress,badge);detail.append(summary,body);node.append(box,detail);
+  const record={node,detail,body,name,progress,badge,box};
+  box.addEventListener('change',()=>{
+   if(box.checked)selected.set(job.id,record.job.actions);else selected.delete(job.id);
+   outcome.textContent='';syncSelection();
+  });
   detail.addEventListener('toggle',()=>{
    body.replaceChildren();if(detail.open)downloadRowDetails(body,record.job);
   });
@@ -338,7 +419,7 @@ function downloadQueue(container){
    position++;
   }
   for(const [id,record] of records)if(!current.has(id))record.node.remove();
-  records=current;
+  records=current;matching=total;syncSelection();
   more.hidden=next==null;
   feedback.textContent=total?current.size+' of '+total+' shown':search.value||filter.value!=='all'?'No matching downloads.':'No downloads yet.';
  }
@@ -374,8 +455,8 @@ function downloadQueue(container){
   }
  }
  function changeFilter(){
-  generation++;wanted=50;list.scrollTop=0;files.hidden=true;
-  for(const r of records.values())r.node.remove();records.clear();
+  generation++;wanted=50;list.scrollTop=0;files.hidden=true;selected.clear();matching=0;outcome.textContent='';
+  for(const r of records.values())r.node.remove();records.clear();syncSelection();
   more.hidden=true;feedback.textContent='Finding downloads…';
   clearTimeout(timer);timer=setTimeout(refreshList,160);
  }

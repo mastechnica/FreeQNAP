@@ -34,7 +34,8 @@ def downloads(manager,owner,action,payload):
   from ..access_scope import current
   if current()!=actor:raise ValueError('Download account identity mismatch')
   return manager.add(payload)
- if action not in ('downloads.control','downloads.files','downloads.read'):raise ValueError('Shared download settings require an administrator')
+ if action=='downloads.control':return manager.control(payload,actor=actor)
+ if action not in ('downloads.files','downloads.read'):raise ValueError('Shared download settings require an administrator')
  row=manager.jobs().get(payload.get('id')) or manager.ctx.state.setting('downloads_retained_files',{}).get(payload.get('id'))
  if not row or not owned(row):raise ValueError('Download not available to this account')
- return {'downloads.control':manager.control,'downloads.files':manager.list_files,'downloads.read':manager.read_file}[action](payload)
+ return {'downloads.files':manager.list_files,'downloads.read':manager.read_file}[action](payload)

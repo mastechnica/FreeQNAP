@@ -248,3 +248,12 @@ body.files-mode .file-desktop{height:max(680px,calc(100dvh - 310px))}.file-selec
 .download-row-body .actions button{margin:0}
 .download-queue-panel button[hidden],.download-browse[hidden]{display:none}
 @media(max-width:580px){.download-queue-counts{display:block;margin:.3rem 0 0 1rem}.download-row summary{flex-wrap:wrap;gap:.4rem}.download-row small:empty{display:none}.download-row .badge{font-size:.67rem}.download-queue-tools{grid-template-columns:1fr}}
+
+.download-bulk{display:flex;align-items:center;flex-wrap:wrap;gap:.4rem .75rem;margin:.45rem 0}
+.download-bulk label{display:inline-flex;align-items:center;gap:.35rem;margin:0}
+.download-bulk input[type=checkbox],.download-row>input[type=checkbox]{width:1rem;height:1rem;padding:0;margin:0;accent-color:#ae4969}
+.download-bulk [hidden]{display:none}
+.download-bulk .actions{margin:0}
+.download-bulk+p:empty{display:none}
+.download-row{display:grid;grid-template-columns:1.5rem minmax(0,1fr);align-items:start}
+.download-row>input[type=checkbox]{justify-self:center;margin-top:.8rem}
