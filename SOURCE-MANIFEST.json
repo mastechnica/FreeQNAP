@@ -1,7 +1,7 @@
 {
   "format": 1,
   "project": "FreeQNAP",
-  "source_commit": "74ad73e6f8f1d1bf44ee8ca960e41e58da9155ed",
+  "source_commit": "5e53760f7db2d98da50f076a87d2fc16a076e454",
   "scope": "Committed source and public documentation only; no private Git history, credentials, device state or OS binaries",
   "files": [
     {
@@ -26,8 +26,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 59146,
-      "sha256": "d9d952d0e0c5efc9eb7800623d5ce7082f44cd5df245a01ccf2a763fb95346f7"
+      "bytes": 59742,
+      "sha256": "6460e96a7d8c044efde5e3c4138bb2f98302773d3e98998c9b60bc48f593c3f2"
     },
     {
       "path": "CONTRIBUTING.md",
@@ -696,8 +696,8 @@
     },
     {
       "path": "docs/VPN-DOWNLOADS-MEDIA-ACCESS.md",
-      "bytes": 11465,
-      "sha256": "1414a718ffee238ae655d7cf6cdea4a471cb1a67c7883eb2d029b728ed8c50a6"
+      "bytes": 12841,
+      "sha256": "f9af648554d8b8df40f2db590ea4341d321f81fb892ea1c296cf10e0d2f2763c"
     },
     {
       "path": "docs/WATCHDOG-COOLING-PLAN.md",
@@ -881,18 +881,18 @@
     },
     {
       "path": "freeqnap/accounts.py",
-      "bytes": 18684,
-      "sha256": "6e08f23fb698ff29c468320a281dca3c809196d386717dfa8923f39b4ba52b47"
+      "bytes": 18741,
+      "sha256": "50a9dc576a81857c0c44692f9cadf8c8eed9d8434e097f6a5e827722c7fd8207"
     },
     {
       "path": "freeqnap/activity.py",
-      "bytes": 2562,
-      "sha256": "68402013c614f7e407a59bc4e0266fe83dc73c6fd9606e3de8f12623514561c1"
+      "bytes": 2540,
+      "sha256": "2b040556d31d49bb1157548e172b3c74614070ede68b4078675eb56b4b1eaa1f"
     },
     {
       "path": "freeqnap/agent_operations.json",
-      "bytes": 5326,
-      "sha256": "8e02327991ede3578c12128b5ff5441c1e7b6beb0ded02d8f8cb0dab20a38589"
+      "bytes": 5399,
+      "sha256": "cb6b30e5ac39c81da9188e0a92e23a25849b490bcebc03545313b122dde51dbb"
     },
     {
       "path": "freeqnap/agents.py",
@@ -1011,8 +1011,8 @@
     },
     {
       "path": "freeqnap/nas/backend.py",
-      "bytes": 36941,
-      "sha256": "6b7c00b8912c42c39ba2f69c06bcd6c22e85b3e45354953ee529e837ac45aca7"
+      "bytes": 37775,
+      "sha256": "a59de676f3142cec8333742987386d639a7f9618572fbda644bbe9eaff766a31"
     },
     {
       "path": "freeqnap/nas/backup_schedules.py",
@@ -1021,8 +1021,8 @@
     },
     {
       "path": "freeqnap/nas/broker.py",
-      "bytes": 5692,
-      "sha256": "ccc11f0271412f02da23c1d75d3966b61e4ac9995de0e554e29ce213794ab8f5"
+      "bytes": 5779,
+      "sha256": "6fb0ed18f13a6e79a4c4e3a79d033c5059a1b226b3b603319d3e77ed2d0da0e2"
     },
     {
       "path": "freeqnap/nas/bundle.py",
@@ -1060,9 +1060,29 @@
       "sha256": "4e14d611d7d7e7d23a58a47ca9a91698dc7e64bd46154feb6e8302ef8b091f3f"
     },
     {
+      "path": "freeqnap/nas/download_destinations.py",
+      "bytes": 11321,
+      "sha256": "0bc3b6475c2bdfd19d6a40fa8bd3c87bb41869a1a385fc69aeba7a223e9096a3"
+    },
+    {
+      "path": "freeqnap/nas/download_discovery.py",
+      "bytes": 4402,
+      "sha256": "4ad52484ade8fb58b5c735d281ac19487ff4aaa2176aa8f70ca9327630a3d651"
+    },
+    {
+      "path": "freeqnap/nas/download_limits.py",
+      "bytes": 5599,
+      "sha256": "a1558b71299e250b01bb7942b539f11fc9adcba12a70075702aa6bf635c7f842"
+    },
+    {
+      "path": "freeqnap/nas/download_problems.py",
+      "bytes": 3361,
+      "sha256": "8705dc092175ab55c0ced1151f3432a6165a4019fb77ea812460cce42b7bc2a2"
+    },
+    {
       "path": "freeqnap/nas/downloads.py",
-      "bytes": 18917,
-      "sha256": "6049536066a0648f017aa1f05edad487014601d9d6142e60b144af25aceb1a0a"
+      "bytes": 24223,
+      "sha256": "7498c19d04911cc9f74e599b9967f8b1f74941ebe2bade1306b0b7f3464a734a"
     },
     {
       "path": "freeqnap/nas/external.py",
@@ -1086,8 +1106,8 @@
     },
     {
       "path": "freeqnap/nas/fileops.py",
-      "bytes": 32842,
-      "sha256": "353c95b0515d3cfc87f25fd95d5fdfb844a184790372ea500aa2f19e9c39b534"
+      "bytes": 33450,
+      "sha256": "623cc3af38536e9405f3c6ec59608693cf9a9e0d088ce034dd6eae77da15bf21"
     },
     {
       "path": "freeqnap/nas/files.py",
@@ -1165,6 +1185,11 @@
       "sha256": "a8656e2196365f4c4c594f3772093b823f64261cb37172833611d2b8dfde26bb"
     },
     {
+      "path": "freeqnap/nas/member_services.py",
+      "bytes": 2399,
+      "sha256": "7b53611292044738b1a1b246b81d6af6541bd6ae965b9236a3c5608bb04fe7cb"
+    },
+    {
       "path": "freeqnap/nas/metrics.py",
       "bytes": 5221,
       "sha256": "bb031c3e0f69ffcc06d2a5aa997558f770e429be4d8b117cd74918fab1ade63c"
@@ -1196,8 +1221,8 @@
     },
     {
       "path": "freeqnap/nas/personal.py",
-      "bytes": 17086,
-      "sha256": "1e5b9270ac8b2a454b7b3b29575be869ce67f01574b54959a011b41e5632854b"
+      "bytes": 18426,
+      "sha256": "14e67f78d57ff90712474bb663ccfd155ceb38410f80106ce61d5f10535fa7a5"
     },
     {
       "path": "freeqnap/nas/personal_cloud.py",
@@ -1231,8 +1256,8 @@
     },
     {
       "path": "freeqnap/nas/public_http.py",
-      "bytes": 5212,
-      "sha256": "404586778917c547cd9bceb13f6d23affbfdea551431ef958e75d17f613517f5"
+      "bytes": 5497,
+      "sha256": "1a1e9a4fcc80c182ed8c3797e0f6d5fb384a0030fc5a844919a6466eb976413e"
     },
     {
       "path": "freeqnap/nas/push.py",
@@ -1326,8 +1351,8 @@
     },
     {
       "path": "freeqnap/personal_access.py",
-      "bytes": 14091,
-      "sha256": "1e86a4a5ce793ebf87209b2cb6d643d07f83f33e27bb13edddc46162324564a3"
+      "bytes": 14742,
+      "sha256": "61468139005c0bb800bad1eb010d605406a2591c923fe505b4d9da304d07b98b"
     },
     {
       "path": "freeqnap/photo_album_access.py",
@@ -1376,8 +1401,8 @@
     },
     {
       "path": "freeqnap/server.py",
-      "bytes": 49753,
-      "sha256": "df1e064c96ba30fd7cdbf53101155afde84ccc5cd1a5fb71473243b9cd5280dd"
+      "bytes": 49794,
+      "sha256": "2ddc630010803ca3b81db11d3e10f2d508941e15550f01f01c3bc5e4bb03b393"
     },
     {
       "path": "freeqnap/state.py",
@@ -1770,6 +1795,21 @@
       "sha256": "12f66698d18d14d25b458b1c5df6b7e3dedef0926b554e4b413365f0ad897503"
     },
     {
+      "path": "tests/download-limits.test.cjs",
+      "bytes": 2167,
+      "sha256": "50b496875a3f420901ff83e8ec2119540bc28c839d4dd793ca4d801c9503decf"
+    },
+    {
+      "path": "tests/download-preview.test.cjs",
+      "bytes": 10361,
+      "sha256": "132c1021195321d96d667b56eb90018d4c4cc554c6464f10f42df6a43226641d"
+    },
+    {
+      "path": "tests/download-problems.test.cjs",
+      "bytes": 5160,
+      "sha256": "810c01048e343171fb816d259333cf3f5f68c537f3f6ab2762282cfa1f4e0860"
+    },
+    {
       "path": "tests/download-view.test.cjs",
       "bytes": 845,
       "sha256": "8104baf9169f2a2530ee2d7f55569d2a7f774bd11902289805bafbece2483a3c"
@@ -1781,8 +1821,8 @@
     },
     {
       "path": "tests/family-navigation.test.cjs",
-      "bytes": 2093,
-      "sha256": "4a5fd475431bd0e658819ddbdf4b14802205a23b283b5f4817bbe455562a3741"
+      "bytes": 2809,
+      "sha256": "175e2005c5c0c8d723a4ba403154292a05969b90fb8c927ddb0a820d2687c6f2"
     },
     {
       "path": "tests/file-desktop.test.cjs",
@@ -1886,8 +1926,8 @@
     },
     {
       "path": "tests/test_accounts.py",
-      "bytes": 25764,
-      "sha256": "5ef8dcfaa5b59723f82d3b5637bb1d60abcce481b91ad61dfef468190e7f6677"
+      "bytes": 27671,
+      "sha256": "783993f680e258c4a0bbc78f673bffaf961d7a179fcb3a8927a9ff938985a52c"
     },
     {
       "path": "tests/test_agents.py",
@@ -1963,6 +2003,26 @@
       "path": "tests/test_dlna_options.py",
       "bytes": 1163,
       "sha256": "9da58876851cce2cb7342760096c4741187de81ea318088cf6d1836eb05f1598"
+    },
+    {
+      "path": "tests/test_download_attention.py",
+      "bytes": 5234,
+      "sha256": "fb0736fc2b92e4196c397f0cea397eb2d73cf5b76825813332d2dd73aa314a72"
+    },
+    {
+      "path": "tests/test_download_destinations.py",
+      "bytes": 12003,
+      "sha256": "9cb2d2ea5f7dd4f625cf03a6bfbef15c29a12e1aed43f1017e4ce13cb2ec0639"
+    },
+    {
+      "path": "tests/test_download_limits.py",
+      "bytes": 9890,
+      "sha256": "01358d17dd1414b92398b753c2ad1a6a9e58abcbe5e204243cc63e0bbfc34cd1"
+    },
+    {
+      "path": "tests/test_download_queue_recovery.py",
+      "bytes": 4559,
+      "sha256": "c2015b5162c16bab909e8c2763d14a7a08281818e84f1acd5633400b675f2857"
     },
     {
       "path": "tests/test_external.py",
@@ -2078,6 +2138,11 @@
       "path": "tests/test_media_library.py",
       "bytes": 3315,
       "sha256": "d922c3c4ebc1877d531dcbd6022f42dce897eeb4f3bb9de4f36fcf3abc71a1d2"
+    },
+    {
+      "path": "tests/test_member_downloads.py",
+      "bytes": 5344,
+      "sha256": "ae4c994d835ec768c7b2de7746e3e158c089734134db1397af12eec631002c1a"
     },
     {
       "path": "tests/test_metrics.py",
@@ -2246,8 +2311,8 @@
     },
     {
       "path": "tests/test_user_privacy.py",
-      "bytes": 10066,
-      "sha256": "fdc3ea972fa69ecbbd67ad6108d199e48a12082995e5dfe7191750c8606b00fa"
+      "bytes": 10065,
+      "sha256": "d2ef26e33d720c37632b41841ac97fa1a3573b2bb70c8f8d02d30199e34bd3f6"
     },
     {
       "path": "tests/test_vpn_peers_view.py",
@@ -2346,8 +2411,8 @@
     },
     {
       "path": "tools/download-smoke.py",
-      "bytes": 6709,
-      "sha256": "8454aef0e2183ed7fea71848df7ab9749e7029d603434bb12d24d9d9cabdf332"
+      "bytes": 7024,
+      "sha256": "37883701ec09e826d1c54c04b23c11083c15f3365cc8feaa51f6e94a055f582a"
     },
     {
       "path": "tools/external-smoke.py",
@@ -2521,8 +2586,8 @@
     },
     {
       "path": "web/accounts.js",
-      "bytes": 36421,
-      "sha256": "f5391a5f584aeaf20f394b744763e572782947beee60f73804eac24e1134a0c5"
+      "bytes": 36796,
+      "sha256": "1de84f33afce837484e5f573d34100cd8d91a3cbbe57e54f7783eeddfb2893ad"
     },
     {
       "path": "web/agents.js",
@@ -2531,8 +2596,8 @@
     },
     {
       "path": "web/app.js",
-      "bytes": 205376,
-      "sha256": "34a1aa8c5d7965b3af7113dc3ee1cd7685f20e3c40a921dcbd0443d1f2f58d76"
+      "bytes": 222397,
+      "sha256": "fede79470c66133e7fb8ad0258dc9a3668cc3ef55cf48294a145ff5e74306a80"
     },
     {
       "path": "web/array-recovery.js",
@@ -2581,8 +2646,8 @@
     },
     {
       "path": "web/health.js",
-      "bytes": 5211,
-      "sha256": "a7dce2af2818a30320c2f9e3554c836da3c8e45367125fe78abc109413410527"
+      "bytes": 5547,
+      "sha256": "c2292193ff83d3559f9200cf5334967f6493b9d6299f62a5beeef19d78f62be1"
     },
     {
       "path": "web/icon-192.png",
