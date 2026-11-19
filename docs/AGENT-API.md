@@ -192,6 +192,20 @@ Boot/process/install identities and private file paths are excluded. History is
 bounded/rotated locally and sampled, so it does not prove instantaneous RPM.
 This is a separate explicit grant; existing tokens/presets are unchanged.
 
+### Selecting and controlling multiple downloads
+
+Use `downloads.status` with `{"layout":"list","filter":"waiting","search":""}` to browse matching transfers. Each item includes its queue ID and the bulk actions currently available for it. Follow `next_offset` by passing it as `offset` to get the next page.
+
+To select across the entire filtered queue, request `{"layout":"selection","filter":"waiting","search":""}`. Each item contains an `id` and an `actions` array. If `next` is present and non-null, pass its value as `after` in the next request with the same filters. Collect the selected IDs before changing transfer state.
+
+Send `downloads.control` a batch of 1–200 IDs and one action. For example, to pause two transfers use the following payload.
+
+```json
+{"ids":["<first queue ID>","<second queue ID>"],"action":"pause"}
+```
+
+Allowed actions are `pause`, `resume` and `remove`. The response includes `changed`, `skipped` and `files_deleted: false`. Counts refer to distinct IDs. The broker checks current state and access when applying each batch. A changed count records saved queue intent. Poll status to see the transfer engine apply it. For a larger selection, submit successive batches. If a response is lost, refresh status before retrying. Single-entry callers can continue to pass `id`.
+
 ### Download recovery status
 
 `downloads.status` job records can include `recovery_required: true` when the engine
