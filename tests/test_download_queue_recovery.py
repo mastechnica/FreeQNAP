@@ -44,6 +44,28 @@ class DownloadQueueTests(unittest.TestCase):
             self.assertNotIn('1', ids)
             self.assertEqual([r['id'] for r in page(filter='active')['jobs']], ['0'])
 
+    def test_compact_list_sorts_active_first_and_filters_retained_by_account(self):
+        rows = self.rows(600)
+        rows['2'].update(state='active', label='Matching video')
+        rows['0']['desired']='paused'
+        rows['1']['state']='complete'
+        rows['3']['attention_required']=True
+        rows['3']['state']='error'
+        self.ctx.state.set('downloads_jobs',rows)
+        kept={key:{'id':key,'created':0,'label':'Matching file','state':state,'actor':actor}
+              for key,state,actor in [('saved','complete',self.actor),('partial','paused',self.actor),('other','complete','user:'+'b'*32)]}
+        self.ctx.state.set('downloads_retained_files',kept)
+        def page(**request):
+            return downloads(self.manager,self.actor[5:],'downloads.status',{'layout':'list',**request})
+        first=page()
+        self.assertEqual(first['counts'],{'active':1,'waiting':596,'paused':1,'error':1,'complete':2,'removed':1})
+        self.assertEqual([r['id'] for r in first['items'][:2]],['2','3'])
+        ids={row['id'] for offset in range(0,602,50) for row in page(offset=offset)['items']}
+        self.assertEqual(ids,set(rows)|{'saved','partial'})
+        self.assertEqual([r['id'] for r in page(filter='complete',search='MATCHING')['items']],['saved'])
+        self.assertTrue(page(filter='removed')['items'][0]['retained'])
+        self.assertEqual(page(search='neither')['matching'],0)
+
     def test_restored_job_outside_cursor_runs_in_first_pass(self):
         rows = self.rows(700)
         rows['0']['desired'] = 'paused'

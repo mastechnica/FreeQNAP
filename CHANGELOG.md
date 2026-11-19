@@ -1,3 +1,7 @@
+## 19 November 2026 — Compact Downloads workspace
+
+Combined direct downloads and linked-file discovery in the top add panel. Moved destination and transfer preferences to Settings. The collapsible queue combines active, waiting, completed and removed transfers with filename search, status filtering and in-place expansion.
+
 ## 19 November 2026 — Download queue recovery and large lists
 
 Downloads automatically resumes eligible transfers when the worker or engine restarts. Account pauses, destinations, concurrency and bandwidth settings persist. The queue and retained-file history have no fixed entry count. The Downloads view pages through all matching records and URL previews can include more than 500 linked files.

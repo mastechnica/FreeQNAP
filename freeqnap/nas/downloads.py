@@ -58,6 +58,46 @@ def config_text(root,target,token,options):
            'console-log-level=error','summary-interval=0','log-level=error','log='+str(root/'aria2.log')]
     return '\n'.join(lines)+'\n'
 
+def list_category(row, retained):
+    if retained:
+        return 'complete' if row.get('state')=='complete' or (row.get('delivery') or {}).get('state')=='delivered' else 'removed'
+    if row.get('state')=='error' or row.get('engine_error') or (row.get('delivery') or {}).get('state')=='needs-attention':
+        return 'error'
+    if row.get('state')=='complete':return 'complete'
+    if row.get('desired')=='removed':return 'removed'
+    if row.get('desired')=='paused':return 'paused'
+    if row.get('state')=='active':return 'active'
+    return 'waiting'
+
+
+def download_list(manager, jobs, retained, request):
+    categories=('active','error','waiting','paused','complete','removed')
+    view=request.get('filter','all')
+    offset=request.get('offset',0)
+    search=request.get('search','')
+    if view not in ('all',*categories) or type(offset) is not int or offset<0 or not isinstance(search,str) or len(search)>256:
+        raise ValueError('Invalid download list filter')
+    counts=dict.fromkeys(categories,0)
+    search=search.strip().casefold()
+    matches=[]
+    queued_ids={row['id'] for row in jobs}
+    for rows,archived in ((jobs,False),(retained,True)):
+        for row in rows:
+            if archived and row['id'] in queued_ids:continue
+            category=list_category(row,archived)
+            counts[category]+=1
+            if (view=='all' or view==category) and search in row.get('label','').casefold():
+                matches.append((category,archived,row))
+    def order(entry):
+        category,_,row=entry
+        created=row.get('created',0)
+        return (categories.index(category),created if category=='waiting' else -created,row['id'])
+    matches.sort(key=order)
+    items=[{**manager.public_job(row),'category':category,'retained':archived}
+           for category,archived,row in matches[offset:offset+PAGE_SIZE]]
+    end=offset+len(items)
+    return {'items':items,'counts':counts,'matching':len(matches),'next_offset':end if end<len(matches) else None}
+
 class Downloads:
     def __init__(self,ctx):self.ctx=ctx;self.root=Path('/var/lib/freeqnap-downloads');self.destinations=None
     def settings(self):return self.ctx.state.setting('downloads_settings')
@@ -137,12 +177,13 @@ class Downloads:
         request=request or {}
         offset=request.get('offset',0)
         view=request.get('filter','all')
-        if type(offset) is not int or offset<0 or view not in ('all','active','paused','complete','error'):
-            raise ValueError('Invalid download page or filter')
         def visible(rows):
             return [row for row in rows.values() if actor is None or row.get('actor')==actor]
         jobs=visible(self.jobs())
         retained=visible(self.ctx.state.setting('downloads_retained_files',{}))
+        if request.get('layout')=='list':return download_list(self,jobs,retained,request)
+        if type(offset) is not int or offset<0 or view not in ('all','active','paused','complete','error'):
+            raise ValueError('Invalid download page or filter')
         matches=jobs
         if view=='error':
             matches=[row for row in jobs if row.get('state')=='error' or row.get('engine_error') or (row.get('delivery') or {}).get('state')=='needs-attention']

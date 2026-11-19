@@ -228,38 +228,210 @@ function vpn(w){vpnVisual(w);
  (current.openvpn_peers||[]).forEach(peer=>{const a=el('article');a.append(el('h3',peer.name),el('p',peer.revoked?'Revoked':'Active certificate'));if(!peer.revoked)a.append(action('Revoke & disconnect',async()=>{if(!confirm('Revoke '+peer.name+' and disconnect current VPN server sessions?'))return;await nas('vpn.revoke',{name:peer.name});await refresh(true);},true,true));manage.append(a);});w.append(manage);}
  w.append(el('p','Provider profiles with scripts, plugins, TAP bridging, obsolete encryption or arbitrary route commands are not imported. IPv6 internet is blocked when the tunnel lacks IPv6 support. Provider interoperability, remote client devices and sustained throughput still require your real-network acceptance test.',{class:'note'}));
 }
-function downloads(w){downloadLimitControls(w);downloadDestinationControls(w);downloadDiscovery(w);const settings=state.nas.downloads?.settings,config=panel('Download settings','HTTP(S) URLs, magnet links and torrent files. Partial files and the private queue survive engine restarts. Nothing is downloaded until you add a job.');const f=el('form'),pool=field(f,'Storage volume',{id:'download-pool',type:'select',required:true});choices(pool,state.nas.pools.filter(p=>p.mounted));if(settings)pool.value=settings.pool;
+let downloadsTab='queue';
+function downloads(w){
+ const tabs=el('div',null,{class:'actions download-filters',role:'tablist','aria-label':'Downloads'});
+ const queue=el('div',null,{id:'downloads-queue-panel',role:'tabpanel','aria-labelledby':'downloads-queue-tab'});
+ const settings=el('div',null,{id:'downloads-settings-panel',role:'tabpanel','aria-labelledby':'downloads-settings-tab'});
+ const tabsByKey={};
+ function activate(key){
+  downloadsTab=key;queue.hidden=key!=='queue';settings.hidden=key!=='settings';
+  for(const [name,button] of Object.entries(tabsByKey)){
+   button.setAttribute('aria-selected',String(name===key));button.tabIndex=name===key?0:-1;
+  }
+  if(key==='queue')renderDownloadJobs();
+ }
+ for(const [key,label] of [['queue','Downloads'],['settings','Settings']]){
+  const button=el('button',label,{id:'downloads-'+key+'-tab',type:'button',role:'tab',class:'quiet','aria-controls':'downloads-'+key+'-panel'});
+  button.addEventListener('click',()=>activate(key));
+  button.addEventListener('keydown',event=>{
+   if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+   event.preventDefault();
+   const next=event.key==='Home'?'queue':event.key==='End'?'settings':key==='queue'?'settings':'queue';
+   activate(next);tabsByKey[next].focus();
+  });
+  tabsByKey[key]=button;tabs.append(button);
+ }
+ w.append(tabs,queue,settings);
+ downloadAddPanel(queue);
+ if(!state.nas.downloads?.settings)queue.append(el('p',familyMember()?'An administrator must configure download storage before files can be queued.':'Choose a storage volume in Settings to start downloading.',{class:'notice warning'}));
+ downloadQueue(queue);
+ downloadDestinationControls(settings);downloadLimitControls(settings);
+ if(!familyMember())downloadStorageSettings(settings);
+ activate(downloadsTab);
+}
+function downloadStorageSettings(w){
+ const settings=state.nas.downloads?.settings,config=panel('Download storage and seeding');const f=el('form'),pool=field(f,'Storage volume',{id:'download-pool',type:'select',required:true});choices(pool,state.nas.pools.filter(p=>p.mounted));if(settings)pool.value=settings.pool;
  const up=field(f,'Maximum upload · KiB/s',{id:'upload-speed',type:'number',min:1,max:1000000,value:settings?.options.upload_kib||256}), ratio=field(f,'Stop seeding at upload ratio',{id:'download-ratio',type:'number',min:0,max:100,value:settings?.options.seed_ratio??1}), seed=field(f,'Maximum seeding minutes · 0 = stop at completion',{id:'download-seed-time',type:'number',min:0,max:10080,value:settings?.options.seed_minutes??0});ratio.step='0.1';
- submit(f,'Save download settings',async()=>{await nas('downloads.setup',{pool:pool.value,concurrent:settings?.options.concurrent??0,download_kib:settings?.options.download_kib??0,upload_kib:Number(up.value),seed_ratio:Number(ratio.value),seed_minutes:Number(seed.value)});await refresh(true);});config.append(f);const downloadSettings=el('details',null,{class:'download-settings'});downloadSettings.append(el('summary','Download settings'),config);if(!settings&&!familyMember())w.append(downloadSettings);
- const add=panel('Add downloads','Torrents exchange data with other peers while downloading. To prevent ordinary internet fallback, first enable the NAS full-tunnel VPN and verify its kill switch.');const submissionDestination=downloadSubmissionDestination(add,'Download location for these files'),a=el('form'),urls=field(a,'One URL or magnet link per line',{id:'download-urls',type:'textarea'}), torrent=field(a,'Or upload a torrent file · maximum 512 KiB',{id:'download-torrent',type:'file'}), digest=field(a,'Optional expected SHA-256 · single URL only',{id:'download-checksum'});
- submit(a,'Start download',async()=>{submissionDestination.setDisabled(true);try{const destination=submissionDestination.request(),file=torrent.files[0];if(file){if(urls.value.trim())throw Error('Choose URLs or a torrent file.');if(file.size>512*1024)throw Error('Torrent file is too large.');await nas('downloads.add',{name:file.name,torrent_base64:b64(new Uint8Array(await file.arrayBuffer())),...destination});}else{const values=urls.value.split('\n').map(v=>v.trim()).filter(Boolean);if(!values.length)throw Error('Enter at least one URL.');if(digest.value&&values.length!==1)throw Error('A checksum applies to a single URL.');for(const [index,url] of values.entries()){try{await nas('downloads.add',{url,sha256:digest.value.trim(),...destination});}catch(error){urls.value=values.slice(index).join('\n');throw Error(index+' links queued. Check the first remaining link in the queue before retrying. '+error.message);}}}a.reset();await refresh(true);}finally{submissionDestination.setDisabled(false);}});add.append(a);w.append(add);
- const queue=panel('Download queue','Pause, resume or remove a queue entry. Removing an entry keeps all downloaded and partial files.');queue.append(action('Refresh download status',async()=>refresh(true),false,true),el('div',null,{id:'download-jobs'}));w.prepend(queue);w.append(add);if(!familyMember())w.append(downloadSettings);else if(!settings)w.append(panel('Downloads are not configured','An administrator must select the shared download destination before you can add jobs.'));const retained=panel('Downloaded files','Removing a queue entry does not delete downloaded files. Browse them here.');retained.append(el('div',null,{id:'download-retained'}));const savedFiles=el('details');savedFiles.append(el('summary','Downloaded files'),retained);w.append(savedFiles,el('section',null,{id:'download-file-browser',class:'panel',hidden:''}));renderDownloadJobs();}
-let downloadFilter='all',downloadOffset=0,downloadPageRequest=0,downloadPagePending=null;
-async function loadDownloadPage(offset,filter){
- const key=offset+'/'+filter;
- if(downloadPagePending===key)return;
- const request=++downloadPageRequest;
- downloadOffset=offset;downloadFilter=filter;downloadPagePending=key;
- try{
-  const page=await nas('downloads.status',{offset,filter});
-  if(request!==downloadPageRequest||routeName()!=='downloads')return;
-  downloadOffset=page.offset;state.nas.downloads=page;renderDownloadJobs();
- }finally{if(request===downloadPageRequest)downloadPagePending=null;}
+ submit(f,'Save download settings',async()=>{await nas('downloads.setup',{pool:pool.value,concurrent:settings?.options.concurrent??0,download_kib:settings?.options.download_kib??0,upload_kib:Number(up.value),seed_ratio:Number(ratio.value),seed_minutes:Number(seed.value)});await refresh(true);});config.append(f);w.append(config);
+}
+function downloadAddPanel(w){
+ const add=panel('Add downloads'),mode=field(add,'Source',{type:'select',id:'download-source-mode'});
+ choices(mode,[{value:'direct',label:'Direct links or torrent file'},{value:'linked',label:'Find files linked from a URL'}]);
+ const direct=el('div'),linked=el('div');linked.hidden=true;
+ add.append(direct,linked);w.append(add);
+ downloadDirectForm(direct);downloadDiscovery(linked);
+ mode.addEventListener('change',()=>{direct.hidden=mode.value!=='direct';linked.hidden=mode.value!=='linked';});
+}
+function downloadDirectForm(container){
+ const a=el('form'),urls=field(a,'One URL or magnet link per line',{id:'download-urls',type:'textarea'}), torrent=field(a,'Or upload a torrent file · maximum 512 KiB',{id:'download-torrent',type:'file'});
+ const options=el('details',null,{class:'download-options'});options.append(el('summary','Save folder and checksum'));
+ const submissionDestination=downloadSubmissionDestination(options,'Download location for these files');
+ const digest=field(options,'Optional expected SHA-256 · single URL only',{id:'download-checksum'});
+ a.append(options,el('small','Torrents also upload to peers. Download traffic follows NAS routing.',{class:'note'}));
+ submit(a,'Start download',async()=>{submissionDestination.setDisabled(true);try{const destination=submissionDestination.request(),file=torrent.files[0];if(file){if(urls.value.trim())throw Error('Choose URLs or a torrent file.');if(file.size>512*1024)throw Error('Torrent file is too large.');await nas('downloads.add',{name:file.name,torrent_base64:b64(new Uint8Array(await file.arrayBuffer())),...destination});}else{const values=urls.value.split('\n').map(v=>v.trim()).filter(Boolean);if(!values.length)throw Error('Enter at least one URL.');if(digest.value&&values.length!==1)throw Error('A checksum applies to a single URL.');for(const [index,url] of values.entries()){try{await nas('downloads.add',{url,sha256:digest.value.trim(),...destination});}catch(error){urls.value=values.slice(index).join('\n');throw Error(index+' links queued. Check the first remaining link in the queue before retrying. '+error.message);}}}a.reset();await refresh(true);}finally{submissionDestination.setDisabled(false);}});container.append(a);
 }
 function downloadView(job){if(job.limited&&job.state==='paused')return {...downloadView({...job,limited:false}),status:'Waiting for your download slot'};const total=Number(job.total_bytes)||0,done=Number(job.completed_bytes)||0,speed=Number(job.download_bps)||0;return {percent:total?Math.min(100,Math.max(0,done/total*100)):0,known:total>0,remaining:speed>0&&total>done?Math.ceil((total-done)/speed):null,status:job.state==='complete'&&job.save_to&&job.delivery?.state!=='delivered'?(job.delivery?.state==='needs-attention'?'Save needs attention':'Saving to folder'):({active:'Downloading',waiting:'Waiting',paused:'Paused',complete:'Finished',error:'Needs attention',removed:'Stopped',retrying:'Retrying'})[job.state]||job.state||'Waiting'};}
-function renderDownloadJobs(){const out=$('download-jobs');if(!out)return;const page=state.nas.downloads||{},jobs=page.jobs||[];
- if(!demo&&(downloadOffset!==(page.offset||0)||downloadFilter!==(page.filter||'all'))){loadDownloadPage(downloadOffset,downloadFilter).catch(e=>message(e.message,true));return;}
- const retained=$('download-retained');if(retained){retained.replaceChildren();for(const item of page.retained_files||[])retained.append(action(item.label,()=>showDownloadFiles(item.id,''),true,true));}
- out.replaceChildren();const stats=el('div',null,{class:'download-stats'});stats.append(stat('DOWNLOADING',String(page.active_count??jobs.filter(j=>j.state==='active').length),'of '+(page.total_jobs??jobs.length)+' downloads'),stat('DOWNLOAD SPEED',size(page.download_bps??jobs.reduce((n,j)=>n+(Number(j.download_bps)||0),0))+'/s','Live status'),stat('FINISHED',String(page.complete_count??jobs.filter(j=>j.state==='complete').length),'Files stay on your NAS'));out.append(stats);const filters=el('div',null,{class:'actions download-filters'});for(const [key,label] of [['all','All'],['active','Downloading'],['paused','Paused'],['complete','Finished'],['error','Needs attention']]){const b=action(label,async()=>{if(demo){downloadFilter=key;renderDownloadJobs();}else await loadDownloadPage(0,key);},false,true);b.setAttribute('aria-pressed',String(downloadFilter===key));filters.append(b);}out.append(filters);
- const count=Math.max(page.matching||0,page.total_retained||0),step=page.page_size||50;
- if(count>step){const nav=el('div',null,{class:'actions'}),prev=action('Previous page',()=>loadDownloadPage(downloadOffset-step,downloadFilter),false,true),next=action('Next page',()=>loadDownloadPage(downloadOffset+step,downloadFilter),false,true);prev.disabled=downloadOffset===0;next.disabled=downloadOffset+step>=count;nav.append(prev,el('span','Page '+(1+Math.floor(downloadOffset/step))+' of '+Math.ceil(count/step)),next);out.append(nav);}
- const shown=jobs.filter(j=>downloadFilter==='all'||(downloadFilter==='error'?(j.state==='error'||j.delivery?.state==='needs-attention'||!!j.engine_error):j.state===downloadFilter));if(!shown.length)empty(out,(page.total_jobs||jobs.length)?'No downloads in this view.':'No downloads yet. Add a link or torrent above.');shown.forEach(job=>{const v=downloadView(job),card=el('article',null,{class:'download-card'}),head=el('div',null,{class:'download-card-head'});head.append(el('span',job.kind==='torrent'?'⇄':'↓',{class:'download-icon','aria-hidden':'true'}),el('h3',job.label),el('span',v.status,{class:'badge '+(job.state==='complete'?'good':job.state==='error'?'warn':'')}));const progress=el('progress',null,{max:100,'aria-label':job.label+' download progress'});if(v.known)progress.value=v.percent;else if(job.state!=='active')progress.value=0;const eta=v.remaining===null?'':v.remaining<60?v.remaining+' sec remaining':v.remaining<3600?Math.ceil(v.remaining/60)+' min remaining':(v.remaining/3600).toFixed(1)+' hr remaining';card.append(head,progress,el('p',(v.known?Math.round(v.percent)+'% · '+size(job.completed_bytes||0)+' of '+size(job.total_bytes):size(job.completed_bytes||0)+' downloaded · size not yet known')+' · '+size(job.download_bps||0)+'/s'+(eta?' · '+eta:''),{class:'download-meta'}));if(job.save_to){card.append(el('p','Save to: '+job.save_to.label,{class:'note'}));if(job.delivery?.state==='delivered')card.append(el('p','Saved and verified in the chosen folder.',{class:'badge good'}));if(job.delivery?.state==='needs-attention')card.append(el('p',job.delivery.message,{class:'notice warning'}));}downloadProblemDetails(card,job);const controls=el('div',null,{class:'actions'});controls.append(action('Show files',()=>showDownloadFiles(job.id,''),false,true));if(job.actor==='user:'+currentUser?.id&&canPersonal('files.write')&&!['copying','delivered'].includes(job.delivery?.state))controls.append(action('Choose save folder…',async()=>{const picked=await selectNasLocation({title:'Save this download to',writable:true});if(!picked)return;await nas('downloads.destination',{id:job.id,save_to:{share:picked.share,path:picked.path}});await refresh();},false,true));if(job.state==='error'&&!job.recovery_required)controls.append(action('Retry now',async()=>{await nas('downloads.control',{id:job.id,action:'resume'});await refresh();},false,true));if(!['complete','removed'].includes(job.state)&&!job.recovery_required)controls.append(action(job.desired==='paused'?'Resume':'Pause',async()=>{await nas('downloads.control',{id:job.id,action:job.desired==='paused'?'resume':'pause'});await refresh();},true,true));controls.append(action('Remove from list',async()=>{if(!confirm('Remove this download from the list? Downloaded and partial files will be kept.'))return;await nas('downloads.control',{id:job.id,action:'remove'});await refresh();},true,true));card.append(controls);out.append(card);});}
+function downloadQueue(container){
+ const panel=el('section',null,{id:'download-jobs',class:'panel download-queue-panel'});
+ const disclosure=el('details'),heading=el('summary',null,{class:'download-queue-heading'});
+ const totals=el('span','Loading…',{class:'download-queue-counts'});
+ heading.append(el('strong','Download queue'),totals);disclosure.append(heading);
+ const tools=el('div',null,{class:'download-queue-tools'}),search=field(tools,'Find a download',{type:'search',placeholder:'Filename'}),filter=field(tools,'Status',{type:'select'});
+ search.maxLength=256;
+ const labels={all:'All',active:'Downloading',waiting:'Waiting',paused:'Paused',complete:'Finished',error:'Needs attention',removed:'Removed'};
+ choices(filter,Object.entries(labels).map(([value,label])=>({value,label})));
+ const list=el('div',null,{class:'download-rows',role:'list','aria-label':'Downloads and retained files',tabindex:0});
+ const feedback=el('p',null,{class:'note','aria-live':'polite'}),more=el('button','Show more downloads',{type:'button',class:'quiet'});
+ const files=el('section',null,{id:'download-file-browser',class:'download-browse',hidden:''});
+ disclosure.append(tools,list,feedback,more,files);panel.append(disclosure);container.append(panel);
+ let wanted=50,generation=0,loading=false,reload=false,timer,records=new Map();
+ more.hidden=true;
+ function statusText(job){
+  if(job.retained)return job.category==='complete'?'Finished · files kept':job.completed_bytes>0?'Removed · partial files kept':'Removed';
+  if(job.category==='error')return 'Needs attention';
+  if(job.category==='paused')return 'Paused';
+  if(job.category==='waiting')return 'Waiting';
+  if(job.category==='removed')return 'Removing';
+  return downloadView(job).status;
+ }
+ function updateRow(record,job){
+  const previous=record.job;
+  record.job=job;
+  record.name.textContent=job.label||'Download';
+  record.badge.textContent=statusText(job);
+  record.badge.className='badge '+(job.category==='complete'?'good':job.category==='error'?'warn':'');
+  const v=downloadView(job);
+  record.progress.textContent=job.category==='active'?(v.known?Math.round(v.percent)+'% · ':'')+size(job.download_bps||0)+'/s':v.known?Math.round(v.percent)+'%':'';
+  if(record.detail.open&&JSON.stringify(previous)!==JSON.stringify(job)&&!record.body.contains(document.activeElement)){
+   record.body.replaceChildren();downloadRowDetails(record.body,job);
+  }
+ }
+ function createRow(job){
+  const node=el('div',null,{role:'listitem',class:'download-row'}),detail=el('details'),summary=el('summary');
+  const name=el('span',null,{class:'download-row-name'}),progress=el('small'),badge=el('span'),body=el('div',null,{class:'download-row-body'});
+  summary.append(name,progress,badge);detail.append(summary,body);node.append(detail);
+  const record={node,detail,body,name,progress,badge};
+  detail.addEventListener('toggle',()=>{
+   body.replaceChildren();if(detail.open)downloadRowDetails(body,record.job);
+  });
+  updateRow(record,job);return record;
+ }
+ function draw(items,total,next){
+  const current=new Map();let position=0;
+  for(const job of items){
+   if(current.has(job.id))continue;
+   let record=records.get(job.id);
+   if(record)updateRow(record,job);else record=createRow(job);
+   current.set(job.id,record);
+   if(list.children[position]!==record.node)list.insertBefore(record.node,list.children[position]||null);
+   position++;
+  }
+  for(const [id,record] of records)if(!current.has(id))record.node.remove();
+  records=current;
+  more.hidden=next==null;
+  feedback.textContent=total?current.size+' of '+total+' shown':search.value||filter.value!=='all'?'No matching downloads.':'No downloads yet.';
+ }
+ function demoPage(){
+  const rows=(state.nas.downloads?.jobs||[]).map(job=>({...job,category:({active:'active',complete:'complete',error:'error',paused:job.limited?'waiting':'paused'})[job.state]||'waiting'}));
+  const counts={};for(const row of rows)counts[row.category]=(counts[row.category]||0)+1;
+  const items=rows.filter(row=>(filter.value==='all'||row.category===filter.value)&&(row.label||'').toLowerCase().includes(search.value.trim().toLowerCase()));
+  return {items,matching:items.length,counts,next_offset:null};
+ }
+ async function refreshList(){
+  if(loading){reload=true;return;}
+  loading=true;const version=generation;
+  const valid=()=>version===generation&&panel.isConnected;
+  try{
+   const query={layout:'list',filter:filter.value,search:search.value.trim()};
+   let page=demo?demoPage():await nas('downloads.status',query);
+   if(!valid())return;
+   const c=page.counts;
+   totals.textContent=[(c.active||0)+' downloading',(c.waiting||0)+' waiting',(c.complete||0)+' finished',...(c.paused?[c.paused+' paused']:[]),...(c.error?[c.error+' need attention']:[]),...(c.removed?[c.removed+' removed']:[])].join(' · ');
+   if(!disclosure.open)return;
+   const items=[...page.items];
+   while(page.next_offset!=null&&items.length<wanted){
+    page=await nas('downloads.status',{...query,offset:page.next_offset});
+    if(!valid()||!disclosure.open)return;
+    items.push(...page.items);
+   }
+   draw(items,page.matching,page.next_offset);
+  }catch(error){
+   if(valid()){feedback.textContent='Could not refresh the queue. '+error.message;totals.textContent='Queue status unavailable';}
+  }finally{
+   loading=false;
+   if(reload&&panel.isConnected){reload=false;void refreshList();}
+  }
+ }
+ function changeFilter(){
+  generation++;wanted=50;list.scrollTop=0;files.hidden=true;
+  for(const r of records.values())r.node.remove();records.clear();
+  more.hidden=true;feedback.textContent='Finding downloads…';
+  clearTimeout(timer);timer=setTimeout(refreshList,160);
+ }
+ search.addEventListener('input',changeFilter);filter.addEventListener('change',changeFilter);
+ more.addEventListener('click',()=>{wanted+=50;void refreshList();});
+ disclosure.addEventListener('toggle',()=>{if(disclosure.open)void refreshList();});
+ panel.refreshQueue=refreshList;
+}
+
+function renderDownloadJobs(){
+ const out=$('download-jobs');
+ if(out&&downloadsTab==='queue')out.refreshQueue();
+}
+function downloadRowDetails(card,job){
+ const view=downloadView(job),progress=el('progress',null,{max:100,'aria-label':job.label+' download progress'});
+ if(view.known)progress.value=view.percent;else if(job.state!=='active')progress.value=0;
+ const bytes=size(job.completed_bytes||0);
+ let status=view.known?Math.round(view.percent)+'% · '+bytes+' of '+size(job.total_bytes):bytes+' downloaded · size not yet known';
+ if(job.category==='active'||job.state==='active'&&!job.retained)status+=' · '+size(job.download_bps||0)+'/s';
+ if(view.remaining!==null&&!job.retained){
+  const seconds=view.remaining;
+  status+=' · '+(seconds<60?seconds+' sec':seconds<3600?Math.ceil(seconds/60)+' min':(seconds/3600).toFixed(1)+' hr')+' remaining';
+ }
+ card.append(progress,el('p',status,{class:'download-meta'}));
+ if(job.save_to){
+  card.append(el('p','Save to: '+job.save_to.label,{class:'note'}));
+  if(job.delivery?.state==='delivered')card.append(el('p','Saved and verified in the chosen folder.',{class:'badge good'}));
+  if(job.delivery?.state==='needs-attention')card.append(el('p',job.delivery.message,{class:'notice warning'}));
+ }
+ downloadProblemDetails(card,job);
+ const controls=el('div',null,{class:'actions'});card.append(controls);
+ controls.append(action('Show files',()=>showDownloadFiles(job.id,''),false,true));
+ if(job.retained)return;
+ if(job.actor==='user:'+currentUser?.id&&canPersonal('files.write')&&!['copying','delivered'].includes(job.delivery?.state)){
+  controls.append(action('Choose save folder…',async()=>{
+   const picked=await selectNasLocation({title:'Save this download to',writable:true});
+   if(!picked)return;
+   await nas('downloads.destination',{id:job.id,save_to:{share:picked.share,path:picked.path}});await refresh();
+  },false,true));
+ }
+ async function control(command){await nas('downloads.control',{id:job.id,action:command});await refresh();}
+ if(job.state==='error'&&!job.recovery_required)controls.append(action('Retry now',()=>control('resume'),false,true));
+ if(!['complete','removed'].includes(job.state)&&!job.recovery_required){
+  const paused=job.desired==='paused';
+  controls.append(action(paused?'Resume':'Pause',()=>control(paused?'resume':'pause'),true,true));
+ }
+ controls.append(action('Remove from queue',async()=>{
+  if(confirm('Remove this download from the queue? Downloaded and partial files will be kept.'))await control('remove');
+ },true,true));
+}
 
 function dlnaOptions(w){const p=panel('Playback & folder access','');p.append(el('div',null,{id:'dlna-options'}));w.append(p);if(demo){empty($('dlna-options'),'Connect to the NAS to inspect playback options.');return;}loadDlnaOptions().catch(e=>message(e.message,true));}
 async function loadDlnaOptions(){const data=await nas('media.dlna-options'),out=$('dlna-options');if(!out)return;const f=el('form'),profile=field(f,'Default player / display type',{type:'select'});choices(profile,Object.entries(data.profiles).map(([value,p])=>({value,label:p.name})));profile.value=data.settings.default_profile;const hints=el('ul');function suggestions(){hints.replaceChildren(...data.profiles[profile.value].suggestions.map(v=>el('li',v)));}profile.addEventListener('change',suggestions);suggestions();f.append(hints,el('p','Presets provide setup recommendations; they do not change codecs or guarantee playback.',{class:'note'}));const trans=field(f,'Transcoding',{type:'select'});choices(trans,[{value:'direct-play',label:'Direct play · original media'},{value:'audio',label:'Live audio conversion · unavailable'},{value:'video',label:'Live video conversion · unavailable'}]);[...trans.options].filter(o=>o.value!=='direct-play').forEach(o=>o.disabled=true);f.append(el('p',data.transcoding.reason));submit(f,'Save playback preferences',async()=>{await nas('media.dlna-options-save',{default_profile:profile.value,transcoding:trans.value});message('Playback preferences saved.');});out.replaceChildren(f);const access=el('details');access.append(el('summary','Who can see which folders?'),el('p',data.folder_access.scope),el('p','DLNA has no NAS username/password login. A player approval is a network-device decision, not a user account. For private folders: keep DLNA off for that library, create an SMB share under Shares & users, choose its allowed users, and connect with an SMB-capable player.'),el('a','Configure shared-folder permissions',{href:'#shares',class:'button quiet'}));out.append(access);for(const client of state.nas.dlna_access?.clients||[]){const cf=el('form'),select=field(cf,(client.label||client.ip)+' · device profile',{type:'select'});choices(select,Object.entries(data.profiles).map(([value,p])=>({value,label:p.name})));select.value=client.profile||profile.value;submit(cf,'Save device profile',async()=>{await nas('media.client-profile',{id:client.id,profile:select.value});message('Device recommendations saved; access permissions unchanged.');});out.append(cf);}}
 function dlnaClients(w){const data=state.nas.dlna_access||{},p=panel('Approved media players','Media catalog and streams are blocked until a player is approved. Open its media-server search, then refresh this list. Approved players may need to rescan; unsolicited multicast announcements are suppressed.');if((state.nas.libraries||[]).some(l=>l.dlna))p.append(el('p',data.enforcement?.applied?'Default-deny media rules are active.':'Media approval policy is unavailable; the server must remain stopped.',{class:'notice '+(data.enforcement?.applied?'':'warning')}));p.append(action('Refresh discovered clients',async()=>refresh(true),false,true));const t=table(['Client','Observed network identity','Access','Action']);(data.clients||[]).forEach(c=>{const r=el('tr'),a=el('td');a.append(action(c.approved?'Revoke':'Approve',async()=>{const label=prompt('Optional name for this player',c.label||'');if(label===null)return;await nas('media.approve',{id:c.id,approved:!c.approved,label});await refresh(true);}));r.append(el('td',c.label||'Unnamed player'),el('td',c.ip+' · '+c.mac),el('td',c.approved?'Approved':'Blocked / pending'),a);t.body.append(r);});p.append(t.wrap);if(!(data.clients||[]).length)empty(p,'No requesting clients observed yet.');p.append(el('p','Approval binds the observed IP, Ethernet address and LAN interface. It is not a cryptographic login; use a trusted network. A changed address needs new approval. Revocation cannot erase media a client already downloaded or cached.',{class:'note'}));w.append(p);}
 
-async function showDownloadFiles(id,path){const value=await nas('downloads.files',{id,path}),p=$('download-file-browser');p.hidden=false;p.replaceChildren(el('h2','Download files'),el('p','/'+path));if(path)p.append(action('Up',()=>showDownloadFiles(id,path.split('/').slice(0,-1).join('/')),true,true));const list=el('div',null,{class:'list'});value.entries.forEach(entry=>{const child=[path,entry.name].filter(Boolean).join('/'),a=el('article');if(entry.directory&&!entry.symlink)a.append(action('▸ '+entry.name,()=>showDownloadFiles(id,child),true,true));else if(!entry.symlink)a.append(el('a',entry.name,{href:'/api/download-file?'+new URLSearchParams({id,path:child}),class:'button quiet'}));else a.append(el('p',entry.name+' · symbolic link not followed'));list.append(a);});p.append(list);if(!value.entries.length)empty(p,'No files yet.');p.scrollIntoView({behavior:'smooth'});}
+async function showDownloadFiles(id,path){const value=await nas('downloads.files',{id,path}),p=$('download-file-browser');if(!p)return;p.hidden=false;p.replaceChildren(el('h3','Download files'),action('Close files',()=>{p.hidden=true;},false,true),el('p','/'+path));if(path)p.append(action('Up',()=>showDownloadFiles(id,path.split('/').slice(0,-1).join('/')),true,true));const list=el('div',null,{class:'list'});value.entries.forEach(entry=>{const child=[path,entry.name].filter(Boolean).join('/'),a=el('article');if(entry.directory&&!entry.symlink)a.append(action('▸ '+entry.name,()=>showDownloadFiles(id,child),true,true));else if(!entry.symlink)a.append(el('a',entry.name,{href:'/api/download-file?'+new URLSearchParams({id,path:child}),class:'button quiet'}));else a.append(el('p',entry.name+' · symbolic link not followed'));list.append(a);});p.append(list);if(!value.entries.length)empty(p,'No files yet.');p.scrollIntoView({behavior:'smooth'});}
 async function external(w){
  const p=panel('USB drives','');p.append(action('Refresh drives',()=>loadExternal(),true,true),el('div',null,{id:'external-devices',class:'list'}));w.append(p,el('section',null,{id:'external-file-browser',class:'panel',hidden:''}));if(!demo)loadExternal().catch(e=>message(e.message,true));else empty($('external-devices'),'Connect a USB drive to the NAS.');
 }
@@ -514,13 +686,13 @@ function downloadFilePreview(out,result){
  bulk.append(selectAll,clear,add);out.append(controls,summary,note,bulk,list,feedback);draw();
 }
 function downloadDiscovery(w){
- const p=panel('Download linked files from a URL','Preview files linked from one site and starting folder. No sign-in cookies or JavaScript pages are used. Limits: depth 0–5, 100 page probes and 30 seconds per scan.'),f=el('form'),url=field(f,'Starting URL',{type:'url',required:true}),depth=field(f,'Links deep',{type:'number',min:0,max:5,value:0}),out=el('div');
+ const f=el('form'),url=field(f,'Starting URL',{type:'url',required:true}),depth=field(f,'Links deep',{type:'number',min:0,max:5,value:0}),out=el('div');
  f.append(el('p','Depth 0 finds files linked on the starting page. Depth 1 also follows one level of linked pages or folders.'));
  submit(f,'Find files',async()=>{out.replaceChildren();const query={url:url.value.trim(),depth:Number(depth.value)},progress=el('p','Finding linked files…');out.append(progress);
  let result=await nas('downloads.discover',query);const items=new Map(result.items.map(item=>[item.url,item]));
  while(result.next_offset!=null){progress.textContent=items.size+' files found. Loading more…';result=await nas('downloads.discover',{...query,offset:result.next_offset});for(const item of result.items)items.set(item.url,item);}
  result.items=[...items.values()];out.replaceChildren();out.append(el('p',result.items.length+' files found across '+result.pages_scanned+' pages.'+(result.truncated?' Limit reached; this is a partial result.':'')+(result.failed_pages?' Some pages could not be read.':'')));if(result.items.length)downloadFilePreview(out,result);});
- p.append(f,out);w.append(p);
+ w.append(f,out);
 }
 
 function downloadDestinationRequest(){const selected=typeof state==='object'&&state?.nas?.downloads?.selected_destination;return {save_to:selected?.token||null};}
