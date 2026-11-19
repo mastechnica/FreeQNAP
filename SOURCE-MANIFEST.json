@@ -1,7 +1,7 @@
 {
   "format": 1,
   "project": "FreeQNAP",
-  "source_commit": "276fd316a5f1ee050eedb16860cee4dbe00d49c8",
+  "source_commit": "ac45032060c8e616d9835d9ea7a1a4ffe37e382e",
   "scope": "Committed source and public documentation only; no private Git history, credentials, device state or OS binaries",
   "files": [
     {
@@ -271,8 +271,8 @@
     },
     {
       "path": "docs/AGENT-API.md",
-      "bytes": 32474,
-      "sha256": "72e7afb2f3deda13ec583e426fe008bd0c3a755c004c16c83a73e3447969145c"
+      "bytes": 33783,
+      "sha256": "e1401cedc1fa1509a2ccbd0c8aebaf4addf2f50950aca4952f338b4294a4d276"
     },
     {
       "path": "docs/AUDIO-CARDS-VALIDATION-2026-11-04.md",
@@ -696,8 +696,8 @@
     },
     {
       "path": "docs/VPN-DOWNLOADS-MEDIA-ACCESS.md",
-      "bytes": 13725,
-      "sha256": "1549ad727ce6fccc9bf9e74a61d399de8eb9cafdf7b7d92957444d5d4597419e"
+      "bytes": 14206,
+      "sha256": "9e08489b738f1416d7d06b0585a18956998975f9bcc7020f7999e361ccadb620"
     },
     {
       "path": "docs/WATCHDOG-COOLING-PLAN.md",
